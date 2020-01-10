@@ -1,0 +1,33 @@
+{
+  "name": "nhl-discord-bot",
+  "version": "0.1.0",
+  "description": "🏒 Self-Hosted NHL Discord Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "eslint ./"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/conrmahr/nhl-discord-bot.git"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "node",
+    "nhl",
+    "hockey",
+    "sports"
+  ],
+  "author": "Conor Meagher <conor@hireconor.com> (https://conr.co)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/conrmahr/nhl-discord-bot/issues"
+  },
+  "homepage": "https://github.com/conrmahr/nhl-discord-bot#readme",
+  "dependencies": {
+    "discord.js": "^11.5.1",
+    "eslint": "^6.8.0",
+    "moment-timezone": "^0.5.27",
+    "node-fetch": "^2.6.0"
+  }
+}
