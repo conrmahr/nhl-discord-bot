@@ -5,12 +5,12 @@ const querystring = require('querystring');
 
 module.exports = {
 	name: 'nhl',
-	usage: '<date> <team> <opponent>',
-	description: 'Get games for a tomorrow, yesterday, next 5 games, last 5 games, or given date (YYYY-MM-DD). If none is specified, return games scheduled for today.  Add team abbreviation to filter for a specific team and opponent.',
+	usage: '<date> <team> <opponent> -<flag>',
+	description: 'Get games for `today`, `tomorrow`, `yesterday`, `next` 5 games, `last` 5 games, or a given date `YYYY-MM-DD`. If nothing is specified, games scheduled for today will return. Add abbreviations to filter for a specific team and opponent. Add flags `-tv` and/or `-venue`for more detail.',
 	category: 'scores',
 	aliases: ['nhl', 'n'],
-	examples: ['', 'nyi', 'tomorrow', 'next nyi nyr'],
-	async execute(message, args, prefix) {
+	examples: ['', 'nyi', 'tomorrow -tv -venue', 'next nyi nyr'],
+	async execute(message, args, flags, prefix) {
 
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
 		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current/').then(response => response.json());
@@ -79,8 +79,24 @@ module.exports = {
 			}
 		}
 
+		let expands = 'schedule.linescore';
+		let flagBroadcasts = false;
+		let flagVenue = false;
+		flags.forEach(flag => {
+			if (['tv', 't'].includes(flag)) {
+				expands += ',schedule.broadcasts';
+				flagBroadcasts = true;
+			}
+			else if (['venue', 'v'].includes(flag)) {
+				flagVenue = true;
+			}
+			else {
+				return message.channel.send(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
+			}
+		});
+
+		parameters.expand = expands;
 		parameters.gameType = ['PR', 'R', 'P', 'A'];
-		parameters.expand = ['schedule.linescore'];
 		const query = querystring.stringify(parameters);
 		const schedule = await fetch(endpoint + query).then(response => response.json());
 		const checkGames = schedule.totalGames;
@@ -109,25 +125,34 @@ module.exports = {
 					}
 				}
 
-				const { status: { statusCode }, teams: { away, home }, linescore } = game;
+				const { status: { statusCode }, teams: { away, home }, linescore, broadcasts, venue } = game;
 				const awayTeam = teams.find(o => o.id === away.team.id).abbreviation;
 				const homeTeam = teams.find(o => o.id === home.team.id).abbreviation;
 				const awayBB = isBold(away.score, home.score);
 				const homeBB = isBold(home.score, away.score);
+				let tv = '';
+				let arena = '';
+				if (broadcasts && flagBroadcasts) {
+					const channels = broadcasts.map(i => i.name).join(', ');
+					tv = '[' + channels + ']';
+				}
+				if (venue && flagVenue) {
+					arena = '[' + game.venue.name + ']';
+				}
 
 				if (statusCode < 3) {
 					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
-					return `${awayTeam} @ ${homeTeam} (${gameTimeEST})`;
+					return `${awayTeam} @ ${homeTeam} (${gameTimeEST}) ${arena} ${tv}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {
 					const awayPP = linescore.teams.away.powerPlay ? '[*PP*]' : '';
 					const homePP = linescore.teams.home.powerPlay ? '[*PP*]' : '';
 					const awayEN = linescore.teams.away.goaliePulled ? '[*EN*]' : '';
 					const homeEN = linescore.teams.home.goaliePulled ? '[*EN*]' : '';
-					return `${awayTeam} ${away.score} ${awayPP} ${awayEN} ${homeTeam} ${home.score} ${homePP} ${homeEN} (${linescore.currentPeriodTimeRemaining}/${linescore.currentPeriodOrdinal})`;
+					return `${awayTeam} ${away.score} ${awayPP} ${awayEN} ${homeTeam} ${home.score} ${homePP} ${homeEN} (${linescore.currentPeriodTimeRemaining}/${linescore.currentPeriodOrdinal}) ${arena} ${tv}`;
 				}
 				else if (statusCode > 5 && statusCode < 8) {
-					return `${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} (${formatPeriod(linescore.currentPeriodOrdinal)})`;
+					return `${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} (${formatPeriod(linescore.currentPeriodOrdinal)}) ${arena} ${tv}`;
 				}
 				else if (statusCode === 9) {
 					return `${awayTeam} @ ${homeTeam} PPD`;

@@ -21,7 +21,8 @@ client.on('message', message => {
 
 	if (!message.content.startsWith(prefix) || !isNaN(message.content.substring(1, 2)) || message.author.bot) return;
 
-	const args = message.content.slice(prefix.length).split(/ +/);
+	const args = message.content.slice(prefix.length).split(/-\S+| /).filter(Boolean);
+	const flags = (message.content.match(/-([^\s]+)/g) || []).map(f => f.slice(1));
 	const commandName = args.shift().toLowerCase();
 	const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
@@ -31,7 +32,7 @@ client.on('message', message => {
 		return message.reply(reply);
 	}
 	try {
-		command.execute(message, args, prefix);
+		command.execute(message, args, flags, prefix);
 	}
 	catch (error) {
 		console.error(error);
