@@ -82,6 +82,7 @@ module.exports = {
 		let expands = 'schedule.linescore';
 		let flagBroadcasts = false;
 		let flagVenue = false;
+		let flagHide = false;
 		flags.forEach(flag => {
 			if (['tv', 't'].includes(flag)) {
 				expands += ',schedule.broadcasts';
@@ -89,6 +90,9 @@ module.exports = {
 			}
 			else if (['venue', 'v'].includes(flag)) {
 				flagVenue = true;
+			}
+			else if (['hide', 'h'].includes(flag)) {
+				flagHide = true;
 			}
 			else {
 				return message.channel.send(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
@@ -140,7 +144,7 @@ module.exports = {
 					arena = '[' + game.venue.name + ']';
 				}
 
-				if (statusCode < 3) {
+				if (statusCode < 3 || flagHide) {
 					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
 					return `${awayTeam} @ ${homeTeam} (${gameTimeEST}) ${arena} ${tv}`;
 				}
