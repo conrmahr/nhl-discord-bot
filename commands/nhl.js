@@ -119,37 +119,17 @@ module.exports = {
 				}
 
 				function formatPeriod(t, p) {
-					let remain = '';
-					let ordinal = '';
-					switch(t) {
-					case 'END':
-						remain = '0:00';
-						break;
-					case 'Final':
-						remain = 'F';
-						break;
-					default:
-						remain = t + ' - ';
+					const possibleTime = { Final: 'F', END: '0:00' };
+					const remain = possibleTime[t] || t;
+					const possibleSpacer = { OT: '/', SO: '/' };
+					const spacer = possibleSpacer[p] || '';
+					let ordinal = p;
+					if (remain === 'F' && p === '3rd') {
+						ordinal = '';
+						console.log(true);
 					}
-					if(remain != 'F') {
-						switch(p) {
-						case 'OT':
-							ordinal = 'OT';
-							break;
-						case 'SO':
-							ordinal = 'SO';
-							break;
-						default:
-							ordinal = p;
-						}
-					}
-					else if (p === 'OT') {
-						ordinal = '/OT';
-					}
-					else if (p === 'SO') {
-						ordinal = '/SO';
-					}
-					return `(${remain}${ordinal})`;
+
+					return `(${remain}${spacer}${ordinal})`;
 				}
 
 				const { status: { statusCode }, teams: { away, home }, linescore, broadcasts, venue } = game;
