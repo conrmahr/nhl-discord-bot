@@ -142,9 +142,11 @@ module.exports = {
 						default:
 							ordinal = p;
 						}
-					} else if (p === 'OT') {
+					}
+					else if (p === 'OT') {
 						ordinal = '/OT';
-					} else if (p === 'SO') {
+					}
+					else if (p === 'SO') {
 						ordinal = '/SO';
 					}
 					return `(${remain}${ordinal})`;
