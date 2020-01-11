@@ -12,7 +12,7 @@ module.exports = {
 
 		if (!args.length) {
 			const embed = new RichEmbed();
-			embed.setColor(0xa1cdff);
+			embed.setColor(0x59acef);
 			embed.addField('Command List',
 				[
 					'This is a list of all available commands.',
@@ -32,7 +32,7 @@ module.exports = {
 			return message.reply(`\`${name}\` is not a valid command. Type \`${prefix}help\` for a list of commands.`);
 		}
 		const embed = new RichEmbed();
-		embed.setColor(0xa1cdff);
+		embed.setColor(0x59acef);
 		embed.setTitle(`\`${prefix}${command.name} ${command.usage}\``);
 		embed.addField('Description', command.description);
 		if (command.examples.length) {
