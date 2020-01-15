@@ -83,7 +83,7 @@ module.exports = {
 		let flagBroadcasts = false;
 		let flagVenue = false;
 		let flagHide = false;
-		flags.forEach(flag => {
+		for (const flag of flags) {
 			if (['tv', 't'].includes(flag)) {
 				expands += ',schedule.broadcasts';
 				flagBroadcasts = true;
@@ -97,7 +97,7 @@ module.exports = {
 			else {
 				return message.channel.send(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
 			}
-		});
+		}
 
 		parameters.expand = expands;
 		parameters.gameType = ['PR', 'R', 'P', 'A'];
@@ -121,12 +121,11 @@ module.exports = {
 				function formatPeriod(t, p) {
 					const possibleTime = { Final: 'F', END: '0:00' };
 					const remain = possibleTime[t] || t;
-					const possibleSpacer = { OT: '/', SO: '/' };
-					const spacer = possibleSpacer[p] || '';
+					let spacer = '/';
 					let ordinal = p;
 					if (remain === 'F' && p === '3rd') {
+						spacer = '';
 						ordinal = '';
-						console.log(true);
 					}
 
 					return `(${remain}${spacer}${ordinal})`;
@@ -152,7 +151,7 @@ module.exports = {
 
 				if (statusCode < 3 || flagHide) {
 					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
-					const gameTime = flagHide ? `${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}` : gameTimeEST;
+					const gameTime = (statusCode > 2) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
 					return `${awayTeam} @ ${homeTeam} ${gameTime} ${arena} ${tv}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {
@@ -162,8 +161,11 @@ module.exports = {
 					const homeEN = linescore.teams.home.goaliePulled ? '[*EN*]' : '';
 					return `${awayTeam} ${away.score} ${awayPP} ${awayEN} ${homeTeam} ${home.score} ${homePP} ${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${arena} ${tv}`;
 				}
-				else if (statusCode > 5 && statusCode < 8) {
+				else if (statusCode > 4 && statusCode < 8) {
 					return `${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${arena} ${tv}`;
+				}
+				else if (statusCode === 8) {
+					return `${awayTeam} @ ${homeTeam} TBD`;
 				}
 				else if (statusCode === 9) {
 					return `${awayTeam} @ ${homeTeam} PPD`;
@@ -179,6 +181,7 @@ module.exports = {
 		embed.setColor(0x59acef);
 		embed.setAuthor('NHL Scores', 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/05_NHL_Shield.svg/150px-05_NHL_Shield.svg.png');
 		schedule.dates.slice(0, limit).map(({ date, games }) => embed.addField(':hockey: ' + moment(date).format('ddd, MMM DD'), `${getScores(games)}`));
+
 
 		message.channel.send(embed);
 
