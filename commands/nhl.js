@@ -97,7 +97,7 @@ module.exports = {
 			else {
 				return message.channel.send(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
 			}
-		};
+		}
 
 		parameters.expand = expands;
 		parameters.gameType = ['PR', 'R', 'P', 'A'];
