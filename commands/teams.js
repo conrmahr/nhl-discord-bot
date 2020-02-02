@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 module.exports = {
 	name: 'teams',
 	usage: '',
-	description: 'All active team abbreviations.',
+	description: 'All active team mascots and abbreviations.',
 	category: 'teams',
 	aliases: ['teams', 't'],
 	examples: [],

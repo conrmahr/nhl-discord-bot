@@ -104,7 +104,7 @@ module.exports = {
 		const query = querystring.stringify(parameters);
 		const schedule = await fetch(endpoint + query).then(response => response.json());
 		const checkGames = schedule.totalGames;
-		if (!checkGames) return message.reply('No games scheduled.');
+		if (!checkGames) return message.reply('no games scheduled.');
 
 		function getScores(games) {
 			return games.map(game => {
