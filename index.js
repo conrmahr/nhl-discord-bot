@@ -21,8 +21,8 @@ client.on('message', message => {
 
 	if (!message.content.startsWith(prefix) || !isNaN(message.content.substring(1, 2)) || message.author.bot) return;
 
-	const args = message.content.slice(prefix.length).split(/-\S+| /).filter(Boolean);
-	const flags = (message.content.match(/-([^\s]+)/g) || []).map(f => f.slice(1));
+	const args = message.content.slice(prefix.length).split(/(?:\s(?:-\S+)?)+/).filter(Boolean);
+	const flags = (message.content.match(/(?:^|\s)-\S+/g) || []).map(f => f.slice(2));
 	const commandName = args.shift().toLowerCase();
 	const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
