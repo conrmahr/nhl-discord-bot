@@ -1,7 +1,7 @@
 const { RichEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
-const querystring = require('querystring');
+const qs = require('qs');
 
 module.exports = {
 	name: 'nhl',
@@ -14,7 +14,7 @@ module.exports = {
 
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
 		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current/').then(response => response.json());
-		const endpoint = 'https://statsapi.web.nhl.com/api/v1/schedule/?';
+		const endpoint = 'https://statsapi.web.nhl.com/api/v1/schedule/';
 		const parameters = {};
 		let limit = 1;
 
@@ -46,7 +46,7 @@ module.exports = {
 					break;
 				}
 			}
-			else if (moment(args[0], 'YYYY-MM-DD').isValid()) {
+			else if (moment(args[0], 'YYYY-MM-DD', true).isValid()) {
 				parameters.startDate = moment(args[0]).format('MM/DD/YYYY');
 				parameters.endDate = moment(args[0]).format('MM/DD/YYYY');
 			}
@@ -79,13 +79,13 @@ module.exports = {
 			}
 		}
 
-		let expands = 'schedule.linescore';
+		parameters.expand = ['schedule.teams', 'schedule.linescore'];
 		let flagBroadcasts = false;
 		let flagVenue = false;
 		let flagHide = false;
 		for (const flag of flags) {
 			if (['tv', 't'].includes(flag)) {
-				expands += ',schedule.broadcasts';
+				parameters.expand.push('schedule.broadcasts');
 				flagBroadcasts = true;
 			}
 			else if (['venue', 'v'].includes(flag)) {
@@ -99,9 +99,7 @@ module.exports = {
 			}
 		}
 
-		parameters.expand = expands;
-		parameters.gameType = ['PR', 'R', 'P', 'A'];
-		const query = querystring.stringify(parameters);
+		const query = qs.stringify(parameters, { arrayFormat: 'comma', addQueryPrefix: true });
 		const schedule = await fetch(endpoint + query).then(response => response.json());
 		const checkGames = schedule.totalGames;
 		if (!checkGames) return message.reply('no games scheduled.');
