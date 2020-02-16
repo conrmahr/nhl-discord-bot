@@ -1,7 +1,7 @@
 const { RichEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
-const querystring = require('querystring');
+const qs = require('qs');
 
 module.exports = {
 	name: 'nhl',
@@ -14,7 +14,7 @@ module.exports = {
 
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
 		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current/').then(response => response.json());
-		const endpoint = 'https://statsapi.web.nhl.com/api/v1/schedule/?';
+		const endpoint = 'https://statsapi.web.nhl.com/api/v1/schedule/';
 		const parameters = {};
 		let limit = 1;
 
@@ -46,7 +46,7 @@ module.exports = {
 					break;
 				}
 			}
-			else if (moment(args[0], 'YYYY-MM-DD').isValid()) {
+			else if (moment(args[0], 'YYYY-MM-DD', true).isValid()) {
 				parameters.startDate = moment(args[0]).format('MM/DD/YYYY');
 				parameters.endDate = moment(args[0]).format('MM/DD/YYYY');
 			}
@@ -62,7 +62,7 @@ module.exports = {
 					parameters.teamId = teamObj.id;
 				}
 				else {
-					return message.channel.send(`\`${args[1]}\` is not a valid team. Type \`${prefix}teams\` for a list of teams.`);
+					return message.reply(`\`${args[1]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`);
 				}
 			}
 
@@ -74,18 +74,18 @@ module.exports = {
 					parameters.opponentId = opponentObj.id;
 				}
 				else {
-					return message.channel.send(`\`${args[2]}\` is not a valid opponent. Type \`${prefix}teams\` for a list of teams.`);
+					return message.reply(`\`${args[2]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`);
 				}
 			}
 		}
 
-		let expands = 'schedule.linescore';
+		parameters.expand = ['schedule.teams', 'schedule.linescore'];
 		let flagBroadcasts = false;
 		let flagVenue = false;
 		let flagHide = false;
 		for (const flag of flags) {
 			if (['tv', 't'].includes(flag)) {
-				expands += ',schedule.broadcasts';
+				parameters.expand.push('schedule.broadcasts');
 				flagBroadcasts = true;
 			}
 			else if (['venue', 'v'].includes(flag)) {
@@ -95,13 +95,11 @@ module.exports = {
 				flagHide = true;
 			}
 			else {
-				return message.channel.send(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
+				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
 			}
 		}
 
-		parameters.expand = expands;
-		parameters.gameType = ['PR', 'R', 'P', 'A'];
-		const query = querystring.stringify(parameters);
+		const query = qs.stringify(parameters, { arrayFormat: 'comma', addQueryPrefix: true });
 		const schedule = await fetch(endpoint + query).then(response => response.json());
 		const checkGames = schedule.totalGames;
 		if (!checkGames) return message.reply('no games scheduled.');
@@ -123,7 +121,7 @@ module.exports = {
 					const remain = possibleTime[t] || t;
 					let spacer = '/';
 					let ordinal = p;
-					if (remain === 'F' && p === '3rd') {
+					if (remain === 'F' && p === '3rd' || remain === 'F' && p === '2nd') {
 						spacer = '';
 						ordinal = '';
 					}
@@ -132,8 +130,8 @@ module.exports = {
 				}
 
 				const { status: { statusCode }, teams: { away, home }, linescore, broadcasts, venue } = game;
-				const awayTeam = teams.find(o => o.id === away.team.id).abbreviation;
-				const homeTeam = teams.find(o => o.id === home.team.id).abbreviation;
+				const awayTeam = away.team.abbreviation;
+				const homeTeam = home.team.abbreviation;
 				const awayBB = isBold(away.score, home.score);
 				const homeBB = isBold(home.score, away.score);
 				let tv = '';
