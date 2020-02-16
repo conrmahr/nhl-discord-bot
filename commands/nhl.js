@@ -121,7 +121,7 @@ module.exports = {
 					const remain = possibleTime[t] || t;
 					let spacer = '/';
 					let ordinal = p;
-					if (remain === 'F' && p === '3rd') {
+					if (remain === 'F' && p === '3rd' || remain === 'F' && p === '2nd') {
 						spacer = '';
 						ordinal = '';
 					}
@@ -130,8 +130,8 @@ module.exports = {
 				}
 
 				const { status: { statusCode }, teams: { away, home }, linescore, broadcasts, venue } = game;
-				const awayTeam = teams.find(o => o.id === away.team.id).abbreviation;
-				const homeTeam = teams.find(o => o.id === home.team.id).abbreviation;
+				const awayTeam = away.team.abbreviation;
+				const homeTeam = home.team.abbreviation;
 				const awayBB = isBold(away.score, home.score);
 				const homeBB = isBold(home.score, away.score);
 				let tv = '';
