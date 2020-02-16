@@ -62,7 +62,8 @@ module.exports = {
 					parameters.teamId = teamObj.id;
 				}
 				else {
-					return message.reply(`\`${args[1]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`);				}
+					return message.reply(`\`${args[1]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`);
+				}
 			}
 
 			if (args[2]) {
