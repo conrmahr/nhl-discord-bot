@@ -62,8 +62,7 @@ module.exports = {
 					parameters.teamId = teamObj.id;
 				}
 				else {
-					return message.channel.send(`\`${args[1]}\` is not a valid team. Type \`${prefix}teams\` for a list of teams.`);
-				}
+					return message.reply(`\`${args[1]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`);				}
 			}
 
 			if (args[2]) {
@@ -74,7 +73,7 @@ module.exports = {
 					parameters.opponentId = opponentObj.id;
 				}
 				else {
-					return message.channel.send(`\`${args[2]}\` is not a valid opponent. Type \`${prefix}teams\` for a list of teams.`);
+					return message.reply(`\`${args[2]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`);
 				}
 			}
 		}
@@ -95,7 +94,7 @@ module.exports = {
 				flagHide = true;
 			}
 			else {
-				return message.channel.send(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
+				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
 			}
 		}
 
