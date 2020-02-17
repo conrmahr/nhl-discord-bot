@@ -168,7 +168,7 @@ module.exports = {
 				else if (statusCode === 9) {
 					return `${awayTeam} @ ${homeTeam} PPD`;
 				}
-			}).join('\n');
+			}).join('\u200B\n');
 		}
 
 		if (args[0] === 'last') {
