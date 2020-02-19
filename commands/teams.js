@@ -16,7 +16,7 @@ module.exports = {
 		});
 		const embed = new Discord.RichEmbed();
 		embed.setColor(0x59acef);
-		embed.setAuthor('NHL Teams', 'https://i.imgur.com/zQkDJU1.png');
+		embed.setAuthor('NHL Teams', 'https://i.imgur.com/zl8JzZc.png');
 		for (const division in divisions) {
 			embed.addField(division, `\`${divisions[division].sort().join('`\n`')}\``, true);
 		}

@@ -177,7 +177,7 @@ module.exports = {
 
 		const embed = new RichEmbed();
 		embed.setColor(0x59acef);
-		embed.setAuthor('NHL Scores', 'https://i.imgur.com/zQkDJU1.png');
+		embed.setAuthor('NHL Scores', 'https://i.imgur.com/zl8JzZc.png');
 		schedule.dates.slice(0, limit).map(({ date, games }) => embed.addField(':hockey: ' + moment(date).format('ddd, MMM DD'), `${getScores(games)}`));
 
 
