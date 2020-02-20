@@ -153,11 +153,11 @@ module.exports = {
 					return `${awayTeam} @ ${homeTeam} ${gameTime} ${arena} ${tv}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {
-					const awayPP = linescore.teams.away.powerPlay ? '[*PP*]' : '';
-					const homePP = linescore.teams.home.powerPlay ? '[*PP*]' : '';
-					const awayEN = linescore.teams.away.goaliePulled ? '[*EN*]' : '';
-					const homeEN = linescore.teams.home.goaliePulled ? '[*EN*]' : '';
-					return `${awayTeam} ${away.score} ${awayPP} ${awayEN} ${homeTeam} ${home.score} ${homePP} ${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${arena} ${tv}`;
+					const awayPP = linescore.teams.away.powerPlay ? ' [*PP*]' : '';
+					const homePP = linescore.teams.home.powerPlay ? ' [*PP*]' : '';
+					const awayEN = linescore.teams.away.goaliePulled ? ' [*EN*]' : '';
+					const homeEN = linescore.teams.home.goaliePulled ? ' [*EN*]' : '';
+					return `${awayTeam} ${away.score}${awayPP}${awayEN} ${homeTeam} ${home.score}${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${arena} ${tv}`;
 				}
 				else if (statusCode > 4 && statusCode < 8) {
 					return `${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${arena} ${tv}`;
@@ -168,7 +168,7 @@ module.exports = {
 				else if (statusCode === 9) {
 					return `${awayTeam} @ ${homeTeam} PPD`;
 				}
-			}).join('\n');
+			}).join('\u200B\n');
 		}
 
 		if (args[0] === 'last') {
@@ -177,7 +177,7 @@ module.exports = {
 
 		const embed = new RichEmbed();
 		embed.setColor(0x59acef);
-		embed.setAuthor('NHL Scores', 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/05_NHL_Shield.svg/150px-05_NHL_Shield.svg.png');
+		embed.setAuthor('NHL Scores', 'https://i.imgur.com/zl8JzZc.png');
 		schedule.dates.slice(0, limit).map(({ date, games }) => embed.addField(':hockey: ' + moment(date).format('ddd, MMM DD'), `${getScores(games)}`));
 
 
