@@ -20,11 +20,11 @@ module.exports = {
 
 		if (moment(args[0], 'YYYY', true).isValid()) {
 			const prevSeason = args[0] - 1;
-			fullSeason = prevSeason + args[0];
+			fullSeason = `${prevSeason}${args[0]}`;
 			args.shift();
 		}
 
-		const humanSeason = fullSeason.substring(0, 4) + '-' + fullSeason.substring(6);
+		const humanSeason = `${fullSeason.substring(0, 4)} - ${fullSeason.substring(6)}`;
 		const terms = args.join(' ');
 		const options = {
 			key: googleSearch.key,
@@ -83,9 +83,9 @@ module.exports = {
 			let teamLogo = 'https://i.imgur.com/zl8JzZc.png';
 			let currentTeam = '';
 			let currentAge = '';
-			let position = p.primaryPosition.abbreviation;
-			let birthDate = moment(p.birthDate).format('MMM DD, YYYY');
-			let birthStateProvince = p.birthStateProvince ? p.birthStateProvince + ', ' : '';
+			const position = p.primaryPosition.abbreviation;
+			const birthDate = moment(p.birthDate).format('MMM D, YYYY');
+			const birthStateProvince = p.birthStateProvince ? p.birthStateProvince + ', ' : '';
 			let statLine = '';
 
 			if (p.active === true) {
@@ -105,9 +105,8 @@ module.exports = {
 			const embed = new RichEmbed();
 			embed.setThumbnail(thumbnail + playerId + '.jpg');
 			embed.setColor(0x59acef);
-			embed.setAuthor(p.fullName + ' | #' + p.primaryNumber, teamLogo);
+			embed.setAuthor(`${p.fullName} | #${p.primaryNumber}`, teamLogo);
 			embed.setDescription(`${position} | ${p.height} | ${p.weight} lb ${currentAge} ${currentTeam}\nBorn: ${birthDate} (${p.birthCity}, ${birthStateProvince}${p.birthCountry})`);
-		
 			const { splits } = data.stats[0];
 
 			if (splits.length > 0) {
@@ -172,7 +171,7 @@ module.exports = {
 							statLine = `GS ${g.gamesStarted} ${g.decision} | SA ${g.shotsAgainst} GA ${g.goalsAgainst} Sv% ${g.savePercentage} SO ${g.shutouts} TOI ${g.TOI}`;
 						}
 						else {
-							statLine = `${g.goals}G-${g.assists}A-${g.points}P | ${g.plusMinus} PIM ${g.pim} Hits ${g.hits} Shots ${g.shots} TOI ${g.TOI}`;
+							statLine = `${g.goals}G-${g.assists}A-${g.points}P | +/- ${g.plusMinus} PIM ${g.pim} Hits ${g.hits} Shots ${g.shots} TOI ${g.TOI}`;
 						}
 
 						embed.addField(`:hockey: ${g.date} ${g.isHome} ${g.opponent} (${g.isWin}${g.isOT})`, statLine);
