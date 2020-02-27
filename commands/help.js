@@ -7,7 +7,7 @@ module.exports = {
 	category: 'help',
 	aliases: ['help', 'h'],
 	examples: ['nhl', 'teams'],
-	execute(message, args, prefix) {
+	execute(message, args, flags, prefix) {
 		const { commands } = message.client;
 
 		if (!args.length) {

@@ -4,5 +4,9 @@
   "activity": {
     "type": "",
     "name": ""
+  },
+  "googleSearch": {
+    "key": "",
+    "cx": ""
   }
 }
