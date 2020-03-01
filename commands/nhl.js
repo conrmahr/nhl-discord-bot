@@ -156,7 +156,7 @@ module.exports = {
 					return `${awayTeam} ${away.score}${awayPP}${awayEN} ${homeTeam} ${home.score}${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${arena} ${tv}`;
 				}
 				else if (statusCode > 4 && statusCode < 8) {
-					return `${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${arena} ${tv}`;
+					return `${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${arena}`;
 				}
 				else if (statusCode === 8) {
 					return `${awayTeam} @ ${homeTeam} TBD`;
