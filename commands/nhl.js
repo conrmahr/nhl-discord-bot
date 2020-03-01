@@ -101,7 +101,7 @@ module.exports = {
 
 		const query = qs.stringify(parameters, { arrayFormat: 'comma', addQueryPrefix: true });
 		const schedule = await fetch(`${endpoint}${query}`).then(response => response.json());
-	
+		
 		if (!schedule.totalGames) return message.reply('no games scheduled.');
 
 		function getScores(games) {
