@@ -85,7 +85,7 @@ module.exports = {
 			let currentAge = '';
 			const position = p.primaryPosition.abbreviation;
 			const birthDate = moment(p.birthDate).format('MMM D, YYYY');
-			const birthStateProvince = p.birthStateProvince ? p.birthStateProvince + ', ' : '';
+			const birthStateProvince = p.birthStateProvince ? `${p.birthStateProvince} , ` : '';
 			let statLine = '';
 
 			if (p.active === true) {
@@ -93,8 +93,8 @@ module.exports = {
 				const html = await fetch(teams[0].officialSiteUrl).then(response => response.text());
 				const $ = cheerio.load(html);
 				teamLogo = $('[rel="shortcut icon"]').attr('href');
-				currentTeam = ' ' + teams[0].abbreviation;
-				currentAge = p.currentAge ? '| Age: ' + p.currentAge + ' |' : '|';
+				currentTeam = ` ${teams[0].abbreviation}`;
+				currentAge = p.currentAge ? `| Age: ${p.currentAge} |` : '|';
 			}
 
 			const query = qs.stringify(parameters, { addQueryPrefix: true });
@@ -103,7 +103,7 @@ module.exports = {
 			const singleSeason = renameTitle[parameters.stats];
 			const data = await fetch(`${apiPeople}${playerId}/stats/${query}`).then(response => response.json());
 			const embed = new RichEmbed();
-			embed.setThumbnail(thumbnail + playerId + '.jpg');
+			embed.setThumbnail(`${thumbnail}${playerId}.jpg`);
 			embed.setColor(0x59acef);
 			embed.setAuthor(`${p.fullName} | #${p.primaryNumber}`, teamLogo);
 			embed.setDescription(`${position} | ${p.height} | ${p.weight} lb ${currentAge} ${currentTeam}\nBorn: ${birthDate} (${p.birthCity}, ${birthStateProvince}${p.birthCountry})`);
@@ -127,7 +127,7 @@ module.exports = {
 							'Faceoff %': splits[s].stat.faceOffPct,
 							Shots: splits[s].stat.shots,
 							'Shot %': splits[s].stat.shotPct,
-							'+/-': (splits[s].stat.plusMinus > 0) ? '+' + splits[s].stat.plusMinus : (splits[s].stat.plusMinus === 0) ? 'E' : splits[s].stat.plusMinus,
+							'+/-': (splits[s].stat.plusMinus > 0) ? `+${splits[s].stat.plusMinus}` : (splits[s].stat.plusMinus === 0) ? 'E' : splits[s].stat.plusMinus,
 							Starts: splits[s].stat.gamesStarted,
 							Wins: splits[s].stat.wins,
 							Losses: splits[s].stat.loses,
@@ -140,7 +140,7 @@ module.exports = {
 							'Sv%': splits[s].stat.savePercentage ? splits[s].stat.savePercentage.toFixed(3) : null,
 							Shutouts: splits[s].stat.shutouts,
 						};
-						const seasonOrPlayoffs = splits[s].season ? splits[s].season.substring(0, 4) + '-' + splits[s].season.substring(6) : '-';
+						const seasonOrPlayoffs = splits[s].season ? `${splits[s].season.substring(0, 4)}-${splits[s].season.substring(6)}` : '-';
 						embed.addField(singleSeason, seasonOrPlayoffs, true);
 						Object.entries(g).filter(([, number ]) => number != null).forEach(([ key, value ]) => embed.addField(key, value, true));
 					}
@@ -154,7 +154,7 @@ module.exports = {
 							goals: splits[s].stat.goals,
 							assists: splits[s].stat.assists,
 							points: splits[s].stat.points,
-							plusMinus: (splits[s].stat.plusMinus > 0) ? '+' + splits[s].stat.plusMinus : (splits[s].stat.plusMinus === 0) ? 'E' : splits[s].stat.plusMinus,
+							plusMinus: (splits[s].stat.plusMinus > 0) ? `+${splits[s].stat.plusMinus}` : (splits[s].stat.plusMinus === 0) ? 'E' : splits[s].stat.plusMinus,
 							pim: splits[s].stat.pim,
 							hits: splits[s].stat.hits,
 							shots: splits[s].stat.shots,
