@@ -100,20 +100,16 @@ module.exports = {
 		}
 
 		const query = qs.stringify(parameters, { arrayFormat: 'comma', addQueryPrefix: true });
-		const schedule = await fetch(endpoint + query).then(response => response.json());
-		const checkGames = schedule.totalGames;
-		if (!checkGames) return message.reply('no games scheduled.');
+		const schedule = await fetch(`${endpoint}${query}`).then(response => response.json());
+	
+		if (!schedule.totalGames) return message.reply('no games scheduled.');
 
 		function getScores(games) {
 			return games.map(game => {
 
 				function isBold(w, l) {
-					if(w > l) {
-						return '**';
-					}
-					else {
-						return '';
-					}
+					const b = (w > l) ? '**' : '';
+					return b;
 				}
 
 				function formatPeriod(t, p) {
@@ -138,13 +134,13 @@ module.exports = {
 				let arena = '';
 				if (broadcasts) {
 					const channels = broadcasts.map(i => i.name).join(', ');
-					tv = ':tv: [' + channels + ']';
+					tv = `:tv: [${channels}]`;
 				}
 				else if (flagBroadcasts) {
 					tv = ':tv: :flag_ca:';
 				}
 				if (venue && flagVenue) {
-					arena = ':stadium: [' + venue.name + ']';
+					arena = `:stadium: [${venue.name}]`;
 				}
 
 				if (statusCode < 3 || flagHide) {
@@ -178,7 +174,7 @@ module.exports = {
 		const embed = new RichEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor('NHL Scores', 'https://i.imgur.com/zl8JzZc.png');
-		schedule.dates.slice(0, limit).map(({ date, games }) => embed.addField(':hockey: ' + moment(date).format('ddd, MMM DD'), `${getScores(games)}`));
+		schedule.dates.slice(0, limit).map(({ date, games }) => embed.addField(`:hockey: ${moment(date).format('ddd, MMM DD')}`, `${getScores(games)}`));
 
 
 		message.channel.send(embed);
