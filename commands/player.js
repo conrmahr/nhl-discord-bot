@@ -84,7 +84,7 @@ module.exports = {
 			let currentTeam = '';
 			let currentAge = '';
 			const position = p.primaryPosition.abbreviation;
-			const number = p.primaryNumber ? ` | #${p.primaryNumber}` : '';
+			const sweater = p.primaryNumber ? ` | #${p.primaryNumber}` : '';
 			const birthDate = moment(p.birthDate).format('MMM D, YYYY');
 			const birthStateProvince = p.birthStateProvince ? `${p.birthStateProvince} , ` : '';
 			let statLine = '';
@@ -106,7 +106,7 @@ module.exports = {
 			const embed = new RichEmbed();
 			embed.setThumbnail(`${thumbnail}${playerId}.jpg`);
 			embed.setColor(0x59acef);
-			embed.setAuthor(`${p.fullName}${number}`, teamLogo);
+			embed.setAuthor(`${p.fullName}${sweater}`, teamLogo);
 			embed.setDescription(`${position} | ${p.height} | ${p.weight} lb ${currentAge} ${currentTeam}\u200B\nBorn: ${birthDate} (${p.birthCity}, ${birthStateProvince}${p.birthCountry})`);
 			const { splits } = data.stats[0];
 
