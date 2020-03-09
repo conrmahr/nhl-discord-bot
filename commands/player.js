@@ -24,7 +24,7 @@ module.exports = {
 			args.shift();
 		}
 
-		const humanSeason = `${fullSeason.substring(0, 4)} - ${fullSeason.substring(6)}`;
+		const humanSeason = `${fullSeason.substring(0, 4)}-${fullSeason.substring(6)}`;
 		const terms = args.join(' ');
 		const options = {
 			key: googleSearch.key,
@@ -141,7 +141,8 @@ module.exports = {
 							'Sv%': splits[s].stat.savePercentage ? splits[s].stat.savePercentage.toFixed(3) : null,
 							Shutouts: splits[s].stat.shutouts,
 						};
-						const seasonOrPlayoffs = splits[s].season ? `${splits[s].season.substring(0, 4)}-${splits[s].season.substring(6)}` : '-';
+
+						const seasonOrPlayoffs = splits[s].season ? humanSeason : '--';
 						embed.addField(singleSeason, seasonOrPlayoffs, true);
 						Object.entries(g).filter(([, number ]) => number != null).forEach(([ key, value ]) => embed.addField(key, value, true));
 					}
