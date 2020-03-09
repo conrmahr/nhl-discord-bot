@@ -107,7 +107,7 @@ module.exports = {
 			embed.setThumbnail(`${thumbnail}${playerId}.jpg`);
 			embed.setColor(0x59acef);
 			embed.setAuthor(`${p.fullName}${number}`, teamLogo);
-			embed.setDescription(`${position} | ${p.height} | ${p.weight} lb ${currentAge} ${currentTeam}\nBorn: ${birthDate} (${p.birthCity}, ${birthStateProvince}${p.birthCountry})`);
+			embed.setDescription(`${position} | ${p.height} | ${p.weight} lb ${currentAge} ${currentTeam}\u200B\nBorn: ${birthDate} (${p.birthCity}, ${birthStateProvince}${p.birthCountry})`);
 			const { splits } = data.stats[0];
 
 			if (splits.length > 0) {
