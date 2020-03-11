@@ -151,12 +151,12 @@ module.exports = {
 				else if (statusCode > 2 && statusCode < 5) {
 
 					const clock = function getClock(s) {
-						const c = s ? new Date(s * 1000).toISOString().slice(14, -5) : '';
+						let c = s ? new Date(s * 1000).toISOString().slice(14, -5) : '';
 						return c;
 					};
 
-					const awayPP = (linescore.teams.away.powerPlay && linescore.powerPlayInfo.situationTimeRemaining > 0) ? ` [*PP ${clock(linescore.powerPlayInfo.situationTimeRemaining)}*]` : '';
-					const homePP = (linescore.teams.home.powerPlay && linescore.powerPlayInfo.situationTimeRemaining > 0) ? ` [*PP ${clock(linescore.powerPlayInfo.situationTimeRemaining)}*]` : '';
+					const awayPP = (linescore.teams.away.powerPlay && linescore.powerPlayInfo.situationTimeRemaining > 0) ? ` [*PP*]` : '';
+					const homePP = (linescore.teams.home.powerPlay && linescore.powerPlayInfo.situationTimeRemaining > 0) ? ` [*PP*]` : '';
 					const awayEN = linescore.teams.away.goaliePulled ? ' [*EN*]' : '';
 					const homeEN = linescore.teams.home.goaliePulled ? ' [*EN*]' : '';
 					const intermission = linescore.intermissionInfo.inIntermission ? `[${clock(linescore.intermissionInfo.intermissionTimeRemaining)} Int]` : '';
