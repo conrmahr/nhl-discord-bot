@@ -151,12 +151,12 @@ module.exports = {
 				else if (statusCode > 2 && statusCode < 5) {
 
 					const clock = function getClock(s) {
-						let c = s ? new Date(s * 1000).toISOString().slice(14, -5) : '';
+						const c = s ? new Date(s * 1000).toISOString().slice(14, -5) : '';
 						return c;
 					};
 
-					const awayPP = (linescore.teams.away.powerPlay && linescore.powerPlayInfo.situationTimeRemaining > 0) ? ` [*PP*]` : '';
-					const homePP = (linescore.teams.home.powerPlay && linescore.powerPlayInfo.situationTimeRemaining > 0) ? ` [*PP*]` : '';
+					const awayPP = (linescore.teams.away.powerPlay && linescore.powerPlayInfo.situationTimeRemaining > 0) ? ' [*PP*]' : '';
+					const homePP = (linescore.teams.home.powerPlay && linescore.powerPlayInfo.situationTimeRemaining > 0) ? ' [*PP*]' : '';
 					const awayEN = linescore.teams.away.goaliePulled ? ' [*EN*]' : '';
 					const homeEN = linescore.teams.home.goaliePulled ? ' [*EN*]' : '';
 					const intermission = linescore.intermissionInfo.inIntermission ? `[${clock(linescore.intermissionInfo.intermissionTimeRemaining)} Int]` : '';
@@ -165,14 +165,14 @@ module.exports = {
 				else if (statusCode > 4 && statusCode < 8) {
 					return `${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${arena}`;
 				}
-				else if (statusCode === "8") {
+				else if (statusCode === '8') {
 					return `${awayTeam} @ ${homeTeam} TBD`;
 				}
-				else if (statusCode === "9") {
+				else if (statusCode === '9') {
 					return `${awayTeam} @ ${homeTeam} PPD`;
 				}
 				else {
-					return `Game status not found.`;
+					return 'Game status not found.';
 				}
 
 			}).join('\u200B\n');
