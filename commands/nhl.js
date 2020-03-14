@@ -149,11 +149,17 @@ module.exports = {
 					return `${awayTeam} @ ${homeTeam} ${gameTime} ${arena} ${tv}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {
-					const awayPP = linescore.teams.away.powerPlay ? ' [*PP*]' : '';
-					const homePP = linescore.teams.home.powerPlay ? ' [*PP*]' : '';
+					const clock = function getClock(s) {
+						const c = s ? new Date(s * 1000).toISOString().slice(14, -5) : '';
+						return c;
+					};
+
+					const awayPP = (linescore.teams.away.powerPlay && linescore.powerPlayInfo.situationTimeRemaining > 0) ? ' [*PP*]' : '';
+					const homePP = (linescore.teams.home.powerPlay && linescore.powerPlayInfo.situationTimeRemaining > 0) ? ' [*PP*]' : '';
 					const awayEN = linescore.teams.away.goaliePulled ? ' [*EN*]' : '';
 					const homeEN = linescore.teams.home.goaliePulled ? ' [*EN*]' : '';
-					return `${awayTeam} ${away.score}${awayPP}${awayEN} ${homeTeam} ${home.score}${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${arena} ${tv}`;
+					const intermission = linescore.intermissionInfo.inIntermission ? `[${clock(linescore.intermissionInfo.intermissionTimeRemaining)} Int]` : '';
+					return `${awayTeam} ${away.score}${awayPP}${awayEN} ${homeTeam} ${home.score}${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${intermission} ${arena} ${tv}`;
 				}
 				else if (statusCode > 4 && statusCode < 8) {
 					return `${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${arena}`;
