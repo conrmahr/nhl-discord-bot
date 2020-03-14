@@ -1,6 +1,6 @@
 {
   "name": "nhl-discord-bot",
-  "version": "0.6.1",
+  "version": "1.0.0-rc1",
   "description": "🏒 Self-Hosted NHL Discord Bot",
   "main": "index.js",
   "scripts": {
