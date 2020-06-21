@@ -185,7 +185,6 @@ module.exports = {
 		embed.setAuthor('NHL Scores', 'https://i.imgur.com/zl8JzZc.png');
 		schedule.dates.slice(0, limit).map(({ date, games }) => embed.addField(`:hockey: ${moment(date).format('ddd, MMM DD')}`, `${getScores(games)}`));
 
-
 		message.channel.send(embed);
 
 	},

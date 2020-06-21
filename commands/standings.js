@@ -5,7 +5,7 @@ const qs = require('qs');
 
 module.exports = {
 	name: 'standings',
-	usage: '<date> <table>',
+	usage: '<date> <table> -<flag>',
 	description: 'Get current standings for any division, conference, or league. Add `YYYY` to specifiy a season.',
 	category: 'standings',
 	aliases: ['standings', 's'],
@@ -23,6 +23,7 @@ module.exports = {
 		let standingsLogo = 'https://i.imgur.com/zl8JzZc.png';
 		let standingsTitle = 'National Hockey League';
 		let humanSeason = '';
+		let flagWildCard = false;
 
 		if (!args[0]) return message.reply(`no league, conference, or division was specified. Type \`${prefix}help standings\` for a list of arguments.`);
 
@@ -45,6 +46,17 @@ module.exports = {
 		
 		const { seasonId, tiesInUse, conferencesInUse, divisionsInUse, wildCardInUse } = seasons[0];
 		humanSeason = `${seasonId.substring(0, 4)}-${seasonId.substring(6)}`;
+
+		if (wildCardInUse) {
+			for (const flag of flags) {
+				if (['wildcard', 'wc'].includes(flag)) {
+					flagWildCard = true;
+				}
+				else {
+					return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help standings\` for list of flags.`);
+				}
+			}
+		}
 
 		if (['eastern', 'east', 'western', 'west', 'wales', 'campbell' ].includes(args[1].toLowerCase()) && conferencesInUse) {
 			const conferenceShort = args[1].toLowerCase();
@@ -77,7 +89,7 @@ module.exports = {
 			if (!conferenceId) return  message.reply(`\`${args[1]}\` is not a valid conference for the ${humanSeason} season. Type \`${prefix}help standings\` for a list of arguments.`);
 
 			tableObj = await fetch(`https://statsapi.web.nhl.com/api/v1/conferences/${conferenceId.conference.id}`).then(response => response.json());
-			standingsType = 'byConference';
+			standingsType = flagWildCard ? 'wildCardWithLeaders' : 'byConference';
 			standingsLogo = conferenceLogos[tableObj.conferences[0].name];
 		}
 		else if (['metropolitan', 'metro', 'atlantic', 'atl', 'central', 'cen', 'pacific', 'pac', 'northeast', 'southeast', 'northwest', 'canadian', 'american', 'east', 'west', 'adams', 'norris', 'patrick', 'smythe'].includes(args[1].toLowerCase()) && divisionsInUse) {
@@ -126,40 +138,57 @@ module.exports = {
 
 		if (standingsType === 'byConference') {
 			standingsObj = records.find(o => o.conference.id === tableObj.conferences[0].id);
-			standingsTitle = `${tableObj.conferences[0].name} Conference`;
+			standingsTitle = `${tableObj.conferences[0].name} Conference`;	
 		}
 		else if (standingsType === 'byDivision') {
 			standingsObj = records.find(o => o.division.id === tableObj.divisions[0].id);
 			standingsTitle = `${tableObj.divisions[0].name} Division`;
 		}
+		else if (standingsType === 'wildCardWithLeaders') {
+			records.reverse();
+			standingsPrepObj = records.filter((o => o.conference.id === tableObj.conferences[0].id), []);
+			standingsTitle = `${tableObj.conferences[0].name} Conference Wildcard`;
+			standingsObj = standingsPrepObj.reduce((c, i) => {c.teamRecords.push(...i.teamRecords); return c; }, {teamRecords: []});;
+
+		}
 		else {
 			standingsObj = records[0];
 		}
 
+		const updated = records[0].teamRecords[0].lastUpdated;
 		const { teams } = teamsObj;
 
 		function getStandings(tables) {
-			let rank = 0;
+			let r = 0;
+			let lb = '';
 			return tables.map(table => {
-				rank++;
-				const { team: { abbreviation }, gamesPlayed, leagueRecord: { wins, losses, ties, ot }, points, regulationWins, row, streak: { streakCode } } = table;
+				const { team: { abbreviation }, gamesPlayed, leagueRecord: { wins, losses, ties, ot }, points, regulationWins, divisionRank, conferenceRank, leagueRank, wildCardRank, row, streak: { streakCode } } = table;
+				const ranks = { byDivision: divisionRank, byConference: conferenceRank, byLeague: leagueRank, wildCardWithLeaders: wildCardRank};
+				const rank = (ranks[standingsType] == 0) ? divisionRank : ranks[standingsType];
 				const teamAbbreviation = teams.find(o => o.id === table.team.id).abbreviation;
 				const extra = tiesInUse ? ` T: **${ties}** ` : ` OT: **${ot}** `;
-				let rw = '';
-				if (row) rw = ` ROW: **${row}**`;
+				let rw =  row ? ` ROW: **${row}**` : '';
 				if (regulationWins) rw = ` RW: **${regulationWins}**`;
 				const strk = streakCode ? ` STRK: **${streakCode}**` : '';
 				const checkType = (standingsType != 'byLeague') ? rw + strk : '';
-				return `${rank}. ${teamAbbreviation} - GP: **${gamesPlayed}** W: **${wins}** L: **${losses}**${extra}P: **${points}**${checkType}`;
+				r++;
+				const checkBreak = [ 3, 6];
+				function getLine(n) {
+					if (checkBreak.includes(n)) return '\n';
+					return '';
+				}
+				return `${rank}. <${teamAbbreviation}> GP: **${gamesPlayed}** W: **${wins}** L: **${losses}**${extra}P: **${points}**${checkType}${getLine(r)}`;
 
 			}).join('\u200B\n');
 		}
-
+	
 		const embed = new RichEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor(`${humanSeason} ${standingsTitle}`, standingsLogo);
 		embed.setThumbnail(standingsLogo);
 		embed.setDescription(`${getStandings(standingsObj.teamRecords)}`);
+		embed.setTimestamp(updated);
+		embed.setFooter('Last updated', 'https://i.imgur.com/zl8JzZc.png');
 
 		message.channel.send(embed);
 	},
