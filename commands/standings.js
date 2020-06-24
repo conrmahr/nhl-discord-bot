@@ -6,7 +6,7 @@ const qs = require('qs');
 module.exports = {
 	name: 'standings',
 	usage: '<date> <table> -<flag>',
-	description: 'Get current standings for any division, conference, or league. Add `YYYY` to specifiy a season.',
+	description: 'Get current standings for any division, conference, or league. Add `YYYY` to specify a season. Add flags `-wildcard` or `-percentage` after a conference for sorting.',
 	category: 'standings',
 	aliases: ['standings', 's'],
 	examples: ['metro', 'east', 'league', '1981 campbell', '1993 patrick'],
@@ -24,6 +24,7 @@ module.exports = {
 		let standingsTitle = 'National Hockey League';
 		let humanSeason = '';
 		let flagWildCard = false;
+		let flagPointsPercentage = false;
 
 		if (!args[0]) return message.reply(`no league, conference, or division was specified. Type \`${prefix}help standings\` for a list of arguments.`);
 
@@ -45,14 +46,15 @@ module.exports = {
 		const { seasonId, tiesInUse, conferencesInUse, divisionsInUse, wildCardInUse } = seasons[0];
 		humanSeason = `${seasonId.substring(0, 4)}-${seasonId.substring(6)}`;
 
-		if (wildCardInUse) {
-			for (const flag of flags) {
-				if (['wildcard', 'wc'].includes(flag)) {
-					flagWildCard = true;
-				}
-				else {
-					return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help standings\` for list of flags.`);
-				}
+		for (const flag of flags) {
+			if (wildCardInUse && ['wildcard', 'wc'].includes(flag)) {
+				flagWildCard = true;
+			}
+			else if (['percentage', 'p'].includes(flag)) {
+				flagPointsPercentage = true;
+			}
+			else {
+				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help standings\` for list of flags.`);
 			}
 		}
 
@@ -136,10 +138,13 @@ module.exports = {
 
 		if (standingsType === 'byConference') {
 			standingsObj = records.find(o => o.conference.id === tableObj.conferences[0].id);
+			standingsObj.teamRecords.sort((a, b) => Number(a.ppConferenceRank) - Number(b.ppConferenceRank));
 			standingsTitle = `${tableObj.conferences[0].name} Conference`;
+			if (flagPointsPercentage) standingsTitle = `${standingsTitle} Points Percentage`;
 		}
 		else if (standingsType === 'byDivision') {
 			standingsObj = records.find(o => o.division.id === tableObj.divisions[0].id);
+			standingsObj.teamRecords.sort((a, b) => Number(a.divisionRank) - Number(b.divisionRank));
 			standingsTitle = `${tableObj.divisions[0].name} Division`;
 		}
 		else if (standingsType === 'wildCardWithLeaders') {
@@ -153,6 +158,7 @@ module.exports = {
 		}
 		else {
 			standingsObj = records[0];
+			standingsObj.teamRecords.sort((a, b) => Number(a.leagueRank) - Number(b.leagueRank));
 		}
 
 		const updated = records[0].teamRecords[0].lastUpdated;
@@ -161,31 +167,60 @@ module.exports = {
 		function getStandings(tables) {
 			let r = 0;
 			return tables.map(table => {
-				const { gamesPlayed, leagueRecord: { wins, losses, ties, ot }, points, regulationWins, divisionRank, conferenceRank, leagueRank, wildCardRank, row, streak: { streakCode } } = table;
+				const { gamesPlayed, leagueRecord: { wins, losses, ties, ot }, points, regulationWins, goalsAgainst, goalsScored, divisionRank, conferenceRank, leagueRank, wildCardRank, row, streak: { streakCode }, pointsPercentage } = table;
 				const ranks = { byDivision: divisionRank, byConference: conferenceRank, byLeague: leagueRank, wildCardWithLeaders: wildCardRank };
 				const rank = (ranks[standingsType] == 0) ? divisionRank : ranks[standingsType];
 				const teamAbbreviation = teams.find(o => o.id === table.team.id).abbreviation;
-				const extra = tiesInUse ? ` T: **${ties}** ` : ` OT: **${ot}** `;
-				let rw = row ? ` ROW: **${row}**` : '';
-				if (regulationWins) rw = ` RW: **${regulationWins}**`;
-				const strk = streakCode ? ` STRK: **${streakCode}**` : '';
-				const checkType = (standingsType != 'byLeague') ? rw + strk : '';
+				const extra = tiesInUse ? ties : ot;
+				const pp = (flagPointsPercentage && pointsPercentage) ? pointsPercentage.toFixed(3).substring(1) : '';
+				const rw = (!flagPointsPercentage && regulationWins) ? regulationWins : '';
+				const rowe = (!flagPointsPercentage && !regulationWins && row) ? row : '';
+				const strk = streakCode ? `${streakCode}` : '';
 				r++;
-				const checkBreak = [ 3, 6];
-				function getLine(n, t) {
-					if (checkBreak.includes(n) && t) return '\n';
+				function getHeader(loop, xrw, xrow, xpp, tiu) {
+					if (loop === 1 && xrw && !xpp) return '#  TEAM  GP W  L  OT PTS RW DIFF STRK\n';
+					if (loop === 1 && xrow && !xpp) return '#  TEAM  GP W  L  OT PTS ROW DIFF STRK\n';
+					if (loop === 1 && xpp) return '#  TEAM  GP W  L  OT PTS PTS% DIFF STRK\n';
+					if (loop === 1 && tiu) return '#  TEAM  GP W  L  T  PTS DIFF STRK\n';
+					if (loop === 1) return '#  TEAM  GP W  L  OT PTS DIFF STRK\n';
 					return '';
 				}
-				return `${rank}. <${teamAbbreviation}> GP: **${gamesPlayed}** W: **${wins}** L: **${losses}**${extra}P: **${points}**${checkType}${getLine(r, flagWildCard)}`;
+				function getDiff(scored, against) {
+					const diff = scored - against;
+					if (diff > 0) return `+${diff}`;
+					if (diff === 0) return ` ${diff}`;
+					return diff;
+				}
+				function getLine(loop, wc, percent) {
+					const wcBreak = [3, 6];
+					if (wcBreak.includes(loop) && wc) return '\n';
+					if (loop === 12 && percent) return '\n';
+					return '';
+				}
+				function pad(stat, column) {
+					const d = new String(stat);
+					if (d.length === 1 && column === 3) return `${d}  `;
+					if (d.length === 2 && column === 3) return `${d} `;
+					if (d.length === 1 && column === 4) return `${d}   `;
+					if (d.length === 2 && column === 4) return `${d}  `;
+					if (d.length === 3 && column === 4) return `${d} `;
+					if (d.length === 1 && column === 5) return `${d}    `;
+					if (d.length === 2 && column === 5) return `${d}   `;
+					if (d.length === 3 && column === 5) return `${d}  `;
+					if (d.length === 4 && column === 5) return `${d} `;
+					return `${d}`;
+				}
+				return `${getHeader(r, regulationWins, row, flagPointsPercentage, tiesInUse)}${pad(rank, 3)}<${teamAbbreviation}> ${pad(gamesPlayed, 3)}${pad(wins, 3)}${pad(losses, 3)}${pad(extra, 3)}${pad(points, 4)}${pad(pp, 5)}${pad(rw, 3)}${pad(rowe, 4)}${pad(getDiff(goalsScored, goalsAgainst), 5)}${strk}${getLine(r, flagWildCard, flagPointsPercentage)}`;
 
 			}).join('\u200B\n');
 		}
 
+		const block = '```md\n' + getStandings(standingsObj.teamRecords) + '```';
 		const embed = new RichEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor(`${humanSeason} ${standingsTitle}`, standingsLogo);
 		embed.setThumbnail(standingsLogo);
-		embed.setDescription(`${getStandings(standingsObj.teamRecords)}`);
+		embed.setDescription(block);
 		embed.setTimestamp(updated);
 		embed.setFooter('Last updated', 'https://i.imgur.com/zl8JzZc.png');
 
