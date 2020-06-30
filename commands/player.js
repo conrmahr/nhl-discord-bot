@@ -54,11 +54,13 @@ module.exports = {
 			const career = ['career', 'c'];
 			const playoffs = ['playoffs', 'p'];
 			const gamelog = ['log', 'l'];
+			const onpace = ['onpace', 'o'];
 			const advanced = ['advanced', 'a'];
 			const careerFlag = career.some(e => flags.includes(e));
 			const playoffsFlag = playoffs.some(e => flags.includes(e));
 			const gameLogFlag = gamelog.some(e => flags.includes(e));
 			const advancedFlag = advanced.some(e => flags.includes(e));
+			const onPaceFlag = onpace.some(e => flags.includes(e));
 			const keywordFlag = flags.find(e => e.startsWith('filter=')) || '';
 			const keyword = (keywordFlag.length > 0) ? keywordFlag.substring(7) : '';
 			let last = 1;
@@ -81,6 +83,9 @@ module.exports = {
 			else if (careerFlag) {
 				parameters.stats = 'careerRegularSeason';
 			}
+			else if (onPaceFlag) {
+				parameters.stats = 'onPaceRegularSeason';
+			}
 			else if (p.active) {
 				parameters.stats = 'statsSingleSeason';
 			}
@@ -95,7 +100,6 @@ module.exports = {
 			let teamLogo = 'https://i.imgur.com/zl8JzZc.png';
 			let currentTeam = 'Inactive';
 			let currentAge = '';
-			let onPace = '';
 			const fullName = `${p.fullName}`;
 			const sweater = p.primaryNumber ? `#${p.primaryNumber}` : '';
 			const shootsCatches = { Forward: 'Shoots:', Defenseman: 'Shoots:', Goalie: 'Catches:' };
@@ -125,7 +129,6 @@ module.exports = {
 				teamLogo = $('[rel="shortcut icon"]').attr('href');
 				currentTeam = teams[0].abbreviation ? `${teams[0].abbreviation} ` : '';
 				currentAge = p.currentAge ? `(${p.currentAge}) ` : '';
-				onPace = (parameters.stats === 'statsSingleSeason') ? 82 : null;
 			}
 
 			const flag = Object.keys(flagsObj).includes(p.nationality) ? flagsObj[p.nationality] : `:flag_${p.nationality.toLowerCase().substring(0, 2)}:`;
@@ -145,7 +148,15 @@ module.exports = {
 			const data = await fetch(`${apiPeople}${playerId}/stats/${query}`).then(response => response.json());
 			if (Array.isArray(data.stats[0].splits) && data.stats[0].splits.length === 0) return message.reply(`no stats associated with \`${fullName.trim()}\` for this argument. Type \`${prefix}help player\` for a list of arguments.`);
 			const { splits } = data.stats[0];
-			const renameTitle = { careerPlayoffs: 'Career Playoffs', careerRegularSeason: 'Career Regular Season', statsSingleSeasonPlayoffs: 'Playoffs', statsSingleSeason: 'Reg. Season', gameLog: 'Reg. Season - Last 5', playoffGameLog: 'Playoffs - Last 7' };
+			const renameTitle = {
+				careerPlayoffs: 'Career Playoffs',
+				careerRegularSeason: 'Career Regular Season',
+				statsSingleSeasonPlayoffs: 'Playoffs',
+				statsSingleSeason: 'Reg. Season',
+				gameLog: 'Reg. Season - Last 5',
+				playoffGameLog: 'Playoffs - Last 7',
+				onPaceRegularSeason: 'On Pace - 82 Games',
+			};
 			const singleSeason = renameTitle[parameters.stats];
 			const seasonOrPlayoffs = splits[0].season ? `${humanSeason} (${singleSeason})` : `(${singleSeason})`;
 			parameters.player.push(fullName, sweater, seasonOrPlayoffs);
@@ -170,22 +181,21 @@ module.exports = {
 								OTG: splits[s].stat.overTimeGoals,
 								SHG: splits[s].stat.shortHandedGoals,
 								SHP: splits[s].stat.shortHandedPoints,
-								'Faceoff %': splits[s].stat.faceOffPct,
+								'Faceoff%': splits[s].stat.faceOffPct,
 								Shots: splits[s].stat.shots,
-								'Shot %': splits[s].stat.shotPct,
+								'Shot%': splits[s].stat.shotPct,
 								PIM: splits[s].stat.pim,
 								Hits: splits[s].stat.hits,
 								Blocked: splits[s].stat.blocked,
 								Shifts: splits[s].stat.shifts,
 								TOI: splits[s].stat.timeOnIce,
 								'PP TOI': splits[s].stat.powerPlayTimeOnIce,
-								'SH TOI': splits[s].stat.shortHandedTimeOnIce,
+								'SHTOI': splits[s].stat.shortHandedTimeOnIce,
 								'Ev TOI': splits[s].stat.evenTimeOnIce,
 								'TOI/G': splits[s].stat.timeOnIcePerGame,
 								'Ev TOI/G': splits[s].stat.evenTimeOnIcePerGame,
 								'SH TOI/G': splits[s].stat.shortHandedTimeOnIcePerGame,
 								'PP TOI/G': splits[s].stat.powerPlayTimeOnIcePerGame,
-								'Scoring Pace (82 Games)': onPace ? `${Math.floor((splits[s].stat.goals / splits[s].stat.games) * onPace)}G-${Math.floor((splits[s].stat.assists / splits[s].stat.games) * onPace)}A-${Math.floor((splits[s].stat.points / splits[s].stat.games) * onPace)}P` : null,
 							},
 							Defenseman: {
 								Games: splits[s].stat.games,
@@ -197,9 +207,9 @@ module.exports = {
 								OTG: splits[s].stat.overTimeGoals,
 								SHG: splits[s].stat.shortHandedGoals,
 								SHP: splits[s].stat.shortHandedPoints,
-								'Faceoff %': splits[s].stat.faceOffPct,
+								'Faceoff%': splits[s].stat.faceOffPct,
 								Shots: splits[s].stat.shots,
-								'Shot %': splits[s].stat.shotPct,
+								'Shot%': splits[s].stat.shotPct,
 								PIM: splits[s].stat.pim,
 								Hits: splits[s].stat.hits,
 								Blocked: splits[s].stat.blocked,
@@ -212,7 +222,6 @@ module.exports = {
 								'Ev TOI/G': splits[s].stat.evenTimeOnIcePerGame,
 								'SH TOI/G': splits[s].stat.shortHandedTimeOnIcePerGame,
 								'PP TOI/G': splits[s].stat.powerPlayTimeOnIcePerGame,
-								'Scoring Pace (82 Games)': onPace ? `${Math.floor((splits[s].stat.goals / splits[s].stat.games) * onPace)}G-${Math.floor((splits[s].stat.assists / splits[s].stat.games) * onPace)}A-${Math.floor((splits[s].stat.points / splits[s].stat.games) * onPace)}P` : null,
 							},
 							Goalie: {
 								Games: splits[s].stat.games,
@@ -237,7 +246,6 @@ module.exports = {
 								'SH Sv%': splits[s].stat.shortHandedSavePercentage ? (splits[s].stat.shortHandedSavePercentage / 100).toFixed(3).substring(1) : null,
 								'Ev Sv%': splits[s].stat.evenStrengthSavePercentage ? (splits[s].stat.evenStrengthSavePercentage / 100).toFixed(3).substring(1) : null,
 								'TOI/G': splits[s].stat.timeOnIcePerGame,
-								'Record Pace (82 Games)': onPace ? `${Math.floor((splits[s].stat.wins / splits[s].stat.games) * onPace)}W-${Math.floor((splits[s].stat.losses / splits[s].stat.games) * onPace)}L-${splits[s].stat.ties ? Math.floor((splits[s].stat.ties / splits[s].stat.games) * onPace) : 0}T-${splits[s].stat.ot ? Math.floor((splits[s].stat.ot / splits[s].stat.games) * onPace) : 0}OT` : null,
 							},
 						};
 
