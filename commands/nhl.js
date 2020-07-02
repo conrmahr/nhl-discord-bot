@@ -6,7 +6,7 @@ const qs = require('qs');
 module.exports = {
 	name: 'nhl',
 	usage: '<date> <team> <opponent> -<flag>',
-	description: 'Get games for `today`, `tomorrow`, `yesterday`, `next` 5 games, `last` 5 games, or a given date `YYYY-MM-DD`. If nothing is specified, games scheduled for today will return. Add abbreviations to filter for a specific team and opponent. Add flags `-tv`, `-venue`, and/or `-hide` for more options.',
+	description: 'Get games for `today`, `tomorrow`, `yesterday`, `next` 5 games, `last` 5 games, or a given date `YYYY-MM-DD`. If nothing is specified, games scheduled for today will return. Add abbreviations to filter for a specific team and opponent. Add flags `-tv`, `-venue`, `-hide` for more options.',
 	category: 'scores',
 	aliases: ['nhl', 'n'],
 	examples: ['', 'nyi -hide', 'tomorrow -tv -venue', 'next nyi nyr'],

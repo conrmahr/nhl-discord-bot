@@ -8,22 +8,22 @@ const { googleSearch } = require('../config.json');
 module.exports = {
 	name: 'player',
 	usage: '<year> <name> -<flag>',
-	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags `-career`, `-playoffs`, `-log`, `-onpace`, `-advanced`, `-filter=<keyword>` for more options.',
+	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags `-career`, `-playoffs`, `-log`, `-onpace`, `-advanced`, `-filter=<term>` for more options.',
 	category: 'stats',
 	aliases: ['player', 'p', 'pseason'],
 	examples: ['barzal', '1993 selanne', 'gretzky -career', 'mcdavid -log', 'ovechkin -onpace'],
 	async execute(message, args, flags, prefix) {
 
-		const apiGoogleCustomSearch = 'https://www.googleapis.com/customsearch/v1';
-		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current').then(response => response.json());
-		let fullSeason = seasons[0].seasonId;
+		let current = 'current';
 
 		if (moment(args[0], 'YYYY', true).isValid()) {
 			const prevSeason = args[0] - 1;
-			fullSeason = `${prevSeason}${args[0]}`;
+			current = `${prevSeason}${args[0]}`;
 			args.shift();
 		}
 
+		const { seasons } = await fetch(`https://statsapi.web.nhl.com/api/v1/seasons/${current}`).then(response => response.json());
+		const fullSeason = seasons[0].seasonId;
 		const humanSeason = `${fullSeason.substring(0, 4)}-${fullSeason.substring(6)}`;
 		const terms = args.join(' ');
 		const options = {
@@ -37,6 +37,7 @@ module.exports = {
 			q: terms,
 		};
 
+		const apiGoogleCustomSearch = 'https://www.googleapis.com/customsearch/v1';
 		const google = await fetch(`${apiGoogleCustomSearch}${qs.stringify(options, { addQueryPrefix: true })}`).then(response => response.json());
 
 		if (google.error) {
@@ -63,6 +64,7 @@ module.exports = {
 			const onPaceFlag = onpace.some(e => flags.includes(e));
 			const keywordFlag = flags.find(e => e.startsWith('filter=') || e.startsWith('f=')) || '';
 			const keyword = (keywordFlag.length > 0) ? keywordFlag.split('=', 2)[1].toLowerCase() : '';
+			if (flags.length > 0 && keywordFlag.length === 0 && !careerFlag && !playoffsFlag && !gameLogFlag && !onPaceFlag && !advancedFlag) return message.reply(`\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help player\` for list of flags.`);
 			let last = 1;
 			const limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
 
@@ -174,9 +176,10 @@ module.exports = {
 
 						const skip = (x) => x === 0 ? null : null;
 						const scoring = (x) => x === 0 ? null : `${k.stat.goals}G-${k.stat.assists}A-${k.stat.points}P`;
-						const record = (x) => x === 0 ? null : `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ties ? k.stat.ties : 0}T-${k.stat.ot ? k.stat.ot : 0}OT`;
+						const record = () => seasons[0].tiesInUse ? `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ties}T` : `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ot}OT`;
+						const fixed1 = (x) => x === 0 ? null : x.toString().substring(1);
 						const fixed2 = (x) => x === 0 ? null : x.toFixed(2);
-						const fixed3 = (x) => x === 0 ? null : x.toFixed(3).substring(1);
+						const fixed3 = (x) => x === 0 ? null : (x / 100).toFixed(3).substring(1);
 
 						const map = {
 							games: { name: 'Games', order: 1 },
@@ -200,8 +203,8 @@ module.exports = {
 							shifts: { name: 'Shifts', order: 19 },
 							shotsAgainst: { name: 'SA', order: 20 },
 							goalsAgainst: { name: 'GA', order: 21 },
-							goalAgainstAverage: { name: 'GAA', order: 22 },
-							savePercentage: { name: 'Save%', order: 23 },
+							goalAgainstAverage: { name: 'GAA', order: 22, f: fixed2 },
+							savePercentage: { name: 'Save%', order: 23, f: fixed1 },
 							shutouts: { name: 'Shutouts', order: 24 },
 							powerPlaySaves: { name: 'PP Sv', order: 25 },
 							shortHandedSaves: { name: 'SH Sv', order: 26 },
@@ -234,7 +237,7 @@ module.exports = {
 								: { ...a, [map[b].name]: { stat: map[b].f(k.stat[b]), order: map[b].order } };
 						}, {});
 
-						const o  = Object.entries(n).map(([key, value]) => Object.assign({}, { key }, value)).sort((a, b) => a.order - b.order);
+						const o = Object.entries(n).map(([key, value]) => Object.assign({}, { key }, value)).sort((a, b) => a.order - b.order);
 
 						Object.entries(o).slice(0, limit).filter(([, element]) => element.key.toLowerCase().startsWith(keyword) && element.stat !== null).forEach(([, values ]) => embed.addField(values.key, values.stat, true));
 					}

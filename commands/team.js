@@ -7,7 +7,7 @@ const cheerio = require('cheerio');
 module.exports = {
 	name: 'team',
 	usage: '<year> <team> -<flag>',
-	description: 'Get team stats or roster for active and former teams. Add `YYYY` to specifiy a season. Add the flags  `-roster`, `-advanced`, `-filter=<keyword>` for more options.',
+	description: 'Get team stats or roster for active and former teams. Add `YYYY` to specifiy a season. Add the flags  `-roster`, `-advanced`, `-filter=<term>` for more options.',
 	category: 'stats',
 	aliases: ['team', 't', 'teams', 'tseason'],
 	examples: ['stl', '1977 mtl', '1982 nyi -roster'],
@@ -15,7 +15,7 @@ module.exports = {
 
 		const parameters = {};
 		let teamObj = '';
-		let current = '';
+		let current = 'current';
 		const embed = new RichEmbed();
 		let type = '/stats/';
 		const roster = ['roster', 'r'];
@@ -24,6 +24,7 @@ module.exports = {
 		const advancedFlag = advanced.some(e => flags.includes(e));
 		const keywordFlag = flags.find(e => e.startsWith('filter=') || e.startsWith('f=')) || '';
 		const keyword = (keywordFlag.length > 0) ? keywordFlag.split('=', 2)[1].toLowerCase() : '';
+		if (flags.length > 0 && keywordFlag.length === 0 && !rosterFlag && !advancedFlag) return message.reply(`\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help team\` for list of flags.`);
 		const limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
 
 		if (moment(args[0], 'YYYY', true).isValid()) {
@@ -32,7 +33,6 @@ module.exports = {
 			current = `${prevSeason}${args[0]}`;
 		}
 		else {
-			current = 'current';
 			args.push(args[0]);
 		}
 
@@ -100,7 +100,7 @@ module.exports = {
 		let g = '';
 
 		if (rosterFlag) {
-			const positions = { 'Left Wing' : [], Center: [], 'Right Wing': [], 'Defenseman': [], Goalie: [], '\u200B': ['\u200B'] };
+			const positions = { 'Left Wing' : [], Center: [], 'Right Wing': [], Defenseman: [], Goalie: [], '\u200B': ['\u200B'] };
 
 			data.roster.sort(function(a, b) {
 				return a['jerseyNumber'] - b['jerseyNumber'];
