@@ -39,7 +39,7 @@ module.exports = {
 			embed.addField('Examples', `\`${prefix}${command.aliases[0]} ${command.examples.join(`\`\n\`${prefix}${command.aliases[0]} `)}\``, true);
 		}
 		if (command.aliases.length > 1) {
-			embed.addField('Aliases', `\`${command.aliases.join('` `')}\``, true);
+			embed.addField('Aliases', `\`${command.aliases.join('`\n`')}\``, true);
 		}
 		return message.channel.send(embed);
 
