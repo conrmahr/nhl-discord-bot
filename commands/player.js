@@ -8,10 +8,10 @@ const { googleSearch } = require('../config.json');
 module.exports = {
 	name: 'player',
 	usage: '<year> <name> -<flag>',
-	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags `-career`, `-playoffs`, `-carrer -playoffs`, `-log`, `-log -playoffs`, `-advanced`, `-filter=<keyword>` for more options.',
+	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags `-career`, `-playoffs`, `-log`, `-onpace`, `-advanced`, `-filter=<keyword>` for more options.',
 	category: 'stats',
 	aliases: ['player', 'p', 'pseason'],
-	examples: ['barzal', '1993 selanne', 'gretzky -career', 'mcdavid -log'],
+	examples: ['barzal', '1993 selanne', 'gretzky -career', 'mcdavid -log', 'ovechkin -onpace'],
 	async execute(message, args, flags, prefix) {
 
 		const apiGoogleCustomSearch = 'https://www.googleapis.com/customsearch/v1';
@@ -61,10 +61,10 @@ module.exports = {
 			const gameLogFlag = gamelog.some(e => flags.includes(e));
 			const advancedFlag = advanced.some(e => flags.includes(e));
 			const onPaceFlag = onpace.some(e => flags.includes(e));
-			const keywordFlag = flags.find(e => e.startsWith('filter=')) || '';
-			const keyword = (keywordFlag.length > 0) ? keywordFlag.substring(7) : '';
+			const keywordFlag = flags.find(e => e.startsWith('filter=') || e.startsWith('f=')) || '';
+			const keyword = (keywordFlag.length > 0) ? keywordFlag.split('=', 2)[1].toLowerCase() : '';
 			let last = 1;
-			const limit = advancedFlag ? 25 : 3;
+			const limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
 
 			if (careerFlag && playoffsFlag) {
 				parameters.stats = 'careerPlayoffs';
@@ -155,7 +155,7 @@ module.exports = {
 				statsSingleSeason: 'Reg. Season',
 				gameLog: 'Reg. Season - Last 5',
 				playoffGameLog: 'Playoffs - Last 7',
-				onPaceRegularSeason: 'On Pace - 82 Games',
+				onPaceRegularSeason: 'Reg. Season On Pace',
 			};
 			const singleSeason = renameTitle[parameters.stats];
 			const seasonOrPlayoffs = splits[0].season ? `${humanSeason} (${singleSeason})` : `(${singleSeason})`;
@@ -168,110 +168,97 @@ module.exports = {
 
 			if (splits.length > 0) {
 				Object.keys(splits).slice(0, last).forEach(s=>{
+					const k = splits[s];
 
 					if (!gameLogFlag) {
-						const g = {
-							Forward: {
-								Games: splits[s].stat.games,
-								'Scoring': `${splits[s].stat.goals}G-${splits[s].stat.assists}A-${splits[s].stat.points}P`,
-								'+/-': (splits[s].stat.plusMinus > 0) ? `+${splits[s].stat.plusMinus}` : splits[s].stat.plusMinus,
-								PPG: splits[s].stat.powerPlayGoals,
-								PPP: splits[s].stat.powerPlayPoints,
-								GWG: splits[s].stat.gameWinningGoals,
-								OTG: splits[s].stat.overTimeGoals,
-								SHG: splits[s].stat.shortHandedGoals,
-								SHP: splits[s].stat.shortHandedPoints,
-								'Faceoff%': splits[s].stat.faceOffPct,
-								Shots: splits[s].stat.shots,
-								'Shot%': splits[s].stat.shotPct,
-								PIM: splits[s].stat.pim,
-								Hits: splits[s].stat.hits,
-								Blocked: splits[s].stat.blocked,
-								Shifts: splits[s].stat.shifts,
-								TOI: splits[s].stat.timeOnIce,
-								'PP TOI': splits[s].stat.powerPlayTimeOnIce,
-								'SHTOI': splits[s].stat.shortHandedTimeOnIce,
-								'Ev TOI': splits[s].stat.evenTimeOnIce,
-								'TOI/G': splits[s].stat.timeOnIcePerGame,
-								'Ev TOI/G': splits[s].stat.evenTimeOnIcePerGame,
-								'SH TOI/G': splits[s].stat.shortHandedTimeOnIcePerGame,
-								'PP TOI/G': splits[s].stat.powerPlayTimeOnIcePerGame,
-							},
-							Defenseman: {
-								Games: splits[s].stat.games,
-								'Scoring': `${splits[s].stat.goals}G-${splits[s].stat.assists}A-${splits[s].stat.points}P`,
-								'+/-': (splits[s].stat.plusMinus > 0) ? `+${splits[s].stat.plusMinus}` : splits[s].stat.plusMinus,
-								PPG: splits[s].stat.powerPlayGoals,
-								PPP: splits[s].stat.powerPlayPoints,
-								GWG: splits[s].stat.gameWinningGoals,
-								OTG: splits[s].stat.overTimeGoals,
-								SHG: splits[s].stat.shortHandedGoals,
-								SHP: splits[s].stat.shortHandedPoints,
-								'Faceoff%': splits[s].stat.faceOffPct,
-								Shots: splits[s].stat.shots,
-								'Shot%': splits[s].stat.shotPct,
-								PIM: splits[s].stat.pim,
-								Hits: splits[s].stat.hits,
-								Blocked: splits[s].stat.blocked,
-								Shifts: splits[s].stat.shifts,
-								TOI: splits[s].stat.timeOnIce,
-								'PP TOI': splits[s].stat.powerPlayTimeOnIce,
-								'SH TOI': splits[s].stat.shortHandedTimeOnIce,
-								'Ev TOI': splits[s].stat.evenTimeOnIce,
-								'TOI/G': splits[s].stat.timeOnIcePerGame,
-								'Ev TOI/G': splits[s].stat.evenTimeOnIcePerGame,
-								'SH TOI/G': splits[s].stat.shortHandedTimeOnIcePerGame,
-								'PP TOI/G': splits[s].stat.powerPlayTimeOnIcePerGame,
-							},
-							Goalie: {
-								Games: splits[s].stat.games,
-								Starts: splits[s].stat.gamesStarted,
-								Record: `${splits[s].stat.wins}W-${splits[s].stat.losses}L-${splits[s].stat.ties ? splits[s].stat.ties : 0}T-${splits[s].stat.ot ? splits[s].stat.ot : 0}OT`,
-								SA: splits[s].stat.shotsAgainst,
-								GA: splits[s].stat.goalsAgainst,
-								GAA: splits[s].stat.goalAgainstAverage ? splits[s].stat.goalAgainstAverage.toFixed(2) : null,
-								'Sv%': splits[s].stat.savePercentage ? splits[s].stat.savePercentage.toFixed(3).substring(1) : null,
-								Shutouts: splits[s].stat.shutouts,
-								TOI: splits[s].stat.timeOnIce,
-								'PP Sv': splits[s].stat.powerPlaySaves,
-								'SH Sv': splits[s].stat.shortHandedSaves,
-								'Ev Sv': splits[s].stat.evenSaves,
-								SHS: splits[s].stat.shortHandedShots,
-								'Ev S': splits[s].stat.evenShots,
-								PPS: splits[s].stat.powerPlayShots,
-								SHG: splits[s].stat.shortHandedGoals,
-								SHP: splits[s].stat.shortHandedPoints,
-								Saves: splits[s].stat.saves,
-								'PP Sv%': splits[s].stat.powerPlaySavePercentage ? (splits[s].stat.powerPlaySavePercentage / 100).toFixed(3).substring(1) : null,
-								'SH Sv%': splits[s].stat.shortHandedSavePercentage ? (splits[s].stat.shortHandedSavePercentage / 100).toFixed(3).substring(1) : null,
-								'Ev Sv%': splits[s].stat.evenStrengthSavePercentage ? (splits[s].stat.evenStrengthSavePercentage / 100).toFixed(3).substring(1) : null,
-								'TOI/G': splits[s].stat.timeOnIcePerGame,
-							},
+
+						const skip = (x) => x === 0 ? null : null;
+						const scoring = (x) => x === 0 ? null : `${k.stat.goals}G-${k.stat.assists}A-${k.stat.points}P`;
+						const record = (x) => x === 0 ? null : `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ties ? k.stat.ties : 0}T-${k.stat.ot ? k.stat.ot : 0}OT`;
+						const fixed2 = (x) => x === 0 ? null : x.toFixed(2);
+						const fixed3 = (x) => x === 0 ? null : x.toFixed(3).substring(1);
+
+						const map = {
+							games: { name: 'Games', order: 1 },
+							gamesStarted: { name: 'GS', order: 2 },
+							wins: { name: 'Record', order: 3, f: record },
+							points: { name: 'Scoring', order: 4, f: scoring },
+							plusMinus: { name: '+/-', order: 5 },
+							powerPlayGoals: { name: 'PPG', order: 6 },
+							powerPlayPoints: { name: 'PPP', order: 7 },
+							gameWinningGoals: { name: 'GWG', order: 8 },
+							overTimeGoals: { name: 'OTG', order: 9 },
+							shortHandedGoals: { name: 'SHG', order: 10 },
+							shortHandedPoints: { name: 'SHP', order: 11 },
+							faceOffPct: { name: 'Faceoff%', order: 12 },
+							shots: { name: 'Shots', order: 13 },
+							shotPct: { name: 'Shot%', order: 14 },
+							pim: { name: 'PIM', order: 15 },
+							penaltyMinutes: { name: 'PM', order: 16 },
+							hits: { name: 'Hits', order: 17 },
+							blocked: { name: 'Blocked', order: 18 },
+							shifts: { name: 'Shifts', order: 19 },
+							shotsAgainst: { name: 'SA', order: 20 },
+							goalsAgainst: { name: 'GA', order: 21 },
+							goalAgainstAverage: { name: 'GAA', order: 22 },
+							savePercentage: { name: 'Save%', order: 23 },
+							shutouts: { name: 'Shutouts', order: 24 },
+							powerPlaySaves: { name: 'PP Sv', order: 25 },
+							shortHandedSaves: { name: 'SH Sv', order: 26 },
+							evenSaves: { name: 'Ev Sv', order: 27 },
+							shortHandedShots: { name: 'SHS', order: 28 },
+							evenShots: { name: 'Ev Shots', order: 29 },
+							powerPlayShots: { name: 'PPS', order: 30 },
+							saves: { name: 'Saves', order: 31 },
+							powerPlaySavePercentage: { name: 'PP Sv%', order: 32, f: fixed3 },
+							shortHandedSavePercentage: { name: 'SH Sv%', order: 33, f: fixed3 },
+							evenStrengthSavePercentage: { name: 'Ev Sv%', order: 34, f: fixed3 },
+							timeOnIce: { name: 'TOI', order: 35 },
+							powerPlayTimeOnIce: { name: 'PP TOI', order: 36 },
+							shortHandedTimeOnIce: { name: 'SH TOI', order: 37 },
+							evenTimeOnIce: { name: 'Ev TOI', order: 38 },
+							timeOnIcePerGame: { name: 'TOI/G', order: 39 },
+							powerPlayTimeOnIcePerGame: { name: 'PP TOI/G', order: 40 },
+							shortHandedTimeOnIcePerGame: { name: 'SH TOI/G', order: 41 },
+							evenTimeOnIcePerGame: { name: 'Ev TOI/G', order: 42 },
+							losses: { name: 'Losses', order: 43, f: skip },
+							ties: { name: 'Ties', order: 44, f: skip },
+							ot: { name: 'OT', order: 45, f: skip },
+							assists: { name: 'Assists', order: 46, f: skip },
+							goals: { name: 'Goals', order: 47, f: skip },
 						};
 
-						Object.entries(g[p.primaryPosition.type]).slice(0, limit).filter(([title, number]) => title.toLowerCase().startsWith(keyword.toLowerCase()) && number !== null).forEach(([ key, value ]) => embed.addField(key, value, true));
+						const n = Object.keys(k.stat).reduce((a, b) => {
+							return (!map[b].f)
+								? { ...a, [map[b].name]: { stat: k.stat[b], order: map[b].order } }
+								: { ...a, [map[b].name]: { stat: map[b].f(k.stat[b]), order: map[b].order } };
+						}, {});
+
+						const o  = Object.entries(n).map(([key, value]) => Object.assign({}, { key }, value)).sort((a, b) => a.order - b.order);
+
+						Object.entries(o).slice(0, limit).filter(([, element]) => element.key.toLowerCase().startsWith(keyword) && element.stat !== null).forEach(([, values ]) => embed.addField(values.key, values.stat, true));
 					}
 					else {
 						const g = {
-							date: moment(splits[s].date).format('MMM DD, YYYY'),
-							opponent: splits[s].opponent.name,
-							isHome: splits[s].isHome ? 'vs' : '@',
-							isWin: splits[s].isWin ? 'W' : 'L',
-							isOT: splits[s].isOT ? '/OT' : '',
-							goals: splits[s].stat.goals,
-							assists: splits[s].stat.assists,
-							points: splits[s].stat.points,
-							plusMinus: (splits[s].stat.plusMinus > 0) ? `+${splits[s].stat.plusMinus}` : splits[s].stat.plusMinus,
-							pim: splits[s].stat.pim,
-							hits: splits[s].stat.hits,
-							shots: splits[s].stat.shots,
-							TOI: (splits[s].stat.timeOnIce) ? splits[s].stat.timeOnIce : '--',
-							gamesStarted: splits[s].stat.gamesStarted ? '1' : '0',
-							decision: (splits[s].stat.decision === 'O') ? 'L/OT' : splits[s].stat.decision ? splits[s].stat.decision : 'ND',
-							shotsAgainst: splits[s].stat.shotsAgainst,
-							goalsAgainst: splits[s].stat.goalsAgainst,
-							savePercentage: splits[s].stat.savePercentage ? splits[s].stat.savePercentage.toFixed(3) : null,
-							shutouts: splits[s].stat.shutouts,
+							date: moment(k.date).format('MMM DD, YYYY'),
+							opponent: k.opponent.name,
+							isHome: k.isHome ? 'vs' : '@',
+							isWin: k.isWin ? 'W' : 'L',
+							isOT: k.isOT ? '/OT' : '',
+							goals: k.stat.goals,
+							assists: k.stat.assists,
+							points: k.stat.points,
+							plusMinus: (k.stat.plusMinus > 0) ? `+${k.stat.plusMinus}` : k.stat.plusMinus,
+							pim: k.stat.pim,
+							hits: k.stat.hits,
+							shots: k.stat.shots,
+							TOI: (k.stat.timeOnIce) ? k.stat.timeOnIce : '--',
+							gamesStarted: k.stat.gamesStarted ? '1' : '0',
+							decision: (k.stat.decision === 'O') ? 'L/OT' : k.stat.decision ? k.stat.decision : 'ND',
+							shotsAgainst: k.stat.shotsAgainst,
+							goalsAgainst: k.stat.goalsAgainst,
+							savePercentage: k.stat.savePercentage ? k.stat.savePercentage.toFixed(3) : null,
+							shutouts: k.stat.shutouts,
 						};
 
 						if (p.primaryPosition.abbreviation === 'G') {

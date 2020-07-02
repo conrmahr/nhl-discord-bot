@@ -22,9 +22,9 @@ module.exports = {
 		const advanced = ['advanced', 'a'];
 		const rosterFlag = roster.some(e => flags.includes(e));
 		const advancedFlag = advanced.some(e => flags.includes(e));
-		const keywordFlag = flags.find(e => e.startsWith('filter=')) || '';
-		const keyword = (keywordFlag.length > 0) ? keywordFlag.substring(7) : '';
-		const limit = advancedFlag ? 25 : 3;
+		const keywordFlag = flags.find(e => e.startsWith('filter=') || e.startsWith('f=')) || '';
+		const keyword = (keywordFlag.length > 0) ? keywordFlag.split('=', 2)[1].toLowerCase() : '';
+		const limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
 
 		if (moment(args[0], 'YYYY', true).isValid()) {
 			const prevSeason = args[0] - 1;
@@ -56,7 +56,7 @@ module.exports = {
 
 			teams.forEach((team) => {
 				checkDivision = team.division.name ? team.division.name : 'Unknown';
-				divisions[checkDivision].push(`${team.teamName.toLowerCase().split(' ').pop()} <${team.abbreviation.toLowerCase()}>`);
+				divisions[checkDivision].push(`${team.teamName.split(' ').pop()} <${team.abbreviation.toLowerCase()}>`);
 			});
 
 			embed.setColor(0x59acef);
@@ -87,9 +87,9 @@ module.exports = {
 			teamLogo = $('[rel="shortcut icon"]').attr('href');
 		}
 
-		const establishedBio = teamObj.firstYearOfPlay ? `Est: ${teamObj.firstYearOfPlay}` : '';
-		const conferenceBio = teamObj.conference.name ? `${teamObj.conference.name} Conference` : '';
-		const divisionBio = teamObj.division.name ? `${teamObj.division.name} Division` : '';
+		const establishedBio = teamObj.firstYearOfPlay ? `Est: ${teamObj.firstYearOfPlay}` : 'Est: Unknown';
+		const conferenceBio = teamObj.conference.name ? `${teamObj.conference.name} Conference` : 'Unknown Conference';
+		const divisionBio = teamObj.division.name ? `${teamObj.division.name} Division` : 'Unknown Division';
 		const franchise = [ establishedBio, conferenceBio, divisionBio ];
 		embed.setThumbnail(teamLogo);
 		embed.setColor(0x59acef);
