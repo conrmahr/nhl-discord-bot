@@ -68,7 +68,7 @@ module.exports = {
 				else {
 					firstPlayoffGame = 'No games';
 				}
-				embed.setAuthor(`${o.first} ${o.last} | #${o.number}`, 'https://i.imgur.com/zl8JzZc.png');
+				embed.setAuthor(`${o.first} ${o.last} #${o.number}`, 'https://i.imgur.com/zl8JzZc.png');
 				embed.setThumbnail(o.headshot);
 				embed.setDescription(`${o.type}${o.city}${o.province}${o.country}`);
 				embed.addField('First Regular Game', firstGame, true);

@@ -119,7 +119,7 @@ module.exports = {
 				Pacific: 'https://i.imgur.com/n6iImAX.png',
 			};
 			const divisionId = teamsObj.teams.find(o => o.division.name.toLowerCase() === divisionName);
-			if (!divisionId) return message.reply(`\`${args[1]}\` is not a valid division for the ${humanSeason} season. Type \`${prefix}help standings\` for a list of arguments.`);
+			if (!divisionId) return message.reply(`\`${args[1]}\` is not a valid conference or division for the ${humanSeason} season. Type \`${prefix}help standings\` for a list of arguments.`);
 			tableObj = await fetch(`https://statsapi.web.nhl.com/api/v1/divisions/${divisionId.division.id}`).then(response => response.json());
 			standingsType = 'byDivision';
 			standingsLogo = divisionLogos[tableObj.divisions[0].name] ? divisionLogos[tableObj.divisions[0].name] : 'https://i.imgur.com/zl8JzZc.png';

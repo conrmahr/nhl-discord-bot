@@ -74,10 +74,10 @@ module.exports = {
 			teamObj = teams.find(o => o.abbreviation === args[1].toUpperCase() || o.teamName.toUpperCase().split(' ').pop() === args[1].toUpperCase());
 		}
 		else {
-			return message.reply(`\`${args[1]}\` is not a team. Type \`${prefix}teams\` for a list of teams.`);
+			return message.reply(`\`${args[1]}\` matched 0 teams. Type \`${prefix}team\` for a list of teams.`);
 		}
 
-		if (!teamObj) return message.reply(`\`${args[1]}\` is not a team. Type \`${prefix}teams\` for a list of teams.`);
+		if (!teamObj) return message.reply(`\`${args[1]}\` matched 0 teams. Type \`${prefix}team\` for a list of teams.`);
 
 		if (rosterFlag) type = '/roster/';
 
@@ -93,7 +93,7 @@ module.exports = {
 		const franchise = [ establishedBio, conferenceBio, divisionBio ];
 		embed.setThumbnail(teamLogo);
 		embed.setColor(0x59acef);
-		embed.setAuthor(`${teamObj.name} ${humanSeason} (Reg. Season)`, teamLogo);
+		embed.setAuthor(`${teamObj.name} (${humanSeason} Reg. Season)`, teamLogo);
 		embed.setDescription(franchise.join(' | '));
 		query = qs.stringify(parameters, { addQueryPrefix: true });
 		const data = await fetch(`https://statsapi.web.nhl.com/api/v1/teams/${teamObj.id}${type}${query}`).then(response => response.json());

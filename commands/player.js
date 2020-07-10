@@ -148,8 +148,6 @@ module.exports = {
 			const query = qs.stringify(parameters, { addQueryPrefix: true });
 			const thumbnail = 'https://nhl.bamcontent.com/images/headshots/current/168x168/';
 			const data = await fetch(`${apiPeople}${playerId}/stats/${query}`).then(response => response.json());
-			if (Array.isArray(data.stats[0].splits) && data.stats[0].splits.length === 0) return message.reply(`no stats associated with \`${fullName.trim()}\` for this argument. Type \`${prefix}help player\` for a list of arguments.`);
-			const { splits } = data.stats[0];
 			const renameTitle = {
 				careerPlayoffs: 'Career Playoffs',
 				careerRegularSeason: 'Career Regular Season',
@@ -160,7 +158,10 @@ module.exports = {
 				onPaceRegularSeason: 'Reg. Season On Pace',
 			};
 			const singleSeason = renameTitle[parameters.stats];
-			const seasonOrPlayoffs = splits[0].season ? `${humanSeason} (${singleSeason})` : `(${singleSeason})`;
+			const { splits } = data.stats[0];
+			console.log(splits);
+			const seasonOrPlayoffs = (singleSeason.split(' ').includes('Career')) ? `(${singleSeason})` : `(${humanSeason} ${singleSeason})`;
+			if (Array.isArray(splits) && splits.length === 0) return message.reply(`no stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`);
 			parameters.player.push(fullName, sweater, seasonOrPlayoffs);
 			const embed = new RichEmbed();
 			embed.setThumbnail(`${thumbnail}${playerId}.jpg`);
@@ -285,7 +286,7 @@ module.exports = {
 
 		}
 		else {
-			const missing = (terms.length > 0) ? `\`${terms}\`ed 0 results.` : `no name provided. Type \`${prefix}help player\` for command format.`;
+			const missing = (terms.length > 0) ? `\`${terms}\` matched 0 players. Type \`${prefix}team <team> -roster\` for a list of player names.` : `no name provided. Type \`${prefix}help player\` for a list of arguments.`;
 			message.reply(missing);
 		}
 
