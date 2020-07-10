@@ -159,7 +159,6 @@ module.exports = {
 			};
 			const singleSeason = renameTitle[parameters.stats];
 			const { splits } = data.stats[0];
-			console.log(splits);
 			const seasonOrPlayoffs = (singleSeason.split(' ').includes('Career')) ? `(${singleSeason})` : `(${humanSeason} ${singleSeason})`;
 			if (Array.isArray(splits) && splits.length === 0) return message.reply(`no stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`);
 			parameters.player.push(fullName, sweater, seasonOrPlayoffs);
@@ -174,10 +173,9 @@ module.exports = {
 					const k = splits[s];
 
 					if (!gameLogFlag) {
-
 						const skip = (x) => x === 0 ? null : null;
 						const scoring = (x) => x === 0 ? null : `${k.stat.goals}G-${k.stat.assists}A-${k.stat.points}P`;
-						const record = () => seasons[0].tiesInUse ? `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ties}T` : `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ot}OT`;
+						const record = () => k.stat.ties ? `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ties}T` : `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ot}OT`;
 						const fixed1 = (x) => x === 0 ? null : x.toString().substring(1);
 						const fixed2 = (x) => x === 0 ? null : x.toFixed(2);
 						const fixed3 = (x) => x === 0 ? null : (x / 100).toFixed(3).substring(1);
