@@ -25,7 +25,7 @@ module.exports = {
 		const keywordFlag = flags.find(e => e.startsWith('filter=') || e.startsWith('f=')) || '';
 		const keyword = (keywordFlag.length > 0) ? keywordFlag.split('=', 2)[1].toLowerCase() : '';
 		if (flags.length > 0 && keywordFlag.length === 0 && !rosterFlag && !advancedFlag) return message.reply(`\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help team\` for list of flags.`);
-		const limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
+		let limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
 
 		if (moment(args[0], 'YYYY', true).isValid()) {
 			const prevSeason = args[0] - 1;
@@ -111,6 +111,12 @@ module.exports = {
 			});
 
 			g = positions;
+			limit = 6;
+
+			Object.entries(g).forEach(([key, value]) => {
+				if (value.length === 0) g[key].push('None');
+			});
+
 
 		}
 		else {
