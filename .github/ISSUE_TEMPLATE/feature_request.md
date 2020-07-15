@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Request a feature for nhl-discord-bot app
+about: Request a feature for nhl-discord-bot
 title: ''
 labels: 'type: enhancement'
 assignees: ''
