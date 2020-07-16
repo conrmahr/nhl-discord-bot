@@ -80,13 +80,11 @@ module.exports = {
 		}
 
 		parameters.expand = ['schedule.teams', 'schedule.linescore'];
-		let flagBroadcasts = false;
 		let flagVenue = false;
 		let flagHide = false;
 		for (const flag of flags) {
 			if (['tv', 't'].includes(flag)) {
 				parameters.expand.push('schedule.broadcasts');
-				flagBroadcasts = true;
 			}
 			else if (['venue', 'v'].includes(flag)) {
 				flagVenue = true;
@@ -136,9 +134,7 @@ module.exports = {
 					const channels = broadcasts.map(i => i.name).join(', ');
 					tv = `:tv: [${channels}]`;
 				}
-				else if (flagBroadcasts) {
-					tv = ':tv: :flag_ca:';
-				}
+
 				if (venue && flagVenue) {
 					arena = `:stadium: [${venue.name}]`;
 				}

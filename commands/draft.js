@@ -35,7 +35,7 @@ module.exports = {
 		}
 		const data = await fetch(`${endpoint}${draftYear}`).then(response => response.json());
 
-		if (!data.drafts[0].rounds) return message.reply(`no draft picks found. Type \`${prefix}help draft\` for a list of arguments.`);
+		if (!data.drafts[0].rounds) return message.reply(`no draft picks found for the ${draftYear} Draft. Type \`${prefix}help draft\` for a list of arguments.`);
 		parameters.season = current;
 		const query = qs.stringify(parameters, { addQueryPrefix: true });
 

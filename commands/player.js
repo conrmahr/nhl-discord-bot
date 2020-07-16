@@ -10,7 +10,7 @@ module.exports = {
 	usage: '<year> <name> -<flag>',
 	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags `-career`, `-playoffs`, `-log`, `-onpace`, `-advanced`, `-filter=<term>` for more options.',
 	category: 'stats',
-	aliases: ['player', 'p', 'pseason'],
+	aliases: ['player', 'p'],
 	examples: ['barzal', '1993 selanne', 'gretzky -career', 'mcdavid -log', 'ovechkin -onpace'],
 	async execute(message, args, flags, prefix) {
 
@@ -148,8 +148,6 @@ module.exports = {
 			const query = qs.stringify(parameters, { addQueryPrefix: true });
 			const thumbnail = 'https://nhl.bamcontent.com/images/headshots/current/168x168/';
 			const data = await fetch(`${apiPeople}${playerId}/stats/${query}`).then(response => response.json());
-			if (Array.isArray(data.stats[0].splits) && data.stats[0].splits.length === 0) return message.reply(`no stats associated with \`${fullName.trim()}\` for this argument. Type \`${prefix}help player\` for a list of arguments.`);
-			const { splits } = data.stats[0];
 			const renameTitle = {
 				careerPlayoffs: 'Career Playoffs',
 				careerRegularSeason: 'Career Regular Season',
@@ -160,7 +158,9 @@ module.exports = {
 				onPaceRegularSeason: 'Reg. Season On Pace',
 			};
 			const singleSeason = renameTitle[parameters.stats];
-			const seasonOrPlayoffs = splits[0].season ? `${humanSeason} (${singleSeason})` : `(${singleSeason})`;
+			const { splits } = data.stats[0];
+			const seasonOrPlayoffs = (singleSeason.split(' ').includes('Career')) ? `(${singleSeason})` : `(${humanSeason} ${singleSeason})`;
+			if (Array.isArray(splits) && splits.length === 0) return message.reply(`no stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`);
 			parameters.player.push(fullName, sweater, seasonOrPlayoffs);
 			const embed = new RichEmbed();
 			embed.setThumbnail(`${thumbnail}${playerId}.jpg`);
@@ -173,10 +173,9 @@ module.exports = {
 					const k = splits[s];
 
 					if (!gameLogFlag) {
-
 						const skip = (x) => x === 0 ? null : null;
 						const scoring = (x) => x === 0 ? null : `${k.stat.goals}G-${k.stat.assists}A-${k.stat.points}P`;
-						const record = () => seasons[0].tiesInUse ? `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ties}T` : `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ot}OT`;
+						const record = () => k.stat.ties ? `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ties}T` : `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ot}OT`;
 						const fixed1 = (x) => x === 0 ? null : x.toString().substring(1);
 						const fixed2 = (x) => x === 0 ? null : x.toFixed(2);
 						const fixed3 = (x) => x === 0 ? null : (x / 100).toFixed(3).substring(1);
@@ -285,7 +284,7 @@ module.exports = {
 
 		}
 		else {
-			const missing = (terms.length > 0) ? `\`${terms}\`ed 0 results.` : `no name provided. Type \`${prefix}help player\` for command format.`;
+			const missing = (terms.length > 0) ? `\`${terms}\` matched 0 players. Type \`${prefix}team <team> -roster\` for a list of player names.` : `no name provided. Type \`${prefix}help player\` for a list of arguments.`;
 			message.reply(missing);
 		}
 

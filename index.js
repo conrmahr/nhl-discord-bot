@@ -14,7 +14,7 @@ for (const file of commandFiles) {
 
 client.once('ready', () => {
 	client.user.setActivity(activity.name, { type: activity.type });
-	console.log('Ready!');
+	console.log(`${client.user.tag} is logged in!`);
 });
 
 client.on('message', message => {

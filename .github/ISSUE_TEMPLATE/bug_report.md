@@ -21,5 +21,6 @@ assignees: ''
 - Node.js version:
 - Operating system:
 - Priority this issue should have:
-
-- [ ] I have also tested the issue on latest master, commit hash:
+  - [ ] Low
+  - [ ] Medium
+  - [ ] High

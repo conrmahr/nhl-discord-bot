@@ -9,7 +9,7 @@ module.exports = {
 	usage: '<year> <team> -<flag>',
 	description: 'Get team stats or roster for active and former teams. Add `YYYY` to specifiy a season. Add the flags  `-roster`, `-advanced`, `-filter=<term>` for more options.',
 	category: 'stats',
-	aliases: ['team', 't', 'teams', 'tseason'],
+	aliases: ['team', 'teams', 't'],
 	examples: ['stl', '1977 mtl', '1982 nyi -roster'],
 	async execute(message, args, flags, prefix) {
 
@@ -25,7 +25,7 @@ module.exports = {
 		const keywordFlag = flags.find(e => e.startsWith('filter=') || e.startsWith('f=')) || '';
 		const keyword = (keywordFlag.length > 0) ? keywordFlag.split('=', 2)[1].toLowerCase() : '';
 		if (flags.length > 0 && keywordFlag.length === 0 && !rosterFlag && !advancedFlag) return message.reply(`\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help team\` for list of flags.`);
-		const limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
+		let limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
 
 		if (moment(args[0], 'YYYY', true).isValid()) {
 			const prevSeason = args[0] - 1;
@@ -74,10 +74,10 @@ module.exports = {
 			teamObj = teams.find(o => o.abbreviation === args[1].toUpperCase() || o.teamName.toUpperCase().split(' ').pop() === args[1].toUpperCase());
 		}
 		else {
-			return message.reply(`\`${args[1]}\` is not a team. Type \`${prefix}teams\` for a list of teams.`);
+			return message.reply(`\`${args[1]}\` matched 0 teams. Type \`${prefix}team\` for a list of teams.`);
 		}
 
-		if (!teamObj) return message.reply(`\`${args[1]}\` is not a team. Type \`${prefix}teams\` for a list of teams.`);
+		if (!teamObj) return message.reply(`\`${args[1]}\` matched 0 teams. Type \`${prefix}team\` for a list of teams.`);
 
 		if (rosterFlag) type = '/roster/';
 
@@ -93,7 +93,7 @@ module.exports = {
 		const franchise = [ establishedBio, conferenceBio, divisionBio ];
 		embed.setThumbnail(teamLogo);
 		embed.setColor(0x59acef);
-		embed.setAuthor(`${teamObj.name} ${humanSeason} (Reg. Season)`, teamLogo);
+		embed.setAuthor(`${teamObj.name} (${humanSeason} Reg. Season)`, teamLogo);
 		embed.setDescription(franchise.join(' | '));
 		query = qs.stringify(parameters, { addQueryPrefix: true });
 		const data = await fetch(`https://statsapi.web.nhl.com/api/v1/teams/${teamObj.id}${type}${query}`).then(response => response.json());
@@ -111,6 +111,12 @@ module.exports = {
 			});
 
 			g = positions;
+			limit = 6;
+
+			Object.entries(g).forEach(([key, value]) => {
+				if (value.length === 0) g[key].push('None');
+			});
+
 
 		}
 		else {
