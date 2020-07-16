@@ -136,9 +136,7 @@ module.exports = {
 					const channels = broadcasts.map(i => i.name).join(', ');
 					tv = `:tv: [${channels}]`;
 				}
-				else if (flagBroadcasts) {
-					tv = ':tv: :flag_ca:';
-				}
+
 				if (venue && flagVenue) {
 					arena = `:stadium: [${venue.name}]`;
 				}
