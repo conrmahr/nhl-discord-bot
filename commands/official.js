@@ -8,7 +8,7 @@ module.exports = {
 	usage: '<#>',
 	description: 'Get active officials information.',
 	category: 'stats',
-	aliases: ['official', 'o', 'ref'],
+	aliases: ['official', 'o'],
 	examples: ['4'],
 	async execute(message, args, flags, prefix) {
 

@@ -10,7 +10,7 @@ module.exports = {
 	usage: '<year> <name> -<flag>',
 	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags `-career`, `-playoffs`, `-log`, `-onpace`, `-advanced`, `-filter=<term>` for more options.',
 	category: 'stats',
-	aliases: ['player', 'p', 'pseason'],
+	aliases: ['player', 'p'],
 	examples: ['barzal', '1993 selanne', 'gretzky -career', 'mcdavid -log', 'ovechkin -onpace'],
 	async execute(message, args, flags, prefix) {
 
