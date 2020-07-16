@@ -24,7 +24,7 @@ NHL Discord Bot is a self-hosted bot that fetches data from live public [NHL API
 
 Make sure, that you have `git` and `node` installed first
 ```sh
-git -version && node -v
+git --version && node -v
 # Example output:
 # git version 2.27.0
 # v12.18.2
