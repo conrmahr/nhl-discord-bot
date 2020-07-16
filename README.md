@@ -69,7 +69,7 @@ Edit the `config.json` file
 Run the bot
 ```sh
 node .
-# Ready!
+# nhl-discord-bot is logged in!
 ```
 
 ```
