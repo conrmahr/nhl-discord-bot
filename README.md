@@ -9,18 +9,18 @@
 NHL Discord Bot is a self-hosted bot that fetches data from live public [NHL API](https://github.com/erunion/sport-api-specifications/tree/master/nhl) endpoints triggered by simple text commands and formats them to styled embeds using the [discord.js](https://github.com/discordjs/discord.js) library.
 >**Disclaimer:** The NHL Discord Bot is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the National Hockey League; National Hockey League Players' Association, National Hockey League Officials' Association, or any of its subsidiaries or its affiliates.
 
-### Requirements
+### :page_with_curl: Requirements
 
 - Node.js v12+
 - Git v1.7+
 - Discord Bot Token
-	- https://discordjs.guide/preparations/setting-up-a-bot-application.html
+  - https://discordjs.guide/preparations/setting-up-a-bot-application.html
 - Google Search Engine ID
-	- https://developers.google.com/custom-search/docs/tutorial/creatingcse
+  - https://developers.google.com/custom-search/docs/tutorial/creatingcse
 - Google APIs Key
-	- https://console.developers.google.com/apis/credentials
+  - https://developers.google.com/custom-search/v1/introduction
 
-### Installation
+### :computer: Installation
 
 Make sure, that you have `git` and `node` installed first
 ```sh
@@ -77,7 +77,7 @@ node .
 https://discordapp.com/oauth2/authorize?client_id={YOUR_CLIENT_ID}&scope=bot
 ```
 
-### Commands
+### :keyboard: Commands
 
 | Command with Arguments                | Description |
 | ------------------------------------- | ------------------------------------- |
@@ -90,35 +90,22 @@ https://discordapp.com/oauth2/authorize?client_id={YOUR_CLIENT_ID}&scope=bot
 |**`standings <date> <table> -<flag>`** | Get current standings for any division, conference, or league.|
 |**`team <year> <team> -<flag>`** | Get team stats or roster for active and former teams.|
 
-### Contribute
+### :handshake: Contributing
 
-1. [Fork the repository](https://github.com/conrmahr/nhl-discord-bot/fork)
-2. Clone your fork: `git clone https://github.com/your-username/nhl-discord-bot.git`
-3. Create your feature branch: `git checkout -b my-new-feature`
-4. Commit your changes: `git commit -am 'Add some feature'`
-5. Push to the branch: `git push origin my-new-feature`
-6. [Submit a pull request](https://github.com/conrmahr/nhl-discord-bot/compare)
+Contributions, issues and feature requests are welcomed!
 
-### Create an Issue
+**If you want to contribute to the codebase of this project, please follow the 
+[contributing guidelines](https://github.com/conrmahr/nhl-discord-bot/blob/master/.github/CONTRIBUTING.md).**
 
-If you have any bugs or feature requests, feel free to [open an issue](https://github.com/conrmahr/nhl-discord-bot/issues/new/choose).
-
-### Community
-
-[![Discord Banner](https://discordapp.com/api/guilds/499434832124837889/widget.png?style=banner2)](https://discord.gg/92UtjGs)
-
-Join the [🏒nhl-discord-bot [ofcl]](https://discord.gg/92UtjGs) server where we help you with issues with this bot.
-
-### Author
+### :book: Author
 
 [@conrmahr](https://github.com/conrmahr)
 
-### Credits
+### :thumbsup: Credits
 
-- [@dword4](https://github.com/dword4) For discovering a majority of the NHL API endpoints and documenting them.
+[@dword4](https://github.com/dword4) For discovering a majority of the NHL API endpoints and documenting them.<br />
+[@erunion](https://github.com/erunion) For documenting the OpenAPI 3.0 specifications for the NHL API.
 
-- [@erunion](https://github.com/erunion) For documenting the OpenAPI 3.0 specifications for the NHL API.
-
-### License
+### :memo: License
 
 This project is licensed under the [MIT License](https://github.com/conrmahr/nhl-discord-bot/blob/master/LICENSE).
