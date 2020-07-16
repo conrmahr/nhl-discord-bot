@@ -80,13 +80,11 @@ module.exports = {
 		}
 
 		parameters.expand = ['schedule.teams', 'schedule.linescore'];
-		let flagBroadcasts = false;
 		let flagVenue = false;
 		let flagHide = false;
 		for (const flag of flags) {
 			if (['tv', 't'].includes(flag)) {
 				parameters.expand.push('schedule.broadcasts');
-				flagBroadcasts = true;
 			}
 			else if (['venue', 'v'].includes(flag)) {
 				flagVenue = true;
