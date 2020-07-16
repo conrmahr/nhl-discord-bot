@@ -94,8 +94,7 @@ https://discordapp.com/oauth2/authorize?client_id={YOUR_CLIENT_ID}&scope=bot
 
 Contributions, issues and feature requests are welcomed!
 
-**If you want to contribute to the codebase of this project, please follow the 
-[contributing guidelines](https://github.com/conrmahr/nhl-discord-bot/blob/master/.github/CONTRIBUTING.md).**
+**If you want to contribute to the codebase of this project, please follow the [contribution guidelines](.github/CONTRIBUTING.md).**
 
 ### :book: Author
 
@@ -108,4 +107,4 @@ Contributions, issues and feature requests are welcomed!
 
 ### :memo: License
 
-This project is licensed under the [MIT License](https://github.com/conrmahr/nhl-discord-bot/blob/master/LICENSE).
+This project is licensed under the [MIT License](LICENSE).
