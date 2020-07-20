@@ -8,10 +8,10 @@ const { googleSearch } = require('../config.json');
 module.exports = {
 	name: 'player',
 	usage: '<year> <name> -<flag>',
-	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags `-career`, `-playoffs`, `-log`, `-byyear`, -onpace`, `-advanced`, `-filter=<term>` for more options.',
+	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags `-career`, `-playoffs`, `-log`, `-year`, -onpace`, `-advanced`, `-filter=<term>` for more options.',
 	category: 'stats',
 	aliases: ['player', 'p'],
-	examples: ['barzal', '1993 selanne', 'gretzky -career', 'mcdavid -log', 'howe -byyear', 'ovechkin -onpace'],
+	examples: ['barzal', '1993 selanne', 'gretzky -career', 'mcdavid -log', 'howe -year', 'ovechkin -onpace'],
 	async execute(message, args, flags, prefix) {
 
 		let current = 'current';
@@ -55,40 +55,40 @@ module.exports = {
 			const career = ['career', 'c'];
 			const playoffs = ['playoffs', 'p'];
 			const gamelog = ['log', 'l'];
-			const byyear = ['byyear', 'b'];
+			const year = ['year', 'y'];
 			const onpace = ['onpace', 'o'];
 			const advanced = ['advanced', 'a'];
 			const careerFlag = career.some(e => flags.includes(e));
 			const playoffsFlag = playoffs.some(e => flags.includes(e));
 			const gameLogFlag = gamelog.some(e => flags.includes(e));
-			const byYearFlag = byyear.some(e => flags.includes(e));
+			const yearFlag = year.some(e => flags.includes(e));
 			const onPaceFlag = onpace.some(e => flags.includes(e));
 			const advancedFlag = advanced.some(e => flags.includes(e));
 			const keywordFlag = flags.find(e => e.startsWith('filter=') || e.startsWith('f=')) || '';
 			const keyword = (keywordFlag.length > 0) ? keywordFlag.split('=', 2)[1].toLowerCase() : '';
-			if (flags.length > 0 && keywordFlag.length === 0 && !careerFlag && !playoffsFlag && !gameLogFlag && !byYearFlag && !onPaceFlag && !advancedFlag) return message.reply(`\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help player\` for list of flags.`);
-			let last = 1;
+			if (flags.length > 0 && keywordFlag.length === 0 && !careerFlag && !playoffsFlag && !gameLogFlag && !yearFlag && !onPaceFlag && !advancedFlag) return message.reply(`\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help player\` for list of flags.`);
+			let last = 0;
 			let rows = '';
 			const limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
+			let hasTie = false;
+			let hasOT = false;
 
 			if (careerFlag && playoffsFlag) {
 				parameters.stats = 'careerPlayoffs';
 			}
 			else if (gameLogFlag && playoffsFlag) {
 				parameters.stats = 'playoffGameLog';
-				last = 7;
+				last = -7;
 			}
 			else if (gameLogFlag) {
 				parameters.stats = 'gameLog';
-				last = 5;
+				last = -5;
 			}
-			else if (playoffsFlag && byYearFlag) {
+			else if (playoffsFlag && yearFlag) {
 				parameters.stats = 'yearByYearPlayoffs';
-				last = -1;
 			}
-			else if (byYearFlag) {
+			else if (yearFlag) {
 				parameters.stats = 'yearByYear';
-				last = -1;
 			}
 			else if (playoffsFlag) {
 				parameters.stats = 'statsSingleSeasonPlayoffs';
@@ -181,15 +181,16 @@ module.exports = {
 			embed.setAuthor(parameters.player.join(' '), teamLogo);
 
 			if (splits.length > 0) {
-				Object.keys(splits).slice(0, last).forEach(s=>{
+				Object.keys(splits).slice(last).forEach(s=>{
 					const k = splits[s];
 					if (!gameLogFlag) {
-						const skip = (x) => byYearFlag ? x : null;
-						const scoring = (x) => byYearFlag ? x : `${k.stat.goals}G-${k.stat.assists}A-${k.stat.points}P`;
-						const record = () => k.stat.ties ? `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ties}T` : `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ot}OT`;
+						const skip = (x) => yearFlag ? x : null;
+						const scoring = (x) => yearFlag ? x : `${k.stat.goals}G-${k.stat.assists}A-${k.stat.points}P`;
+						const record = (x) => yearFlag ? x : k.stat.ties ? `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ties}T` : `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ot}OT`;
 						const fixed1 = (x) => x === 0 ? null : x.toString().substring(1);
 						const fixed2 = (x) => x === 0 ? null : x.toFixed(2);
 						const fixed3 = (x) => x === 0 ? null : (x / 100).toFixed(3).substring(1);
+						let map = '';
 
 						const map = {
 							games: { name: 'Games', order: 1 },
@@ -198,9 +199,9 @@ module.exports = {
 							losses: { name: 'Losses', order: 4, f: skip },
 							ties: { name: 'Ties', order: 5, f: skip },
 							ot: { name: 'OT', order: 6, f: skip },
-							goals: { name: 'Goals', order: 7, f: skip },
+							goals: { name: 'Scoring', order: 7, f: scoring },
 							assists: { name: 'Assists', order: 8, f: skip },
-							points: { name: 'Scoring', order: 9, f: scoring },
+							points: { name: 'Points', order: 9, f: skip },
 							plusMinus: { name: '+/-', order: 10 },
 							powerPlayGoals: { name: 'PPG', order: 11 },
 							powerPlayPoints: { name: 'PPP', order: 12 },
@@ -248,17 +249,19 @@ module.exports = {
 						}, {});
 
 						const o = Object.entries(n).map(([key, value]) => Object.assign({}, { key }, value)).sort((a, b) => a.order - b.order);
-						console.log(o);
-						if (!byYearFlag) {
+
+						if (!yearFlag) {
 							Object.entries(o).slice(0, limit).filter(([, element]) => element.key.toLowerCase().startsWith(keyword) && element.stat !== null).forEach(([, values ]) => embed.addField(values.key, values.stat, true));
 						}
 						else {
 							let season = `${k.season.substring(0,4)}-${k.season.substring(6)}`;
 							if (k.league.id === 133) {
 								let padTeam = `<${k.team.name.split(' ').pop()}>`;
-								const padStat = (x,w) => x.length ==! w ? x.padEnd(w, ' ') : x;
+								const padStat = (x,w) => x.length ==! w ? x.padStart(w, ' ') : x;
+								(k.stat.ties >= 0) ? hasTie = true : '';
+								(k.stat.ot >= 0) ? hasOT = true : '';
 								rows += `\n${season} ${padTeam.padEnd(12, ' ')}`;
-								Object.entries(o).filter(([, element]) => ['Games', 'Goals', 'Assists', 'Points', 'Wins', 'Losses', 'Ties', 'OT', '+/-'].includes(element.key) && element.stat !== null).forEach(([, values ]) => rows += `${values.stat} `.padEnd(4, ' '));
+								Object.entries(o).filter(([, element]) => ['Games', 'Goals', 'Assists', 'Scoring', 'GS' , 'Record', 'Losses', 'Ties', 'OT', '+/-'].includes(element.key) && element.stat !== null).forEach(([, values ]) => rows += `${values.stat} `.padStart(4, ' '));
 							}
 						}
 					}
@@ -304,11 +307,14 @@ module.exports = {
 			
 			let block = '';
 
-			if (byYearFlag) {
+			if (yearFlag) {
 				if (p.primaryPosition.abbreviation === 'G') {
-					block = '```md\n#Season Team        GP  W   L   T/OT' + rows + '```';	
+					let tiebreaker = '';
+					(!hasTie) ? '' : tiebreaker += '   T';
+					(!hasOT) ? '' : tiebreaker += '   OT';
+					block = '```md\n#Season Team         GP   W   L' + tiebreaker + rows + '```';	
 				} else {
-					block = '```md\n#Season Team        GP  G   A   P   +/-' + rows + '```';	
+					block = '```md\n#Season Team         GP   G   A   P  +/-' + rows + '```';	
 				}
 			}
 			
