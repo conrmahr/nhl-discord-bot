@@ -70,8 +70,6 @@ module.exports = {
 			let last = 0;
 			let rows = '';
 			const limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
-			let hasTie = false;
-			let hasOT = false;
 
 			if (careerFlag && playoffsFlag) {
 				parameters.stats = 'careerPlayoffs';
@@ -190,19 +188,18 @@ module.exports = {
 						const fixed1 = (x) => x === 0 ? null : x.toString().substring(1);
 						const fixed2 = (x) => x === 0 ? null : x.toFixed(2);
 						const fixed3 = (x) => x === 0 ? null : (x / 100).toFixed(3).substring(1);
-						let map = '';
 
 						const map = {
 							games: { name: 'Games', order: 1 },
-							gamesStarted: { name: 'GS', order: 2 },
-							wins: { name: 'Record', order: 3, f: record },
+							wins: { name: 'Record', order: 2, f: record },
+							gamesStarted: { name: 'Starts', order: 3 },
 							losses: { name: 'Losses', order: 4, f: skip },
 							ties: { name: 'Ties', order: 5, f: skip },
 							ot: { name: 'OT', order: 6, f: skip },
 							goals: { name: 'Scoring', order: 7, f: scoring },
-							assists: { name: 'Assists', order: 8, f: skip },
-							points: { name: 'Points', order: 9, f: skip },
-							plusMinus: { name: '+/-', order: 10 },
+							plusMinus: { name: '+/-', order: 8 },
+							assists: { name: 'Assists', order: 9, f: skip },
+							points: { name: 'Points', order: 10, f: skip },
 							powerPlayGoals: { name: 'PPG', order: 11 },
 							powerPlayPoints: { name: 'PPP', order: 12 },
 							gameWinningGoals: { name: 'GWG', order: 13 },
@@ -258,10 +255,24 @@ module.exports = {
 							if (k.league.id === 133) {
 								let padTeam = `<${k.team.name.split(' ').pop()}>`;
 								const padStat = (x,w) => x.length ==! w ? x.padStart(w, ' ') : x;
-								(k.stat.ties >= 0) ? hasTie = true : '';
-								(k.stat.ot >= 0) ? hasOT = true : '';
 								rows += `\n${season} ${padTeam.padEnd(12, ' ')}`;
-								Object.entries(o).filter(([, element]) => ['Games', 'Goals', 'Assists', 'Scoring', 'GS' , 'Record', 'Losses', 'Ties', 'OT', '+/-'].includes(element.key) && element.stat !== null).forEach(([, values ]) => rows += `${values.stat} `.padStart(4, ' '));
+								rows += k.stat.games.toString().padStart(3, ' ');
+								
+								if (p.primaryPosition.abbreviation === 'G') {
+									rows += k.stat.gamesStarted.toString().padStart(3, ' ');
+									rows += k.stat.wins.toString().padStart(3, ' ');
+									rows += k.stat.losses.toString().padStart(3, ' ');
+									rows += (k.stat.ties >= 0) ? k.stat.ties.toString().padStart(3, ' ') : ' --';
+									rows += (k.stat.ot >= 0) ? k.stat.ot.toString().padStart(3, ' ') : ' --';
+									rows += k.stat.goalAgainstAverage.toFixed(2).padStart(5, ' ');
+								}
+								else {
+									rows += k.stat.goals.toString().padStart(4, ' ');
+									rows += k.stat.assists.toString().padStart(4, ' ');
+									rows += k.stat.points.toString().padStart(4, ' ');
+									rows += k.stat.plusMinus.toString().padStart(4, ' ');
+									rows += k.stat.pim.toString().padStart(5, ' ');
+								}
 							}
 						}
 					}
@@ -309,12 +320,9 @@ module.exports = {
 
 			if (yearFlag) {
 				if (p.primaryPosition.abbreviation === 'G') {
-					let tiebreaker = '';
-					(!hasTie) ? '' : tiebreaker += '   T';
-					(!hasOT) ? '' : tiebreaker += '   OT';
-					block = '```md\n#Season Team         GP   W   L' + tiebreaker + rows + '```';	
+					block = '```md\n#Season Team          G GS  W  L  T OT  GAA' + rows + '```';	
 				} else {
-					block = '```md\n#Season Team         GP   G   A   P  +/-' + rows + '```';	
+					block = '```md\n#Season Team         GP   G   A   P  +/- PIM' + rows + '```';	
 				}
 			}
 			
