@@ -68,6 +68,7 @@ module.exports = {
 			const keyword = (keywordFlag.length > 0) ? keywordFlag.split('=', 2)[1].toLowerCase() : '';
 			if (flags.length > 0 && keywordFlag.length === 0 && !careerFlag && !playoffsFlag && !gameLogFlag && !yearFlag && !onPaceFlag && !advancedFlag) return message.reply(`\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help player\` for list of flags.`);
 			let last = 0;
+			let seasonCount = 0;
 			let rows = '';
 			const limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
 
@@ -154,6 +155,7 @@ module.exports = {
 			const birthCountry = p.birthCountry ? `${birthStateProvince}${p.birthCountry}` : '';
 			parameters.birthday.push(birthDate, birthCity, birthCountry);
 			let statLine = '';
+			let seasonLine = '';
 			const query = qs.stringify(parameters, { addQueryPrefix: true });
 			const thumbnail = 'https://nhl.bamcontent.com/images/headshots/current/168x168/';
 			const data = await fetch(`${apiPeople}${playerId}/stats/${query}`).then(response => response.json());
@@ -164,13 +166,13 @@ module.exports = {
 				statsSingleSeason: 'Reg. Season',
 				gameLog: 'Reg. Season - Last 5',
 				playoffGameLog: 'Playoffs - Last 7',
-				yearByYear: 'Career Regular Season',
-				yearByYearPlayoffs: 'Career Playoffs',
+				yearByYear: 'Year by Year Reg. Season',
+				yearByYearPlayoffs: 'Year by Year Playoffs',
 				onPaceRegularSeason: 'Reg. Season On Pace',
 			};
 			const singleSeason = renameTitle[parameters.stats];
 			const { splits } = data.stats[0];
-			const seasonOrPlayoffs = (singleSeason.split(' ').includes('Career')) ? `(${singleSeason})` : `(${humanSeason} ${singleSeason})`;
+			const seasonOrPlayoffs = (singleSeason.split(' ').includes('Year', 'Career')) ? `(${singleSeason})` : `(${humanSeason} ${singleSeason})`;
 			if (Array.isArray(splits) && splits.length === 0) return message.reply(`no stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`);
 			parameters.player.push(fullName, sweater, seasonOrPlayoffs);
 			const embed = new RichEmbed();
@@ -251,8 +253,10 @@ module.exports = {
 							Object.entries(o).slice(0, limit).filter(([, element]) => element.key.toLowerCase().startsWith(keyword) && element.stat !== null).forEach(([, values ]) => embed.addField(values.key, values.stat, true));
 						}
 						else {
-							let season = `${k.season.substring(0,4)}-${k.season.substring(6)}`;
+
 							if (k.league.id === 133) {
+								seasonCount++;
+								let season = `${k.season.substring(0,4)}-${k.season.substring(6)}`;
 								let padTeam = `<${k.team.name.split(' ').pop()}>`;
 								const padStat = (x,w) => x.length ==! w ? x.padStart(w, ' ') : x;
 								rows += `\n${season} ${padTeam.padEnd(12, ' ')}`;
@@ -262,7 +266,7 @@ module.exports = {
 									rows += k.stat.gamesStarted.toString().padStart(3, ' ');
 									rows += k.stat.wins.toString().padStart(3, ' ');
 									rows += k.stat.losses.toString().padStart(3, ' ');
-									rows += (k.stat.ties >= 0) ? k.stat.ties.toString().padStart(3, ' ') : ' --';
+									rows += (k.stat.ties >= 0) ? k.stat.ties.toString().padStart(3, ' ') : '  -';
 									rows += (k.stat.ot >= 0) ? k.stat.ot.toString().padStart(3, ' ') : ' --';
 									rows += k.stat.goalAgainstAverage.toFixed(2).padStart(5, ' ');
 								}
@@ -270,7 +274,7 @@ module.exports = {
 									rows += k.stat.goals.toString().padStart(4, ' ');
 									rows += k.stat.assists.toString().padStart(4, ' ');
 									rows += k.stat.points.toString().padStart(4, ' ');
-									rows += k.stat.plusMinus.toString().padStart(4, ' ');
+									rows += (k.stat.plusMinus || k.stat.plusMinus === 0) ? k.stat.plusMinus.toString().padStart(4, ' ') : '  --';
 									rows += k.stat.pim.toString().padStart(5, ' ');
 								}
 							}
@@ -303,7 +307,7 @@ module.exports = {
 							statLine = `GS ${g.gamesStarted} ${g.decision} | SA ${g.shotsAgainst} GA ${g.goalsAgainst} Sv% ${g.savePercentage} SO ${g.shutouts} TOI ${g.TOI}`;
 						}
 						else {
-							statLine = `${g.goals}G-${g.assists}A-${g.points}P (${g.plusMinus}) Shots ${g.shots} PIM ${g.pim} Hits ${g.hits} TOI ${g.TOI}`;
+							statLine = `${g.goals}G-${g.assists}A-${g.points}P (${g.plusMinus}) PIM ${g.pim} Shots ${g.shots} Hits ${g.hits} TOI ${g.TOI}`;
 						}
 
 						embed.addField(`:hockey: ${g.date} ${g.isHome} ${g.opponent} (${g.isWin}${g.isOT})`, statLine);
@@ -315,18 +319,20 @@ module.exports = {
 				embed.addField(renameTitle[parameters.stats], (fullSeason.length > 0) ? humanSeason : '--', true);
 				embed.addField('Games', 0, true);
 			}
-			
-			let block = '';
 
 			if (yearFlag) {
-				if (p.primaryPosition.abbreviation === 'G') {
-					block = '```md\n#Season Team          G GS  W  L  T OT  GAA' + rows + '```';	
-				} else {
-					block = '```md\n#Season Team         GP   G   A   P  +/- PIM' + rows + '```';	
+				if (p.primaryPosition.code === 'G' && seasonCount > 0) {
+					seasonLine = '```md\n#Season Team          G GS  W  L  T OT  GAA' + rows + '```';	
+				}
+				else if (['L', 'C', 'R', 'D'].includes(p.primaryPosition.code) && seasonCount > 0) {
+					seasonLine = '```md\n#Season Team         GP   G   A   P  +/- PIM' + rows + '```';	
+				}
+				else {
+					return message.reply(`no stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`);
 				}
 			}
 			
-			embed.setDescription(`${parameters.bio.join(' | ')}\n${parameters.birthday.join(', ')}${block}`);
+			embed.setDescription(`${parameters.bio.join(' | ')}\n${parameters.birthday.join(', ')}${seasonLine}`);
 			message.channel.send(embed);
 
 		}
