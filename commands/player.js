@@ -8,7 +8,7 @@ const { googleSearch } = require('../config.json');
 module.exports = {
 	name: 'player',
 	usage: '<year> <name> -<flag>',
-	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags `-career`, `-playoffs`, `-log`, `-year`, -onpace`, `-advanced`, `-filter=<term>` for more options.',
+	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags `-career`, `-playoffs`, `-log`, `-year`, `-month`, `-day`, `-onpace`, `-advanced`, `-filter=<term>` for more options.',
 	category: 'stats',
 	aliases: ['player', 'p'],
 	examples: ['barzal', '1993 selanne', 'gretzky -career', 'mcdavid -log', 'howe -year', 'ovechkin -onpace'],
@@ -56,17 +56,21 @@ module.exports = {
 			const playoffs = ['playoffs', 'p'];
 			const gamelog = ['log', 'l'];
 			const year = ['year', 'y'];
+			const month = ['month', 'm'];
+			const day = ['day', 'd'];
 			const onpace = ['onpace', 'o'];
 			const advanced = ['advanced', 'a'];
 			const careerFlag = career.some(e => flags.includes(e));
 			const playoffsFlag = playoffs.some(e => flags.includes(e));
 			const gameLogFlag = gamelog.some(e => flags.includes(e));
 			const yearFlag = year.some(e => flags.includes(e));
+			const monthFlag = month.some(e => flags.includes(e));
+			const dayFlag = day.some(e => flags.includes(e));
 			const onPaceFlag = onpace.some(e => flags.includes(e));
 			const advancedFlag = advanced.some(e => flags.includes(e));
 			const keywordFlag = flags.find(e => e.startsWith('filter=') || e.startsWith('f=')) || '';
 			const keyword = (keywordFlag.length > 0) ? keywordFlag.split('=', 2)[1].toLowerCase() : '';
-			if (flags.length > 0 && keywordFlag.length === 0 && !careerFlag && !playoffsFlag && !gameLogFlag && !yearFlag && !onPaceFlag && !advancedFlag) return message.reply(`\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help player\` for list of flags.`);
+			if (flags.length > 0 && keywordFlag.length === 0 && !careerFlag && !playoffsFlag && !gameLogFlag && !yearFlag && !monthFlag && !dayFlag && !onPaceFlag && !advancedFlag) return message.reply(`\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help player\` for list of flags.`);
 			let last = 0;
 			let seasonCount = 0;
 			let rows = '';
@@ -88,6 +92,18 @@ module.exports = {
 			}
 			else if (yearFlag) {
 				parameters.stats = 'yearByYear';
+			}
+			else if (playoffsFlag && monthFlag) {
+				parameters.stats = 'byMonthPlayoffs';
+			}
+			else if (monthFlag) {
+				parameters.stats = 'byMonth';
+			}
+			else if (playoffsFlag && dayFlag) {
+				parameters.stats = 'byDayOfWeekPlayoffs';
+			}
+			else if (dayFlag) {
+				parameters.stats = 'byDayOfWeek';
 			}
 			else if (playoffsFlag) {
 				parameters.stats = 'statsSingleSeasonPlayoffs';
@@ -164,11 +180,15 @@ module.exports = {
 				careerRegularSeason: 'Career Regular Season',
 				statsSingleSeasonPlayoffs: 'Playoffs',
 				statsSingleSeason: 'Reg. Season',
-				gameLog: 'Reg. Season - Last 5',
+				gameLog: 'Last 5',
 				playoffGameLog: 'Playoffs - Last 7',
-				yearByYear: 'Year by Year Reg. Season',
-				yearByYearPlayoffs: 'Year by Year Playoffs',
-				onPaceRegularSeason: 'Reg. Season On Pace',
+				yearByYear: 'By Year',
+				yearByYearPlayoffs: 'Playoffs - By Year',
+				byMonth: 'By Month',
+				byMonthPlayoffs: 'Playoffs - By Month',
+				byDayOfWeek: 'By Day',
+				byDayOfWeekPlayoffs: 'Playoffs - By Day',
+				onPaceRegularSeason: 'On Pace',
 			};
 			const singleSeason = renameTitle[parameters.stats];
 			const { splits } = data.stats[0];
@@ -249,34 +269,47 @@ module.exports = {
 
 						const o = Object.entries(n).map(([key, value]) => Object.assign({}, { key }, value)).sort((a, b) => a.order - b.order);
 
-						if (!yearFlag) {
+						if (!(yearFlag || monthFlag || dayFlag)) {
 							Object.entries(o).slice(0, limit).filter(([, element]) => element.key.toLowerCase().startsWith(keyword) && element.stat !== null).forEach(([, values ]) => embed.addField(values.key, values.stat, true));
 						}
 						else {
+							let season = '';
+							let padTeam = '';
 
-							if (k.league.id === 133) {
+							if (yearFlag) {
+								if (k.league.id !== 133) return;
 								seasonCount++;
-								let season = `${k.season.substring(0,4)}-${k.season.substring(6)}`;
-								let padTeam = `<${k.team.name.split(' ').pop()}>`;
-								const padStat = (x,w) => x.length ==! w ? x.padStart(w, ' ') : x;
+								season = `${k.season.substring(0, 4)}-${k.season.substring(6)}`;
+								padTeam = `<${k.team.name.split(' ').pop()}>`;
 								rows += `\n${season} ${padTeam.padEnd(12, ' ')}`;
+							}
+							else if (monthFlag) {
+								seasonCount++;
+								season = moment().month(k.month - 1).format('MMM');
+								rows += `\n${season.padEnd(7, ' ')}`;
+							}
+							else {
+								seasonCount++;
+								season = moment().day(k.dayOfWeek).format('ddd');
+								rows += `\n${season.padEnd(7, ' ')}`;
+							}
+
+							if (p.primaryPosition.abbreviation === 'G') {
 								rows += k.stat.games.toString().padStart(3, ' ');
-								
-								if (p.primaryPosition.abbreviation === 'G') {
-									rows += k.stat.gamesStarted.toString().padStart(3, ' ');
-									rows += k.stat.wins.toString().padStart(3, ' ');
-									rows += k.stat.losses.toString().padStart(3, ' ');
-									rows += (k.stat.ties >= 0) ? k.stat.ties.toString().padStart(3, ' ') : '  -';
-									rows += (k.stat.ot >= 0) ? k.stat.ot.toString().padStart(3, ' ') : ' --';
-									rows += k.stat.goalAgainstAverage.toFixed(2).padStart(5, ' ');
-								}
-								else {
-									rows += k.stat.goals.toString().padStart(4, ' ');
-									rows += k.stat.assists.toString().padStart(4, ' ');
-									rows += k.stat.points.toString().padStart(4, ' ');
-									rows += (k.stat.plusMinus || k.stat.plusMinus === 0) ? k.stat.plusMinus.toString().padStart(4, ' ') : '  --';
-									rows += k.stat.pim.toString().padStart(5, ' ');
-								}
+								rows += (k.stat.gamesStarted >= 0) ? k.stat.gamesStarted.toString().padStart(3, ' ') : '  0';
+								rows += (k.stat.wins >= 0) ? k.stat.wins.toString().padStart(3, ' ') : '  0';
+								rows += (k.stat.losses >= 0) ? k.stat.losses.toString().padStart(3, ' ') : '  0';
+								rows += (k.stat.ties >= 0) ? k.stat.ties.toString().padStart(3, ' ') : '  -';
+								rows += (k.stat.ot >= 0) ? k.stat.ot.toString().padStart(3, ' ') : ' --';
+								rows += k.stat.goalAgainstAverage.toFixed(2).padStart(5, ' ');
+							}
+							else {
+								rows += k.stat.games.toString().padStart(3, ' ');
+								rows += k.stat.goals.toString().padStart(4, ' ');
+								rows += k.stat.assists.toString().padStart(4, ' ');
+								rows += k.stat.points.toString().padStart(4, ' ');
+								rows += (k.stat.plusMinus || k.stat.plusMinus === 0) ? k.stat.plusMinus.toString().padStart(4, ' ') : '  --';
+								rows += (k.stat.pim || k.stat.pim === 0) ? k.stat.pim.toString().padStart(5, ' ') : '   0';
 							}
 						}
 					}
@@ -320,21 +353,21 @@ module.exports = {
 				embed.addField('Games', 0, true);
 			}
 
-			if (yearFlag) {
+			if (yearFlag || monthFlag || dayFlag) {
+				const columns = yearFlag ? `${'Season'.padEnd(7, ' ')} ${'Team'.padEnd(12, ' ')}` : monthFlag ? `${'Month'.padEnd(7, ' ')}` : `${'Day'.padEnd(7, ' ')}`;
+
 				if (p.primaryPosition.code === 'G' && seasonCount > 0) {
-					seasonLine = '```md\n#Season Team          G GS  W  L  T OT  GAA' + rows + '```';	
+					seasonLine = '```md\n#' + columns + 'GP GS  W  L  T OT  GAA' + rows + '```';
 				}
 				else if (['L', 'C', 'R', 'D'].includes(p.primaryPosition.code) && seasonCount > 0) {
-					seasonLine = '```md\n#Season Team         GP   G   A   P  +/- PIM' + rows + '```';	
+					seasonLine = '```md\n#' + columns + 'GP   G   A   P  +/- PIM' + rows + '```';
 				}
 				else {
 					return message.reply(`no stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`);
 				}
 			}
-			
 			embed.setDescription(`${parameters.bio.join(' | ')}\n${parameters.birthday.join(', ')}${seasonLine}`);
 			message.channel.send(embed);
-
 		}
 		else {
 			const missing = (terms.length > 0) ? `\`${terms}\` matched 0 players. Type \`${prefix}team <team> -roster\` for a list of player names.` : `no name provided. Type \`${prefix}help player\` for a list of arguments.`;
