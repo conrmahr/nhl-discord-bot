@@ -74,7 +74,7 @@ module.exports = {
 			let last = 0;
 			let seasonCount = 0;
 			let rows = '';
-			const limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
+			const limit = (advancedFlag || keywordFlag.length > 0) ? 23 : 3;
 
 			if (careerFlag && playoffsFlag) {
 				parameters.stats = 'careerPlayoffs';
@@ -179,20 +179,20 @@ module.exports = {
 				careerPlayoffs: 'Career Playoffs',
 				careerRegularSeason: 'Career Regular Season',
 				statsSingleSeasonPlayoffs: 'Playoffs',
-				statsSingleSeason: 'Reg. Season',
-				gameLog: 'Last 5',
-				playoffGameLog: 'Playoffs - Last 7',
-				yearByYear: 'By Year',
-				yearByYearPlayoffs: 'Playoffs - By Year',
-				byMonth: 'By Month',
-				byMonthPlayoffs: 'Playoffs - By Month',
-				byDayOfWeek: 'By Day',
-				byDayOfWeekPlayoffs: 'Playoffs - By Day',
+				statsSingleSeason: 'Regular Season',
+				gameLog: 'Reg. Season Game Log',
+				playoffGameLog: 'Playoffs Game Log',
+				yearByYear: 'Regular Season Year by Year',
+				yearByYearPlayoffs: 'Playoffs Year by Year',
+				byMonth: 'Reg. Season by Month',
+				byMonthPlayoffs: 'Playoffs by Month',
+				byDayOfWeek: 'Reg. Season by Day',
+				byDayOfWeekPlayoffs: 'Playoffs by Day',
 				onPaceRegularSeason: 'On Pace',
 			};
-			const singleSeason = renameTitle[parameters.stats];
+			const statType = renameTitle[parameters.stats];
 			const { splits } = data.stats[0];
-			const seasonOrPlayoffs = (singleSeason.split(' ').includes('Year', 'Career')) ? `(${singleSeason})` : `(${humanSeason} ${singleSeason})`;
+			const seasonOrPlayoffs = (statType.split(' ').includes('Year', 'Career')) ? `(${statType})` : `(${humanSeason} ${statType})`;
 			if (Array.isArray(splits) && splits.length === 0) return message.reply(`no stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`);
 			parameters.player.push(fullName, sweater, seasonOrPlayoffs);
 			const embed = new RichEmbed();
@@ -212,7 +212,7 @@ module.exports = {
 						const fixed3 = (x) => x === 0 ? null : (x / 100).toFixed(3).substring(1);
 
 						const map = {
-							games: { name: 'Games', order: 1 },
+							games: { name: 'GP', order: 1 },
 							wins: { name: 'Record', order: 2, f: record },
 							gamesStarted: { name: 'Starts', order: 3 },
 							losses: { name: 'Losses', order: 4, f: skip },
@@ -232,7 +232,6 @@ module.exports = {
 							shots: { name: 'Shots', order: 18 },
 							shotPct: { name: 'Shot%', order: 19 },
 							pim: { name: 'PIM', order: 20 },
-							penaltyMinutes: { name: 'PM', order: 21 },
 							hits: { name: 'Hits', order: 22 },
 							blocked: { name: 'Blocked', order: 23 },
 							shifts: { name: 'Shifts', order: 24 },
@@ -252,16 +251,21 @@ module.exports = {
 							shortHandedSavePercentage: { name: 'SH Sv%', order: 38, f: fixed3 },
 							evenStrengthSavePercentage: { name: 'Ev Sv%', order: 39, f: fixed3 },
 							timeOnIce: { name: 'TOI', order: 40 },
-							powerPlayTimeOnIce: { name: 'PP TOI', order: 41 },
-							shortHandedTimeOnIce: { name: 'SH TOI', order: 42 },
-							evenTimeOnIce: { name: 'Ev TOI', order: 43 },
-							timeOnIcePerGame: { name: 'TOI/G', order: 44 },
-							powerPlayTimeOnIcePerGame: { name: 'PP TOI/G', order: 45 },
-							shortHandedTimeOnIcePerGame: { name: 'SH TOI/G', order: 46 },
-							evenTimeOnIcePerGame: { name: 'Ev TOI/G', order: 47 },
+							timeOnIcePerGame: { name: 'TOI/GP', order: 41 },
+							evenTimeOnIcePerGame: { name: 'Ev TOI/GP', order: 42 },
+							powerPlayTimeOnIcePerGame: { name: 'PP TOI/GP', order: 43 },
+							shortHandedTimeOnIcePerGame: { name: 'SH TOI/GP', order: 44 },
+							powerPlayTimeOnIce: { name: 'PP TOI', order: 45 },
+							evenTimeOnIce: { name: 'Ev TOI', order: 46 },
+							shortHandedTimeOnIce: { name: 'SH TOI', order: 47 },
+							penaltyMinutes: { name: 'PM', order: 47, f: skip },
+
 						};
 
+						console.log(map);
+
 						const n = Object.keys(k.stat).reduce((a, b) => {
+							console.log(map[b]);
 							return (!map[b].f)
 								? { ...a, [map[b].name]: { stat: k.stat[b], order: map[b].order } }
 								: { ...a, [map[b].name]: { stat: map[b].f(k.stat[b]), order: map[b].order } };
@@ -308,8 +312,8 @@ module.exports = {
 								rows += k.stat.goals.toString().padStart(4, ' ');
 								rows += k.stat.assists.toString().padStart(4, ' ');
 								rows += k.stat.points.toString().padStart(4, ' ');
-								rows += (k.stat.plusMinus || k.stat.plusMinus === 0) ? k.stat.plusMinus.toString().padStart(4, ' ') : '  --';
-								rows += (k.stat.pim || k.stat.pim === 0) ? k.stat.pim.toString().padStart(5, ' ') : '   0';
+								rows += (k.stat.plusMinus || k.stat.plusMinus === 0) ? k.stat.plusMinus.toString().padStart(5, ' ') : '  --';
+								rows += (k.stat.pim || k.stat.pim === 0) ? k.stat.pim.toString().padStart(4, ' ') : '   0';
 							}
 						}
 					}
