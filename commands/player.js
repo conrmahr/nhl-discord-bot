@@ -192,7 +192,9 @@ module.exports = {
 			};
 			const statType = renameTitle[parameters.stats];
 			const { splits } = data.stats[0];
-			const seasonOrPlayoffs = (statType.split(' ').includes('Year', 'Career')) ? `(${statType})` : `(${humanSeason} ${statType})`;
+			const statTypeArr = statType.split(' ');
+			const multiYear = ['Career', 'Year'].some(needle => statTypeArr.includes(needle));
+			const seasonOrPlayoffs = multiYear ? `(${statType})` : `(${humanSeason} ${statType})`;
 			if (Array.isArray(splits) && splits.length === 0) return message.reply(`no stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`);
 			parameters.player.push(fullName, sweater, seasonOrPlayoffs);
 			const embed = new RichEmbed();
@@ -262,10 +264,7 @@ module.exports = {
 
 						};
 
-						console.log(map);
-
 						const n = Object.keys(k.stat).reduce((a, b) => {
-							console.log(map[b]);
 							return (!map[b].f)
 								? { ...a, [map[b].name]: { stat: k.stat[b], order: map[b].order } }
 								: { ...a, [map[b].name]: { stat: map[b].f(k.stat[b]), order: map[b].order } };
