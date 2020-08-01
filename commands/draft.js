@@ -10,7 +10,7 @@ module.exports = {
 	description: 'Get draft picks by round or team. Add `YYYY` to specify a draft year.',
 	category: 'draft',
 	aliases: ['draft', 'd'],
-	examples: ['1993', '1979 edm'],
+	examples: ['1993', '2004 8', '1979 edm'],
 	async execute(message, args, flags, prefix) {
 
 		const endpoint = 'https://statsapi.web.nhl.com/api/v1/draft/';

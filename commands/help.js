@@ -13,7 +13,8 @@ module.exports = {
 		if (!args.length) {
 			const embed = new RichEmbed();
 			embed.setColor(0x59acef);
-			embed.addField('Command List',
+			embed.setAuthor('Command List', 'https://cdn.discordapp.com/avatars/535203406592344067/1473d566732ea6ffd24d02be45af8b21.png');
+			embed.setDescription(
 				[
 					'This is a list of all available commands.',
 					`To view details for a command, type \`${prefix}help <command>\`.`,
