@@ -208,10 +208,10 @@ module.exports = {
 					if (!gameLogFlag) {
 						const skip = (x) => yearFlag ? x : null;
 						const scoring = (x) => yearFlag ? x : `${k.stat.goals}G-${k.stat.assists}A-${k.stat.points}P`;
-						const record = (x) => yearFlag ? x : k.stat.ties ? `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ties}T` : `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ot}OT`;
-						const fixed1 = (x) => x === 0 ? null : x.toString().substring(1);
+						const record = (x) => yearFlag ? x : typeof k.stat.ot === 'undefined' ? `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ties}T` : `${k.stat.wins}W-${k.stat.losses}L-${k.stat.ot}OT`;
+						const fixed1 = (x) => x === 1 ? x.toFixed(3) : x > 0 ? x.toFixed(3).substring(1) : null;
 						const fixed2 = (x) => x === 0 ? null : x.toFixed(2);
-						const fixed3 = (x) => x === 0 ? null : (x / 100).toFixed(3).substring(1);
+						const fixed3 = (x) => x === 0 ? null : x === 100 ? (x / 100).toFixed(3) : (x / 100).toFixed(3).substring(1);
 
 						const map = {
 							games: { name: 'GP', order: 1 },
