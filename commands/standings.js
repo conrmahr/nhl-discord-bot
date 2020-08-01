@@ -182,7 +182,7 @@ module.exports = {
 					if (loop === 1 && xrow && !xpp) return '#  TEAM  GP W  L  OT PTS ROW DIFF STRK\n';
 					if (loop === 1 && xpp) return '#  TEAM  GP W  L  OT PTS PTS% DIFF STRK\n';
 					if (loop === 1 && tiu) return '#  TEAM  GP W  L  T  PTS DIFF STRK\n';
-					if (loop === 1) return '#  TEAM  GP W  L  OT PTS DIFF STRK\n';
+					if (loop === 1) return '#  TEAM  GP  W L  OT PTS DIFF STRK\n';
 					return '';
 				}
 				function getDiff(scored, against) {
@@ -198,17 +198,8 @@ module.exports = {
 					return '';
 				}
 				function pad(stat, column) {
-					const d = new String(stat);
-					if (d.length === 1 && column === 3) return `${d}  `;
-					if (d.length === 2 && column === 3) return `${d} `;
-					if (d.length === 1 && column === 4) return `${d}   `;
-					if (d.length === 2 && column === 4) return `${d}  `;
-					if (d.length === 3 && column === 4) return `${d} `;
-					if (d.length === 1 && column === 5) return `${d}    `;
-					if (d.length === 2 && column === 5) return `${d}   `;
-					if (d.length === 3 && column === 5) return `${d}  `;
-					if (d.length === 4 && column === 5) return `${d} `;
-					return `${d}`;
+					if (stat === '') return '';
+					return stat.toString().padEnd(column, ' ');
 				}
 				return `${getHeader(r, regulationWins, row, flagPointsPercentage, tiesInUse)}${pad(rank, 3)}<${teamAbbreviation}> ${pad(gamesPlayed, 3)}${pad(wins, 3)}${pad(losses, 3)}${pad(extra, 3)}${pad(points, 4)}${pad(pp, 5)}${pad(rw, 3)}${pad(rowe, 4)}${pad(getDiff(goalsScored, goalsAgainst), 5)}${strk}${getLine(r, flagWildCard, flagPointsPercentage)}`;
 
