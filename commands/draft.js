@@ -66,7 +66,7 @@ module.exports = {
 		const data = await fetch(`${endpoint}${draftYear}`).then(response => response.json());
 
 		if (!data.drafts[0].rounds) return message.reply(`no draft picks found for the ${draftYear} Draft. Type \`${prefix}help draft\` for a list of arguments.`);
-		
+
 		const flatFilterPicks = (draft, pred) => draft.drafts.flatMap(({ rounds }) => {
 			return rounds.flatMap(({ picks }) => picks.filter(pred));
 		});
@@ -100,15 +100,8 @@ module.exports = {
 					return '';
 				}
 				function pad(stat, column) {
-					const d = new String(stat);
-					if (d.length === 1 && column === 4) return `${d}   `;
-					if (d.length === 2 && column === 4) return `${d}  `;
-					if (d.length === 3 && column === 4) return `${d} `;
-					if (d.length === 1 && column === 5) return `${d}    `;
-					if (d.length === 2 && column === 5) return `${d}   `;
-					if (d.length === 3 && column === 5) return `${d}  `;
-					if (d.length === 4 && column === 5) return `${d} `;
-					return `${d}`;
+					if (stat === '') return '';
+					return stat.toString().padEnd(column, ' ');
 				}
 				return `${getHeader()}${pad(round, 4)}${pad(pickOverall, 5)}${pad(teamAbbreviation, 5)}${prospect.fullName}`;
 
