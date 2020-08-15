@@ -7,11 +7,11 @@ const { googleSearch } = require('../config.json');
 
 module.exports = {
 	name: 'player',
-	usage: '<year> <name> -<flag>',
-	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags `-career`, `-playoffs`, `-log`, `-year`, `-month`, `-day`, `-onpace`, `-advanced`, `-filter=<term>` for more options.',
+	usage: '[<year>] <name> [-<flag>]',
+	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags  `-advanced`, `-playoffs`, `-career`, `-log`, `-onpace`, `-year`, `-month`, `-day`, `-filter=<term>` for more options.',
 	category: 'stats',
 	aliases: ['player', 'p'],
-	examples: ['barzal', '1993 selanne', 'gretzky -career', 'mcdavid -log', 'howe -year', 'ovechkin -onpace'],
+	examples: ['barzal', 'kucherov -advanced', 'crosby -playoffs', 'gretzky -career', 'mcdavid -log', 'ovechkin -onpace', 'marleau -year', 'wilson -filter=pim'],
 	async execute(message, args, flags, prefix) {
 
 		let current = 'current';

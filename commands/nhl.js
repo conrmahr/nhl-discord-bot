@@ -5,7 +5,7 @@ const qs = require('qs');
 
 module.exports = {
 	name: 'nhl',
-	usage: '<date> <team> <opponent> -<flag>',
+	usage: '[<date>] [<team> <opponent>] [-<flag>]',
 	description: 'Get games for `today`, `tomorrow`, `yesterday`, `next` 5 games, `last` 5 games, or a given date `YYYY-MM-DD`. If nothing is specified, games scheduled for today will return. Filter with a specific team and opponent abbreviations. Add flags `-tv`, `-venue`, `-hide` for more options.',
 	category: 'scores',
 	aliases: ['nhl', 'n'],
@@ -132,33 +132,33 @@ module.exports = {
 				let arena = '';
 				if (broadcasts) {
 					const channels = broadcasts.map(i => i.name).join(', ');
-					tv = `:tv: [${channels}]`;
+					tv = ` :tv: [${channels}] `;
 				}
 
 				if (venue && flagVenue) {
-					arena = `:stadium: [${venue.name}]`;
+					arena = ` :stadium: [${venue.name}] `;
 				}
 
 				if (statusCode < 3 || flagHide) {
 					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
 					const gameTime = (statusCode > 2) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
-					return `${awayTeam} @ ${homeTeam} ${gameTime} ${arena} ${tv}`;
+					return `${awayTeam} @ ${homeTeam} ${gameTime}${arena}${tv}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {
-					const clock = function getClock(s) {
-						const c = s ? new Date(s * 1000).toISOString().slice(14, -5) : '';
-						return c;
+					const clock = function getClock(timeLeft, type) {
+						const clockString = (timeLeft > 0 && type === 'int') ? ` [${moment().startOf('day').seconds(timeLeft).format('mm:ss')} Int] ` : (timeLeft > 0 && type === 'pp') ? `[*PP ${moment().startOf('day').seconds(timeLeft).format('mm:ss')}*] ` : '';
+						return clockString;
 					};
 
-					const awayPP = (linescore.teams.away.powerPlay && linescore.powerPlayInfo.situationTimeRemaining > 0) ? ' [*PP*]' : '';
-					const homePP = (linescore.teams.home.powerPlay && linescore.powerPlayInfo.situationTimeRemaining > 0) ? ' [*PP*]' : '';
-					const awayEN = linescore.teams.away.goaliePulled ? ' [*EN*]' : '';
-					const homeEN = linescore.teams.home.goaliePulled ? ' [*EN*]' : '';
-					const intermission = linescore.intermissionInfo.inIntermission ? `[${clock(linescore.intermissionInfo.intermissionTimeRemaining)} Int]` : '';
-					return `${awayTeam} ${away.score}${awayPP}${awayEN} ${homeTeam} ${home.score}${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${intermission} ${arena} ${tv}`;
+					const awayPP = linescore.teams.away.powerPlay ? clock(linescore.powerPlayInfo.situationTimeRemaining, 'pp') : '';
+					const homePP = linescore.teams.home.powerPlay ? clock(linescore.powerPlayInfo.situationTimeRemaining, 'pp') : '';
+					const awayEN = linescore.teams.away.goaliePulled ? ' [*EN*] ' : '';
+					const homeEN = linescore.teams.home.goaliePulled ? ' [*EN*] ' : '';
+					const intermission = linescore.intermissionInfo.inIntermission ? clock(linescore.intermissionInfo.intermissionTimeRemaining, 'int') : '';
+					return `${awayTeam} ${away.score} ${awayPP}${awayEN} ${homeTeam} ${home.score} ${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${intermission}${arena}${tv}`;
 				}
 				else if (statusCode > 4 && statusCode < 8) {
-					return `${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)} ${arena}`;
+					return `${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${arena}`;
 				}
 				else if (statusCode === '8') {
 					return `${awayTeam} @ ${homeTeam} TBD`;

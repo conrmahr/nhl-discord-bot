@@ -1,12 +1,12 @@
 {
-  "prefix": "",
-  "token": "",
+  "prefix": "ONE-CHARACTER-SYMBOL",
+  "token": "DISCORD-BOT-TOKEN",
   "activity": {
-    "type": "",
-    "name": ""
+    "type": "WATCHING-OR-LISTENING",
+    "name": "ANY-TEXT-STRING"
   },
   "googleSearch": {
-    "cx": "",
-    "key": ""
+    "cx": "GOOGLE-SEARCH-ENGINE-ID",
+    "key": "GOOGLE-APIS-KEY"
   }
 }

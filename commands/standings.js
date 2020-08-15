@@ -5,7 +5,7 @@ const qs = require('qs');
 
 module.exports = {
 	name: 'standings',
-	usage: '<date> <table> -<flag>',
+	usage: '[<year>] <table> [-<flag>]',
 	description: 'Get current standings for any division, conference, or league. Add `YYYY` to specify a season. Add flags `-wildcard` or `-percentage` after a conference for sorting.',
 	category: 'standings',
 	aliases: ['standings', 's'],

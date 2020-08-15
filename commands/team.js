@@ -6,7 +6,7 @@ const cheerio = require('cheerio');
 
 module.exports = {
 	name: 'team',
-	usage: '<year> <team> -<flag>',
+	usage: '[<year>] [<team>] [-<flag>]',
 	description: 'Get team stats or roster for active and former teams. Add `YYYY` to specifiy a season. Add the flags  `-roster`, `-advanced`, `-filter=<term>` for more options.',
 	category: 'stats',
 	aliases: ['team', 'teams', 't'],
