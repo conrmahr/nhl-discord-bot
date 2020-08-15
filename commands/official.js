@@ -5,7 +5,7 @@ const qs = require('qs');
 
 module.exports = {
 	name: 'official',
-	usage: '<#>',
+	usage: '[<#>]',
 	description: 'Get active officials information.',
 	category: 'stats',
 	aliases: ['official', 'o'],

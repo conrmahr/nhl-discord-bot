@@ -7,7 +7,7 @@ const { googleSearch } = require('../config.json');
 
 module.exports = {
 	name: 'player',
-	usage: '<year> <name> -<flag>',
+	usage: '[<year>] <name> [-<flag>]',
 	description: 'Get player stats for active and inactive players. Add `YYYY` to specifiy a season. Add flags  `-advanced`, `-playoffs`, `-career`, `-log`, `-onpace`, `-year`, `-month`, `-day`, `-filter=<term>` for more options.',
 	category: 'stats',
 	aliases: ['player', 'p'],

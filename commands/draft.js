@@ -6,7 +6,7 @@ const cheerio = require('cheerio');
 
 module.exports = {
 	name: 'draft',
-	usage: '<year> <round> <team>',
+	usage: '[<year>] [<round>|<team>]',
 	description: 'Get draft picks by round or team. Add `YYYY` to specify a draft year.',
 	category: 'draft',
 	aliases: ['draft', 'd'],
