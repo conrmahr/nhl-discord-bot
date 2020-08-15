@@ -9,7 +9,7 @@ module.exports = {
 	description: 'Get active officials information.',
 	category: 'stats',
 	aliases: ['official', 'o'],
-	examples: ['4'],
+	examples: ['', '4'],
 	async execute(message, args, flags, prefix) {
 
 		const embed = new RichEmbed();
