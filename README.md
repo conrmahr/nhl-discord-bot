@@ -81,14 +81,15 @@ https://discordapp.com/oauth2/authorize?client_id={YOUR_CLIENT_ID}&scope=bot
 
 | Command with Arguments                | Description |
 | ------------------------------------- | ------------------------------------- |
-|**`about <year> <round> <team>`** | Shows information about `nhl-discord-bot`.|
-|**`draft <year> <round> <team>`** | Get draft picks by round or team.|
+|**`about`** | Shows information about `nhl-discord-bot`.|
+|**`draft [<year>] [<round>|<team>]`** | Get draft picks by round or team.|
+|**`game [<date>] <team> [-<flag>]`** | Get game editorials and boxscores.|
 |**`help <command>`** | List all of commands or info about a specific command.|
-|**`nhl <date> <team> <opponent> -<flag>`** | Get game schedules and scores.|
-|**`official <number>`** | Get active officials information.|
-|**`player <year> <name> -<flag>`** | Get player stats for active and inactive players.|
-|**`standings <date> <table> -<flag>`** | Get current standings for any division, conference, or league.|
-|**`team <year> <team> -<flag>`** | Get team stats or roster for active and former teams.|
+|**`nhl [<date>] [<team> <opponent>] [-<flag>]`** | Get game schedules and scores.|
+|**`official [<#>]`** | Get active officials information.|
+|**`player [<year>] <name> [-<flag>]`** | Get player stats for active and inactive players.|
+|**`standings [<year>] <table> [-<flag>]`** | Get current standings for any division, conference, or league.|
+|**`team [<year>] [<team>] [-<flag>]`** | Get team stats or roster for active and former teams.|
 
 ### :handshake: Contributing
 
