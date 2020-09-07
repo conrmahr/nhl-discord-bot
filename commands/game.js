@@ -10,7 +10,7 @@ module.exports = {
 	description: 'Get game editorials and boxscores. Add one flag `-preview`, `-boxscore`, or `-recap` to isolate.',
 	category: 'stats',
 	aliases: ['game', 'g'],
-	examples: ['phi', 'phi yesterday -boxscore'],
+	examples: ['phi', 'yesterday phi -boxscore'],
 	async execute(message, args, flags, prefix) {
 
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
