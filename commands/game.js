@@ -2,6 +2,7 @@ const { RichEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
 const qs = require('qs');
+const turndown = require('turndown');
 
 module.exports = {
 	name: 'game',
@@ -217,10 +218,11 @@ module.exports = {
 
 			if (contentObj.messageNumber !== 10 && contentObj.editorial.preview.items[0]) {
 				const pre = contentObj.editorial.preview.items[0];
+				const turndownService = new turndown();
 				const contributorFooter = pre.contributor.source ? `By ${pre.contributor.contributors[0].name} / ${pre.contributor.source}` : `By ${pre.contributor.contributors[0].name}`;
 				embed.setTitle(pre.headline);
 				embed.setURL(`https://www.nhl.com${pre.url}`);
-				embed.setDescription(`${pre.preview}\n\n${pre.subhead}`);
+				embed.setDescription(`${turndownService.turndown(pre.preview)}\n\n${pre.subhead}`);
 				embed.setAuthor('Game Preview', 'https://i.imgur.com/zl8JzZc.png');
 				if (Object.keys(pre.media).length > 0) { embed.setImage(pre.media.image.cuts['640x360'].src); }
 				embed.setTimestamp(pre.date);
@@ -238,10 +240,11 @@ module.exports = {
 
 			if (contentObj.messageNumber !== 10 && contentObj.editorial.recap.items[0]) {
 				const post = contentObj.editorial.recap.items[0];
+				const final = `**${gameData.awayTeam} ${gameData.awayScoreFinal} ${gameData.homeTeam} ${gameData.homeScoreFinal} (${gameData.clock})**`;
 				const contributorFooter = post.contributor.source ? `By ${post.contributor.contributors[0].name} / ${post.contributor.source}` : `By ${post.contributor.contributors[0].name}`;
 				embed.setTitle(post.headline);
 				embed.setURL(`https://www.nhl.com${post.url}`);
-				embed.setDescription(post.subhead);
+				embed.setDescription(`${final}\n${post.subhead}`);
 				embed.setAuthor('Game Recap', 'https://i.imgur.com/zl8JzZc.png');
 				if (Object.keys(post.media).length > 0) { embed.setImage(post.media.image.cuts['640x360'].src); }
 				embed.setTimestamp(post.date);
