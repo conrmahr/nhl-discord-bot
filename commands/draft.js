@@ -108,7 +108,7 @@ module.exports = {
 			}).join('\u200B\n');
 		}
 
-		const block = '```md\n' + getPicks(draftObj) + '```';
+		const block = `\`\`\`md\n${getPicks(draftObj)}\n\`\`\``;
 		const authorArr = [draftYear, draftTitle, draftTeam];
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);

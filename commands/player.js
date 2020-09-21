@@ -360,10 +360,10 @@ module.exports = {
 				const columns = yearFlag ? `${'Season'.padEnd(7, ' ')} ${'Team'.padEnd(12, ' ')}` : monthFlag ? `${'Month'.padEnd(7, ' ')}` : `${'Day'.padEnd(7, ' ')}`;
 
 				if (p.primaryPosition.code === 'G' && seasonCount > 0) {
-					seasonLine = '```md\n#' + columns + 'GP GS  W  L  T OT  GAA' + rows + '```';
+					seasonLine = `\`\`\`md\n#${columns}GP GS  W  L  T OT  GA${rows}\n\`\`\``;
 				}
 				else if (['L', 'C', 'R', 'D'].includes(p.primaryPosition.code) && seasonCount > 0) {
-					seasonLine = '```md\n#' + columns + 'GP   G   A   P  +/- PIM' + rows + '```';
+					seasonLine = `\`\`\`md\n#${columns}GP   G   A   P  +/- PIM${rows}\n\`\`\``;
 				}
 				else {
 					return message.reply(`no stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`);

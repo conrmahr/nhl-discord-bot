@@ -206,7 +206,7 @@ module.exports = {
 			}).join('\u200B\n');
 		}
 
-		const block = '```md\n' + getStandings(standingsObj.teamRecords) + '```';
+		const block = `\`\`\`md\n${getStandings(standingsObj.teamRecords)}\n\`\`\``;
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor(`${humanSeason} ${standingsTitle}`, standingsLogo);
