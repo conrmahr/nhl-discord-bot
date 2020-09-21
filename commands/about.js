@@ -10,7 +10,7 @@ module.exports = {
 	examples: [],
 	async execute(message) {
 
-		const embed = new Discord.RichEmbed();
+		const embed = new Discord.MessageEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor('About', 'https://cdn.discordapp.com/avatars/535203406592344067/1473d566732ea6ffd24d02be45af8b21.png');
 		embed.setDescription([

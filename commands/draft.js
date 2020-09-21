@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
 const qs = require('qs');
@@ -110,7 +110,7 @@ module.exports = {
 
 		const block = '```md\n' + getPicks(draftObj) + '```';
 		const authorArr = [draftYear, draftTitle, draftTeam];
-		const embed = new RichEmbed();
+		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor(authorArr.join(' '), 'https://i.imgur.com/zl8JzZc.png');
 		embed.setThumbnail(draftLogo);

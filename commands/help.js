@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 
 module.exports = {
 	name: 'help',
@@ -9,9 +9,9 @@ module.exports = {
 	examples: ['nhl', 'teams'],
 	execute(message, args, flags, prefix) {
 		const { commands } = message.client;
+	    const embed = new MessageEmbed();
 
 		if (!args.length) {
-			const embed = new RichEmbed();
 			embed.setColor(0x59acef);
 			embed.setAuthor('Command List', 'https://cdn.discordapp.com/avatars/535203406592344067/1473d566732ea6ffd24d02be45af8b21.png');
 			embed.setDescription(
@@ -32,7 +32,6 @@ module.exports = {
 			return message.reply(`\`${name}\` is not a valid command. Type \`${prefix}help\` for a list of commands.`);
 		}
 
-		const embed = new RichEmbed();
 		embed.setColor(0x59acef);
 		embed.setTitle(`\`${prefix}${command.name} ${command.usage}\``);
 		embed.addField('Description', command.description);

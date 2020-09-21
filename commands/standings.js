@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
 const qs = require('qs');
@@ -207,7 +207,7 @@ module.exports = {
 		}
 
 		const block = '```md\n' + getStandings(standingsObj.teamRecords) + '```';
-		const embed = new RichEmbed();
+		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor(`${humanSeason} ${standingsTitle}`, standingsLogo);
 		embed.setThumbnail(standingsLogo);

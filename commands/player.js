@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
 const qs = require('qs');
@@ -197,7 +197,7 @@ module.exports = {
 			const seasonOrPlayoffs = multiYear ? `(${statType})` : `(${humanSeason} ${statType})`;
 			if (Array.isArray(splits) && splits.length === 0) return message.reply(`no stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`);
 			parameters.player.push(fullName, sweater, seasonOrPlayoffs);
-			const embed = new RichEmbed();
+			const embed = new MessageEmbed();
 			embed.setThumbnail(`${thumbnail}${playerId}.jpg`);
 			embed.setColor(0x59acef);
 			embed.setAuthor(parameters.player.join(' '), teamLogo);

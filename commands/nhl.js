@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
 const qs = require('qs');
@@ -176,7 +176,7 @@ module.exports = {
 			schedule.dates.reverse();
 		}
 
-		const embed = new RichEmbed();
+		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor('NHL Scores', 'https://i.imgur.com/zl8JzZc.png');
 		schedule.dates.slice(0, limit).map(({ date, games }) => embed.addField(`:hockey: ${moment(date).format('ddd, MMM DD')}`, `${getScores(games)}`));
