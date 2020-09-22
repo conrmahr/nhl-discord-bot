@@ -9,7 +9,7 @@ module.exports = {
 	examples: ['nhl', 'teams'],
 	execute(message, args, flags, prefix) {
 		const { commands } = message.client;
-	    const embed = new MessageEmbed();
+		const embed = new MessageEmbed();
 
 		if (!args.length) {
 			embed.setColor(0x59acef);
