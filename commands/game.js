@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
 const qs = require('qs');
@@ -211,7 +211,7 @@ module.exports = {
 		let gameData = schedule.dates.map(({ games }) => getScores(games));
 		gameData = gameData[0][0];
 		const contentObj = await fetch(`https://statsapi.web.nhl.com${gameData.content}`).then(response => response.json());
-		const embed = new RichEmbed();
+		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 
 		if ((gameData.status < 3 && (!flagBoxscore && !flagRecap)) || flagPreview) {

@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
 const qs = require('qs');
@@ -16,7 +16,7 @@ module.exports = {
 		const parameters = {};
 		let teamObj = '';
 		let current = 'current';
-		const embed = new RichEmbed();
+		const embed = new MessageEmbed();
 		let type = '/stats/';
 		const roster = ['roster', 'r'];
 		const advanced = ['advanced', 'a'];

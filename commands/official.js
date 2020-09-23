@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
 const qs = require('qs');
@@ -12,7 +12,7 @@ module.exports = {
 	examples: ['', '4'],
 	async execute(message, args, flags, prefix) {
 
-		const embed = new RichEmbed();
+		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor('National Hockey League Officials', 'https://i.imgur.com/zl8JzZc.png');
 		const endpoint = 'https://records.nhl.com/site/api/officials/';
