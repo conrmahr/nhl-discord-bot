@@ -2,12 +2,14 @@ const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const qs = require('qs');
 const cheerio = require('cheerio');
-const { googleSearch } = require('../config.json');
+const { BitlyClient } = require('bitly');
+const { googleSearch, bitlyAccess } = require('../config.json');
+const bitly = new BitlyClient(bitlyAccess.token, {});
 
 module.exports = {
 	name: 'cap',
 	usage: '[<name>|<team>]',
-	description: 'Get players most recent contract breakdown or teams latest salary cap numbers.',
+	description: 'Get players most recent contract breakdown and teams latest salary cap numbers.',
 	category: 'stats',
 	aliases: ['cap', 'c'],
 	examples: ['mcdavid', 'edm'],
@@ -37,8 +39,10 @@ module.exports = {
 			message.reply(`${error.code}: ${error.message}`);
 		}
 		else if (google.searchInformation.totalResults > 0 && args[0]) {
-			const { link } = google.items[0];
+			let { link } = google.items[0];
 			const html = await fetch(link).then(response => response.text());
+			const bitlyObj = await bitly.shorten(link);
+			link = bitlyObj.link;
 			const $ = cheerio.load(html);
 			const embed = new MessageEmbed();
 			embed.setColor(0x59acef);
@@ -121,7 +125,8 @@ module.exports = {
 				}
 
 				if (playerObj.url) {
-					playerObj.source = `[${playerObj.source}](${playerObj.url})`;
+					const sourceURL = await bitly.shorten(playerObj.url);
+					playerObj.source = `[${playerObj.source}](${sourceURL.link})`;
 				}
 
 				const capArr = {

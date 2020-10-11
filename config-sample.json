@@ -8,5 +8,8 @@
   "googleSearch": {
     "cx": "GOOGLE-SEARCH-ENGINE-ID",
     "key": "GOOGLE-APIS-KEY"
+  },
+  "bitlyAccess": {
+    "token": "BITLY-GENERIC-ACCESS-TOKEN"
   }
 }

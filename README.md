@@ -13,12 +13,10 @@ NHL Discord Bot is a self-hosted bot that fetches data from live public [NHL API
 
 - Node.js v12+
 - Git v1.7+
-- Discord Bot Token
-  - https://discordjs.guide/preparations/setting-up-a-bot-application.html
-- Google Search Engine ID
-  - https://developers.google.com/custom-search/docs/tutorial/creatingcse
-- Google APIs Key
-  - https://developers.google.com/custom-search/v1/introduction
+- [Discord Bot Token](https://discordjs.guide/preparations/setting-up-a-bot-application.html)
+- [Google Search Engine ID](https://developers.google.com/custom-search/docs/tutorial/creatingcse)
+- [Google APIs Key](https://developers.google.com/custom-search/v1/introduction)
+- [Bitly Generic Access Token](https://support.bitly.com/hc/en-us/articles/230647907-How-do-I-generate-an-OAuth-access-token-for-the-Bitly-API-)
 
 ### :computer: Installation
 
@@ -62,6 +60,9 @@ Edit the `config.json` file
   "googleSearch": {
     "cx": "GOOGLE-SEARCH-ENGINE-ID",
     "key": "GOOGLE-APIS-KEY"
+  },
+  "bitlyAccess": {
+    "token": "BITLY-GENERIC-ACCESS-TOKEN"
   }
 }
 ```
@@ -82,6 +83,7 @@ https://discordapp.com/oauth2/authorize?client_id={YOUR_CLIENT_ID}&scope=bot
 | Command with Arguments                | Description |
 | ------------------------------------- | ------------------------------------- |
 |**`about`** | Shows information about `nhl-discord-bot`.|
+|**`cap [<name>\|<team>]`** | Get players and teams contract information.|
 |**`draft [<year>] [<round>\|<team>]`** | Get draft picks by round or team.|
 |**`game [<date>] <team> [-<flag>]`** | Get game editorials and boxscores.|
 |**`help <command>`** | List all of commands or info about a specific command.|
