@@ -140,7 +140,7 @@ module.exports = {
 				for (const [key, value] of Object.entries(capArr)) {
 
 					if (value) {
-						summary.push(`${key}: ${value}`);
+						summary.push(`**${key}:** ${value}`);
 					}
 				}
 
@@ -178,8 +178,8 @@ module.exports = {
 
 		}
 		else {
-			const missing = (terms.length > 0) ? `\`${terms}\` matched 0 players or teams. Type \`${prefix}team <team> -roster\` for a list of player names.` : `no name provided. Type \`${prefix}help cap\` for a list of arguments.`;
-			message.reply(missing);
+			// const missing = (terms.length > 0) ? `\`${terms}\` matched 0 players or teams. Type \`${prefix}team <team> -roster\` for a list of player names.` : `no name provided. Type \`${prefix}help cap\` for a list of arguments.`;
+			message.reply(`\`${terms}\` matched 0 players or teams.`);
 		}
 	},
 };
