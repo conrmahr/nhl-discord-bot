@@ -15,7 +15,7 @@ module.exports = {
 	examples: ['mcdavid', 'edm'],
 	async execute(message, args, flags, prefix) {
 
-		if (args.length === 0) return message.reply(`no name or team provided. Type \`${prefix}help cap\` for a list of arguments.`);
+		if (args.length === 0) return message.reply(`no player or team provided. Type \`${prefix}help cap\` for a list of arguments.`);
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
 		const terms = args.join(' ');
 		const isTeam = teams.some(o => o.abbreviation === args[0].toUpperCase() || o.teamName.toUpperCase().split(' ').pop() === args[0].toUpperCase());
@@ -178,7 +178,6 @@ module.exports = {
 
 		}
 		else {
-			// const missing = (terms.length > 0) ? `\`${terms}\` matched 0 players or teams. Type \`${prefix}team <team> -roster\` for a list of player names.` : `no name provided. Type \`${prefix}help cap\` for a list of arguments.`;
 			message.reply(`\`${terms}\` matched 0 players or teams.`);
 		}
 	},
