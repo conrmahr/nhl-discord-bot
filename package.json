@@ -1,6 +1,6 @@
 {
   "name": "nhl-discord-bot",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "🏒 Self-Hosted NHL Discord Bot",
   "main": "index.js",
   "scripts": {
@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/conrmahr/nhl-discord-bot#readme",
   "dependencies": {
+    "bitly": "^7.1.0",
     "cheerio": "^1.0.0-rc.3",
     "discord.js": "^12.3.1",
     "moment-timezone": "^0.5.31",
