@@ -40,9 +40,9 @@ module.exports = {
 		}
 		else if (google.searchInformation.totalResults > 0 && args[0]) {
 			let { link } = google.items[0];
-			const html = await fetch(link).then(response => response.text());
 			const bitlyObj = await bitly.shorten(link);
 			link = bitlyObj.link;
+			const html = await fetch(link).then(response => response.text());
 			const $ = cheerio.load(html);
 			const embed = new MessageEmbed();
 			embed.setColor(0x59acef);
