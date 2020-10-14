@@ -87,7 +87,7 @@ module.exports = {
 				playerObj.team = $('.ofh:nth-child(1) > h3').text();
 				playerObj.signed = $('body > div.wrap > div > div > div:nth-child(14) > div:nth-child(1) > h4').text().trim();
 
-				if (playerObj.signed === 'CURRENT CONTRACT') {
+				if (playerObj.signed.includes('CURRENT')) {
 					contract = $('.table_c').filter(function() {
 						return $(this).find('table.cntrct').length;
 					}).first();
