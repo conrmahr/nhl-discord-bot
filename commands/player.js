@@ -15,11 +15,19 @@ module.exports = {
 	async execute(message, args, flags, prefix) {
 
 		let current = 'current';
+		let yearSet = true;
 
 		if (moment(args[0], 'YYYY', true).isValid()) {
-			const prevSeason = args[0] - 1;
-			current = `${prevSeason}${args[0]}`;
+			
+			if (moment(args[0], 'YYYY', true).isSameOrBefore(moment())) {
+				const prevSeason = args[0] - 1;
+				current = `${prevSeason}${args[0]}`;
+			}
+
 			args.shift();
+
+		} else {
+			yearSet = false;
 		}
 
 		const { seasons } = await fetch(`https://statsapi.web.nhl.com/api/v1/seasons/${current}`).then(response => response.json());
@@ -114,11 +122,11 @@ module.exports = {
 			else if (onPaceFlag) {
 				parameters.stats = 'onPaceRegularSeason';
 			}
-			else if (p.active) {
-				parameters.stats = 'statsSingleSeason';
+			else if (!p.active && !yearSet) {
+				parameters.stats = 'careerRegularSeason';
 			}
 			else {
-				parameters.stats = 'careerRegularSeason';
+				parameters.stats = 'statsSingleSeason';
 			}
 
 			parameters.season = fullSeason;
