@@ -170,6 +170,7 @@ module.exports = {
 				const { gamesPlayed, leagueRecord: { wins, losses, ties, ot }, points, regulationWins, goalsAgainst, goalsScored, divisionRank, conferenceRank, leagueRank, wildCardRank, row, streak: { streakCode }, pointsPercentage } = table;
 				const ranks = { byDivision: divisionRank, byConference: conferenceRank, byLeague: leagueRank, wildCardWithLeaders: wildCardRank };
 				const rank = (ranks[standingsType] == 0) ? divisionRank : ranks[standingsType];
+				const clinch = table.clinchIndicator ? `${table.clinchIndicator}-` : '';
 				const teamAbbreviation = teams.find(o => o.id === table.team.id).abbreviation;
 				const extra = tiesInUse ? ties : ot;
 				const pp = (flagPointsPercentage && pointsPercentage) ? pointsPercentage.toFixed(3).substring(1) : '';
@@ -192,7 +193,7 @@ module.exports = {
 					return diff;
 				}
 				function getLine(loop, wc, percent) {
-					const wcBreak = [3, 6];
+					const wcBreak = [3, 6, 8];
 					if (wcBreak.includes(loop) && wc) return '\n';
 					if (loop === 12 && percent) return '\n';
 					return '';
@@ -201,7 +202,7 @@ module.exports = {
 					if (stat === '') return '';
 					return stat.toString().padEnd(column, ' ');
 				}
-				return `${getHeader(r, regulationWins, row, flagPointsPercentage, tiesInUse)}${pad(rank, 3)}<${teamAbbreviation}> ${pad(gamesPlayed, 3)}${pad(wins, 3)}${pad(losses, 3)}${pad(extra, 3)}${pad(points, 4)}${pad(pp, 5)}${pad(rw, 3)}${pad(rowe, 4)}${pad(getDiff(goalsScored, goalsAgainst), 5)}${strk}${getLine(r, flagWildCard, flagPointsPercentage)}`;
+				return `${getHeader(r, regulationWins, row, flagPointsPercentage, tiesInUse)}${pad(rank, 3)}${pad(clinch + teamAbbreviation, 6)}${pad(gamesPlayed, 3)}${pad(wins, 3)}${pad(losses, 3)}${pad(extra, 3)}${pad(points, 4)}${pad(pp, 5)}${pad(rw, 3)}${pad(rowe, 4)}${pad(getDiff(goalsScored, goalsAgainst), 5)}${strk}${getLine(r, flagWildCard, flagPointsPercentage)}`;
 
 			}).join('\u200B\n');
 		}
