@@ -181,7 +181,7 @@ module.exports = {
 			let statLine = '';
 			let seasonLine = '';
 			const query = qs.stringify(parameters, { addQueryPrefix: true });
-			const thumbnail = 'https://nhl.bamcontent.com/images/headshots/current/168x168/';
+			const thumbnail = 'https://cms.nhl.bamgrid.com/images/headshots/current/168x168/';
 			const data = await fetch(`${apiPeople}${playerId}/stats/${query}`).then(response => response.json());
 			const renameTitle = {
 				careerPlayoffs: 'Career Playoffs',
