@@ -14,24 +14,22 @@ module.exports = {
 	examples: ['barzal', 'kucherov -advanced', 'crosby -playoffs', 'gretzky -career', 'mcdavid -log', 'ovechkin -onpace', 'marleau -year', 'wilson -filter=pim'],
 	async execute(message, args, flags, prefix) {
 
-		let current = 'current';
-		let yearSet = true;
+		let yearSet = false;
+		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current').then(response => response.json());
+		let seasonCode = seasons[0].seasonId;
 
 		if (moment(args[0], 'YYYY', true).isValid()) {
-			
-			if (moment(args[0], 'YYYY', true).isSameOrBefore(moment())) {
-				const prevSeason = args[0] - 1;
-				current = `${prevSeason}${args[0]}`;
-			}
-
+			const seasonEnd = moment(seasons[0].seasonEndDate);
+			const seasonX = moment(args[0]);
+			yearSet = true;
 			args.shift();
 
-		} else {
-			yearSet = false;
+			if (seasonX.isBefore(seasonEnd, 'year')) {
+				seasonCode = `${moment(seasonX).format('YYYY')}${moment(seasonX).add(1, 'y').format('YYYY')}`;
+			}
 		}
 
-		const { seasons } = await fetch(`https://statsapi.web.nhl.com/api/v1/seasons/${current}`).then(response => response.json());
-		const fullSeason = seasons[0].seasonId;
+		const fullSeason = seasonCode;
 		const humanSeason = `${fullSeason.substring(0, 4)}-${fullSeason.substring(6)}`;
 		const terms = args.join(' ');
 		const options = {

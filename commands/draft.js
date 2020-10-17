@@ -15,7 +15,6 @@ module.exports = {
 
 		const endpoint = 'https://statsapi.web.nhl.com/api/v1/draft/';
 		const parameters = {};
-		const current = 'current';
 		const draftTitle = 'NHL Draft';
 		let draftYear = moment().format('YYYY');
 		let draftRound = '1';
@@ -24,7 +23,7 @@ module.exports = {
 		let draftTeam = '';
 		let teamObj = '';
 
-		const { seasons } = await fetch(`https://statsapi.web.nhl.com/api/v1/seasons/${current}`).then(response => response.json());
+		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current').then(response => response.json());
 		let seasonCode = seasons[0].seasonId;
 
 		if (moment(args[0], 'YYYY', true).isValid()) {
@@ -36,7 +35,7 @@ module.exports = {
 			}
 
 			draftYear = args[0];
-			args.push('0');
+			args.push(0);
 			parameters.season = seasonCode;
 		}
 		else {
