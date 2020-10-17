@@ -85,9 +85,14 @@ module.exports = {
 				let contract = '';
 				playerObj.name = $('.ofh:nth-child(1) > h1').text();
 				playerObj.team = $('.ofh:nth-child(1) > h3').text();
-				playerObj.signed = $('body > div.wrap > div > div > div:nth-child(14) > div:nth-child(1) > h4').text().trim();
+				playerObj.signed = $('.table_c').prev().find('h4').first().text();
 
-				if (playerObj.signed.includes('CURRENT')) {
+				if (playerObj.signed.includes('FUTURE')) {
+					contract = $('.table_c').filter(function() {
+						return $(this).find('table.cntrct').length;
+					}).eq(1);
+				}
+				else if (playerObj.signed.includes('CURRENT')) {
 					contract = $('.table_c').filter(function() {
 						return $(this).find('table.cntrct').length;
 					}).first();
