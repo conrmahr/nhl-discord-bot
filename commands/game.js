@@ -224,7 +224,7 @@ module.exports = {
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 
-		if ((gameData.status < 3 && (!flagBoxscore && !flagRecap)) || flagPreview) {
+		if (gameData.status < 3 || flagPreview) {
 
 			if (contentObj.messageNumber !== 10 && contentObj.editorial.preview.items[0]) {
 				const pre = contentObj.editorial.preview.items[0];
@@ -242,7 +242,7 @@ module.exports = {
 				return message.reply('no `Game Summary` found.');
 			}
 		}
-		else if ((gameData.status > 2 && gameData.status < 5 && gameData.status > 7) || flagBoxscore) {
+		else if ((gameData.status > 2 && gameData.status < 5) || gameData.status > 7 || flagBoxscore) {
 			embed.setAuthor('Boxscore', 'https://i.imgur.com/zl8JzZc.png');
 			embed.setDescription(gameData.scoreboard);
 			embed.setTimestamp(gameData.date);
