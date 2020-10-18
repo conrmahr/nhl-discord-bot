@@ -235,6 +235,8 @@ module.exports = {
 		else if ((gameData.status > 2 && gameData.status < 5 && gameData.status > 7) || flagBoxscore) {
 			embed.setAuthor('Boxscore', 'https://i.imgur.com/zl8JzZc.png');
 			embed.setDescription(gameData.scoreboard);
+			embed.setTimestamp(gameData.date);
+			embed.setFooter(gameData.venue);
 		}
 		else if ((gameData.status > 4 && gameData.status < 8) || flagRecap) {
 
