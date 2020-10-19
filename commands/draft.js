@@ -17,19 +17,26 @@ module.exports = {
 		const parameters = {};
 		const draftTitle = 'NHL Draft';
 		let draftYear = moment().format('YYYY');
-		let current = '';
 		let draftRound = '1';
 		let draftObj = '';
 		let draftLogo = 'https://i.imgur.com/zl8JzZc.png';
 		let draftTeam = '';
 		let teamObj = '';
 
+		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current').then(response => response.json());
+		let seasonCode = seasons[0].seasonId;
+
 		if (moment(args[0], 'YYYY', true).isValid()) {
-			const nextSeason = parseInt(args[0], 10) + 1;
-			current = `${args[0]}${nextSeason}`;
+			const seasonEnd = moment(seasons[0].seasonEndDate);
+			const seasonX = moment(args[0]);
+
+			if (seasonX.isBefore(seasonEnd, 'year')) {
+				seasonCode = `${moment(seasonX).format('YYYY')}${moment(seasonX).add(1, 'y').format('YYYY')}`;
+			}
+
 			draftYear = args[0];
-			args.push('0');
-			parameters.season = current;
+			args.push(0);
+			parameters.season = seasonCode;
 		}
 		else {
 			args.push(args[0]);
@@ -60,7 +67,6 @@ module.exports = {
 			else {
 				draftTeam = ` (Round ${draftRound})`;
 			}
-
 		}
 
 		const data = await fetch(`${endpoint}${draftYear}`).then(response => response.json());
@@ -79,10 +85,13 @@ module.exports = {
 
 			if (!draftObj.length > 0) return message.reply(`\`${args[1]}\` is not a valid round for the ${draftYear} Draft. Type \`${prefix}help draft\` for a list of arguments.`);
 		}
-		else {
+		else if (teamObj) {
 			draftObj = flatFilterPicks(data, pick => pick.team.id === teamObj.id);
 
 			if (!draftObj) return message.reply(`no draft picks found for the ${draftYear} Draft. Type \`${prefix}help draft\` for a list of arguments.`);
+		}
+		else {
+			draftObj = flatFilterPicks(data, pick => pick.round === '1');
 		}
 
 		draftObj.sort(function(a, b) {
@@ -94,7 +103,9 @@ module.exports = {
 			return rounds.map(pick => {
 				r++;
 				const { round, pickOverall, team, prospect } = pick;
+				const name = prospect.fullName ? prospect.fullName : '-';
 				const teamAbbreviation = teams.find(o => o.id === team.id).abbreviation;
+
 				function getHeader() {
 					if (r === 1) return '#Rd Pick Team Player\n';
 					return '';
@@ -103,7 +114,7 @@ module.exports = {
 					if (stat === '') return '';
 					return stat.toString().padEnd(column, ' ');
 				}
-				return `${getHeader()}${pad(round, 4)}${pad(pickOverall, 5)}${pad(teamAbbreviation, 5)}${prospect.fullName}`;
+				return `${getHeader()}${pad(round, 4)}${pad(pickOverall, 5)}${pad(teamAbbreviation, 5)}${name}`;
 
 			}).join('\u200B\n');
 		}

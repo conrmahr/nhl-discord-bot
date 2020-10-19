@@ -40,9 +40,9 @@ module.exports = {
 		}
 		else if (google.searchInformation.totalResults > 0 && args[0]) {
 			let { link } = google.items[0];
-			const html = await fetch(link).then(response => response.text());
 			const bitlyObj = await bitly.shorten(link);
 			link = bitlyObj.link;
+			const html = await fetch(link).then(response => response.text());
 			const $ = cheerio.load(html);
 			const embed = new MessageEmbed();
 			embed.setColor(0x59acef);
@@ -85,9 +85,14 @@ module.exports = {
 				let contract = '';
 				playerObj.name = $('.ofh:nth-child(1) > h1').text();
 				playerObj.team = $('.ofh:nth-child(1) > h3').text();
-				playerObj.signed = $('body > div.wrap > div > div > div:nth-child(14) > div:nth-child(1) > h4').text().trim();
+				playerObj.signed = $('.table_c').prev().find('h4').first().text();
 
-				if (playerObj.signed === 'CURRENT CONTRACT') {
+				if (playerObj.signed.includes('FUTURE')) {
+					contract = $('.table_c').filter(function() {
+						return $(this).find('table.cntrct').length;
+					}).eq(1);
+				}
+				else if (playerObj.signed.includes('CURRENT')) {
 					contract = $('.table_c').filter(function() {
 						return $(this).find('table.cntrct').length;
 					}).first();

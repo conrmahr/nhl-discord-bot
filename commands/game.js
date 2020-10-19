@@ -146,7 +146,9 @@ module.exports = {
 				const homePP = linescore.teams.home.powerPlay ? '[PP]' : '';
 				const awayEN = linescore.teams.away.goaliePulled ? '[EN]' : '';
 				const homeEN = linescore.teams.home.goaliePulled ? '[EN]' : '';
-				let firstPeriod, secondPeriod, thirdPeriod, overtimePeriod = 0;
+				const hasShootout = linescore.hasShootout;
+				let firstPeriod, secondPeriod, thirdPeriod;
+
 
 				if (linescore.currentPeriod > 0) {
 					firstPeriod = linescore.periods.filter(p => p.num === 1);
@@ -168,11 +170,17 @@ module.exports = {
 					gameObj.awayScore3rd = thirdPeriod.away.goals;
 					gameObj.homeScore3rd = thirdPeriod.home.goals;
 				}
+
 				if (linescore.currentPeriod > 3) {
-					overtimePeriod = linescore.periods.filter(p => p.num === linescore.currentPeriod);
-					[overtimePeriod] = overtimePeriod;
-					gameObj.awayScoreOT = overtimePeriod.away.goals;
-					gameObj.homeScoreOT = overtimePeriod.home.goals;
+					let awayOT = (linescore.teams.away.goals > linescore.teams.home.goals) ? 1 : 0;
+					let homeOT = (linescore.teams.away.goals < linescore.teams.home.goals) ? 1 : 0;
+					if (hasShootout) {
+						awayOT += ` (${linescore.shootoutInfo.away.scores}-${linescore.shootoutInfo.away.attempts})`;
+						homeOT += ` (${linescore.shootoutInfo.home.scores}-${linescore.shootoutInfo.home.attempts})`;
+					}
+
+					gameObj.awayScoreOT = awayOT;
+					gameObj.homeScoreOT = homeOT;
 					gameObj.overtime = true;
 				}
 
@@ -188,19 +196,21 @@ module.exports = {
 				gameObj.overtime ? homeRowArr.push(gameObj.homeScoreOT, gameObj.homeScoreFinal, gameObj.homeShots) : homeRowArr.push(gameObj.homeScoreFinal, gameObj.homeShots);
 				gameObj.awayTeamLine = awayRowArr.join('   ');
 				gameObj.homeTeamLine = homeRowArr.join('   ');
+				const ot = linescore.currentPeriodOrdinal.padEnd(4);
 				const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
 				const gameTime = (statusCode > 2) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
 				gameObj.clock = gameTime;
+				const b = hasShootout ? [41, 20] : gameObj.overtime ? [35, 14] : [35, 14];
 				const o = gameObj.overtime ? 4 : 0;
-				const periodsRow = gameObj.overtime ? '1   2   3   OT  T   SOG ' : '1   2   3   T   SOG ';
+				const periodsRow = hasShootout ? '1   2   3   SO        T   SOG ' : gameObj.overtime ? `1   2   3   ${ot}T   SOG ` : '1   2   3   T   SOG ';
 				let scoreboardStr = '```\n';
-				scoreboardStr += `┌${''.padEnd(35 + o, '─')}┐\n`;
+				scoreboardStr += `┌${''.padEnd(b[0] + o, '─')}┐\n`;
 				scoreboardStr += `| ${gameObj.clock.padEnd(14, ' ')}${periodsRow}│\n`;
-				scoreboardStr += `├${''.padEnd(14, '─')}${''.padEnd(20 + o, '────')}─┤\n`;
+				scoreboardStr += `├${''.padEnd(b[1], '─')}${''.padEnd(20 + o, '────')}─┤\n`;
 				scoreboardStr += `│ ${gameObj.awayTeamLine}  │\n`;
-				scoreboardStr += `├${''.padEnd(14, '─')}${''.padEnd(20 + o, '────')}─┤\n`;
+				scoreboardStr += `├${''.padEnd(b[1], '─')}${''.padEnd(20 + o, '────')}─┤\n`;
 				scoreboardStr += `│ ${gameObj.homeTeamLine}  │\n`;
-				scoreboardStr += `└${''.padEnd(35 + o, '─')}┘\n`;
+				scoreboardStr += `└${''.padEnd(b[0] + o, '─')}┘\n`;
 				scoreboardStr += '```';
 				gameObj.scoreboard = scoreboardStr;
 
@@ -214,7 +224,7 @@ module.exports = {
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 
-		if ((gameData.status < 3 && (!flagBoxscore && !flagRecap)) || flagPreview) {
+		if (gameData.status < 3 || flagPreview) {
 
 			if (contentObj.messageNumber !== 10 && contentObj.editorial.preview.items[0]) {
 				const pre = contentObj.editorial.preview.items[0];
@@ -232,9 +242,11 @@ module.exports = {
 				return message.reply('no `Game Summary` found.');
 			}
 		}
-		else if ((gameData.status > 2 && gameData.status < 5 && gameData.status > 7) || flagBoxscore) {
+		else if ((gameData.status > 2 && gameData.status < 5) || gameData.status > 7 || flagBoxscore) {
 			embed.setAuthor('Boxscore', 'https://i.imgur.com/zl8JzZc.png');
 			embed.setDescription(gameData.scoreboard);
+			embed.setTimestamp(gameData.date);
+			embed.setFooter(gameData.venue);
 		}
 		else if ((gameData.status > 4 && gameData.status < 8) || flagRecap) {
 

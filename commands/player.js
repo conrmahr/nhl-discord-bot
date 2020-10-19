@@ -14,16 +14,22 @@ module.exports = {
 	examples: ['barzal', 'kucherov -advanced', 'crosby -playoffs', 'gretzky -career', 'mcdavid -log', 'ovechkin -onpace', 'marleau -year', 'wilson -filter=pim'],
 	async execute(message, args, flags, prefix) {
 
-		let current = 'current';
+		let yearSet = false;
+		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current').then(response => response.json());
+		let seasonCode = seasons[0].seasonId;
 
 		if (moment(args[0], 'YYYY', true).isValid()) {
-			const prevSeason = args[0] - 1;
-			current = `${prevSeason}${args[0]}`;
+			const seasonEnd = moment(seasons[0].seasonEndDate);
+			const seasonX = moment(args[0]);
+			yearSet = true;
 			args.shift();
+
+			if (seasonX.isBefore(seasonEnd, 'year')) {
+				seasonCode = `${moment(seasonX).format('YYYY')}${moment(seasonX).add(1, 'y').format('YYYY')}`;
+			}
 		}
 
-		const { seasons } = await fetch(`https://statsapi.web.nhl.com/api/v1/seasons/${current}`).then(response => response.json());
-		const fullSeason = seasons[0].seasonId;
+		const fullSeason = seasonCode;
 		const humanSeason = `${fullSeason.substring(0, 4)}-${fullSeason.substring(6)}`;
 		const terms = args.join(' ');
 		const options = {
@@ -114,11 +120,11 @@ module.exports = {
 			else if (onPaceFlag) {
 				parameters.stats = 'onPaceRegularSeason';
 			}
-			else if (p.active) {
-				parameters.stats = 'statsSingleSeason';
+			else if (!p.active && !yearSet) {
+				parameters.stats = 'careerRegularSeason';
 			}
 			else {
-				parameters.stats = 'careerRegularSeason';
+				parameters.stats = 'statsSingleSeason';
 			}
 
 			parameters.season = fullSeason;
@@ -173,7 +179,7 @@ module.exports = {
 			let statLine = '';
 			let seasonLine = '';
 			const query = qs.stringify(parameters, { addQueryPrefix: true });
-			const thumbnail = 'https://nhl.bamcontent.com/images/headshots/current/168x168/';
+			const thumbnail = 'https://cms.nhl.bamgrid.com/images/headshots/current/168x168/';
 			const data = await fetch(`${apiPeople}${playerId}/stats/${query}`).then(response => response.json());
 			const renameTitle = {
 				careerPlayoffs: 'Career Playoffs',
