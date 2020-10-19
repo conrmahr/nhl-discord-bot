@@ -113,10 +113,10 @@ module.exports = {
 			}
 
 			const divisionLogos = {
-				Atlantic: 'https://i.imgur.com/Lzm76PX.png',
-				Central: 'https://i.imgur.com/TA9v6sj.png',
-				Metropolitan: 'https://i.imgur.com/IPqIiIy.png',
-				Pacific: 'https://i.imgur.com/n6iImAX.png',
+				Atlantic: 'https://i.imgur.com/DfukSpN.png',
+				Central: 'https://i.imgur.com/3uVACx4.png',
+				Metropolitan: 'https://i.imgur.com/bciivGM.png',
+				Pacific: 'https://i.imgur.com/xQLkBaO.png',
 			};
 			const divisionId = teamsObj.teams.find(o => o.division.name.toLowerCase() === divisionName);
 			if (!divisionId) return message.reply(`\`${args[1]}\` is not a valid conference or division for the ${humanSeason} season. Type \`${prefix}help standings\` for a list of arguments.`);
