@@ -8,7 +8,7 @@ const bitly = new BitlyClient(bitlyAccess.token, {});
 
 module.exports = {
 	name: 'cap',
-	usage: '[<name>|<team>]',
+	usage: '<name>|<team> [-<flag>]',
 	description: 'Get players most recent contract breakdown and teams latest salary cap numbers. Add flag `-buyout` for current contract buyout details.',
 	category: 'stats',
 	aliases: ['cap', 'c'],
