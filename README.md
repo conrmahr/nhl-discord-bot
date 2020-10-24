@@ -83,7 +83,7 @@ https://discordapp.com/oauth2/authorize?client_id={YOUR_CLIENT_ID}&scope=bot
 | Command with Arguments                | Description |
 | ------------------------------------- | ------------------------------------- |
 |**`about`** | Shows information about `nhl-discord-bot`.|
-|**`cap [<name>\|<team>]`** | Get players and teams contract information.|
+|**`cap <name>\|<team> [-<flag>]`** | Get players and teams contract information.|
 |**`draft [<year>] [<round>\|<team>]`** | Get draft picks by round or team.|
 |**`game [<date>] <team> [-<flag>]`** | Get game editorials and boxscores.|
 |**`help <command>`** | List all of commands or info about a specific command.|
