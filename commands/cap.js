@@ -9,17 +9,28 @@ const bitly = new BitlyClient(bitlyAccess.token, {});
 module.exports = {
 	name: 'cap',
 	usage: '[<name>|<team>]',
-	description: 'Get players most recent contract breakdown and teams latest salary cap numbers.',
+	description: 'Get players most recent contract breakdown and teams latest salary cap numbers. Add flag `-buyout` for current contract buyout details.',
 	category: 'stats',
 	aliases: ['cap', 'c'],
-	examples: ['mcdavid', 'edm'],
+	examples: ['mcdavid', 'edm', 'tavares -buyout'],
 	async execute(message, args, flags, prefix) {
 
 		if (args.length === 0) return message.reply(`no player or team provided. Type \`${prefix}help cap\` for a list of arguments.`);
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
 		const terms = args.join(' ');
 		const isTeam = teams.some(o => o.abbreviation === args[0].toUpperCase() || o.teamName.toUpperCase().split(' ').pop() === args[0].toUpperCase());
-		const type = isTeam ? 'teams' : 'players';
+		let flagBuyout = false;
+
+		for (const flag of flags) {
+			if (['buyout', 'b'].includes(flag)) {
+				flagBuyout = true;
+			}
+			else {
+				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
+			}
+		}
+
+		const type = isTeam ? 'teams' : flagBuyout ? 'buyout-calculator' : 'players';
 		const options = {
 			key: googleSearch.key,
 			cx: googleSearch.cx,
@@ -71,7 +82,6 @@ module.exports = {
 					'Reserve List': reserveList.trim(),
 				};
 
-				embed.setColor(0x59acef);
 				embed.setAuthor(teamName.join(' '), 'https://i.imgur.com/RFALbw5.png', link);
 
 
@@ -79,6 +89,37 @@ module.exports = {
 					embed.addField(key, value, true);
 				}
 
+			}
+			else if (flagBuyout) {
+				const buyoutName = $('#results > h3').text();
+				const buyoutCost = $('#results > .table_c').first();
+				const buyoutHit = $('#results > .table_c').last();
+				const buyoutTeam = buyoutHit.find('tr').first().find('td:last-child').text();
+				let block = '';
+				let table = `- SEASON   EARNINGS    SAVINGS     ${buyoutTeam}\n`;
+				const buyoutCostRow = buyoutCost.find('tr:last-child');
+				block += `Buyout Date: ${buyoutCostRow.find('td:nth-child(1)').text()} (Age: ${buyoutCostRow.find('td:nth-child(6)').text()})\n`;
+				block += `Buyout Length: ${buyoutCostRow.find('td:nth-child(4)').text()} years (Ratio: ${buyoutCostRow.find('td:nth-child(7)').text()})\n`;
+				block += `Total Cost: ${buyoutCostRow.find('td:nth-child(8)').text()} (Annual: ${buyoutCostRow.find('td:nth-child(10)').text()})\n`;
+
+				buyoutHit.find('tr').each(function() {
+					const self = $(this);
+					let result = '';
+					let asterisk = '';
+					const padArr = [2, 9, 12];
+					if (self.find('td:nth-child(1)').text() === 'SEASON') return true;
+					if (self.find('td:nth-child(1)').text() === 'TOTAL') { asterisk = '+ '; }
+					result += `${asterisk.padEnd(padArr[0])}${self.find('td:nth-child(1)').text().trim().padEnd(padArr[1])}`;
+					result += `${self.find('td:nth-child(6)').text().trim().padEnd(padArr[2])}`;
+					result += `${self.find('td:nth-child(7)').text().trim().padEnd(padArr[2])}`;
+					result += `${self.find('td:nth-child(8)').text().trim()}`;
+					result += '\n';
+					table += result;
+				});
+
+				block += `\`\`\`diff\n${table}\n\`\`\``;
+				embed.setAuthor(buyoutName, 'https://i.imgur.com/RFALbw5.png', link);
+				embed.setDescription(block);
 			}
 			else {
 				const playerObj = {};
@@ -152,7 +193,7 @@ module.exports = {
 				let table = '- SEASON   CLAUSE     AAV($)       TOTAL\n';
 				block += summary.join('\n');
 				contract.find('tr').each(function() {
-					const self = $(this).first();
+					const self = $(this);
 					let result = '';
 					let asterisk = '';
 					let slide = self.find('td:nth-child(8)').text();
