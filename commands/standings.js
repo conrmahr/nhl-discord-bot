@@ -193,9 +193,9 @@ module.exports = {
 					return diff;
 				}
 				function getLine(loop, wc, percent) {
-					const wcBreak = [3, 6, 8];
+					const wcBreak = [3, 6];
 					if (wcBreak.includes(loop) && wc) return '\n';
-					if (loop === 12 && percent) return '\n';
+					if (loop === 12 && percent) return '\n--';
 					return '';
 				}
 				function pad(stat, column) {
