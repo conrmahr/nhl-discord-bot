@@ -28,7 +28,7 @@
     "bitly": "^7.1.0",
     "cheerio": "^1.0.0-rc.3",
     "discord.js": "^12.5.1",
-    "moment-timezone": "^0.5.31",
+    "moment-timezone": "^0.5.32",
     "node-fetch": "^2.6.1",
     "qs": "^6.9.4",
     "turndown": "^7.0.0"
