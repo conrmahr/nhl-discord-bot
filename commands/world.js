@@ -164,6 +164,8 @@ module.exports = {
 				const { HomeTeam, GuestTeam, GameDateTime, GameDateTimeUTC, EventStatus, Venue, PhaseId, Group, Status, GameId } = game;
 				const phaseObj = {
 					PreliminaryRound: 'Prelims',
+					BronzeMedalGame: ':third_place: Medal Game',
+					GoldMedalGame: ':first_place: Medal Game',
 				};
 				const formatRound = phaseObj[PhaseId] || PhaseId;
 				const formatGroup = Group ? ` ${Group}` : '';
