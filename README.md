@@ -92,6 +92,7 @@ https://discordapp.com/oauth2/authorize?client_id={YOUR_CLIENT_ID}&scope=bot
 |**`player [<year>] <name> [-<flag>]`** | Get player stats for active and inactive players.|
 |**`standings [<year>] <table> [-<flag>]`** | Get current standings for any division, conference, or league.|
 |**`team [<year>] [<team>] [-<flag>]`** | Get team stats or roster for active and former teams.|
+|**`world [<date>] [-<flag>]`** | Get IIHF tournament schedules and scores.|
 
 ### :handshake: Contributing
 
