@@ -18,23 +18,23 @@ module.exports = {
 		const parameters = {
 			tourneyURLBase: 'https://www.iihf.com',
 			tourneyURL: '',
-			tourneyDate: '',
+			GameDateTimeUTC: '',
 			tourneyTitleCode: '',
 			tourneyTitle: '',
 			tourneyId: '',
 		};
 
 		if (moment(args[0], 'YYYY-MM-DD', true).isValid()) {
-			parameters.tourneyDate = args[0];
+			parameters.GameDateTimeUTC = moment.utc(args[0]).format('YYYY-MM-DD');
 		}
 		else if (args[0] === 'today') {
-			parameters.tourneyDate = moment().format('YYYY-MM-DD');
+			parameters.GameDateTimeUTC = moment.utc().format('YYYY-MM-DD');
 		}
 		else if (args[0] === 'tomorrow') {
-			parameters.tourneyDate = moment().add(1, 'day').format('YYYY-MM-DD');
+			parameters.GameDateTimeUTC = moment.utc().add(1, 'day').format('YYYY-MM-DD');
 		}
 		else if (!args[0]) {
-			parameters.tourneyDate = moment().format('YYYY-MM-DD');
+			parameters.GameDateTimeUTC = moment.utc().format('YYYY-MM-DD');
 			args.push(args[0]);
 		}
 		else {
@@ -53,7 +53,8 @@ module.exports = {
 
 		if (!Array.isArray(fullSchedule) || !fullSchedule.length) return message.reply('no tournament found.');
 
-		let schedule = fullSchedule.filter(o => o.GameDateTime.substring(0, 10) === parameters.tourneyDate);
+		const gameDateEST = moment(parameters.GameDateTimeUTC).tz('America/New_York').format('YYYY-MM-DD');
+		let schedule = fullSchedule.filter(o => o.GameDateTime.substring(0, 10) === gameDateEST);
 
 		if (!Array.isArray(schedule) || !schedule.length) {
 			schedule = [{ no: 'games' }];
@@ -188,7 +189,7 @@ module.exports = {
 
 				};
 
-				if (['FINAL', 'LIVE', 'GAME OVER' ].includes(Status)) {
+				if (['FINAL', 'LIVE', 'F(OT)', 'F(SO)'].includes(Status)) {
 					const GetLatestStateObj = await fetch(`https://realtime.iihf.com/gamestate/GetLatestState/${GameId}`).then(response => response.json());
 					const possiblePeriod = {
 						'Period 1': '1st',
@@ -196,11 +197,13 @@ module.exports = {
 						'Period 2': '2nd',
 						'Period 2 Ended': '2nd Int',
 						'Period 3': '3rd',
-						'Period OT': 'OT',
+						'Overtime': 'OT',
+						'Shootout': 'SO',
 						'Final': 'F',
 						'Game Completed': 'F',
 					};
-					gameObj.eventStatus = Status === 'LIVE' ? 3 : Status === 'FINAL' ? 7 : Status;
+
+					gameObj.eventStatus = Status === 'LIVE' ? 3 : GetLatestStateObj.IsGameCompleted ? 7 : Status;
 					gameObj.awayScore = GetLatestStateObj.CurrentScore.Away;
 					gameObj.homeScore = GetLatestStateObj.CurrentScore.Home;
 					gameObj.isFinished = GetLatestStateObj.IsGameCompleted;
@@ -233,7 +236,7 @@ module.exports = {
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor(parameters.tourneyTitle, 'https://i.imgur.com/udUeTlY.png');
-		embed.addField(`:hockey: ${moment(parameters.tourneyDate).format('ddd, MMM DD')}`, gamesList);
+		embed.addField(`:hockey: ${moment(parameters.GameDateTimeUTC).tz('America/New_York').format('ddd, MMM DD')}`, gamesList);
 
 		message.channel.send(embed);
 	},
