@@ -18,23 +18,23 @@ module.exports = {
 		const parameters = {
 			tourneyURLBase: 'https://www.iihf.com',
 			tourneyURL: '',
-			tourneyDate: '',
+			GameDateTimeUTC: '',
 			tourneyTitleCode: '',
 			tourneyTitle: '',
 			tourneyId: '',
 		};
 
 		if (moment(args[0], 'YYYY-MM-DD', true).isValid()) {
-			parameters.tourneyDate = args[0];
+			parameters.GameDateTimeUTC = args[0];
 		}
 		else if (args[0] === 'today') {
-			parameters.tourneyDate = moment().format('YYYY-MM-DD');
+			parameters.GameDateTimeUTC = moment().format('YYYY-MM-DD');
 		}
 		else if (args[0] === 'tomorrow') {
-			parameters.tourneyDate = moment().add(1, 'day').format('YYYY-MM-DD');
+			parameters.GameDateTimeUTC = moment().add(1, 'day').format('YYYY-MM-DD');
 		}
 		else if (!args[0]) {
-			parameters.tourneyDate = moment().format('YYYY-MM-DD');
+			parameters.GameDateTimeUTC = moment().format('YYYY-MM-DD');
 			args.push(args[0]);
 		}
 		else {
@@ -53,7 +53,7 @@ module.exports = {
 
 		if (!Array.isArray(fullSchedule) || !fullSchedule.length) return message.reply('no tournament found.');
 
-		let schedule = fullSchedule.filter(o => o.GameDateTime.substring(0, 10) === parameters.tourneyDate);
+		let schedule = fullSchedule.filter(o => o.GameDateTime.substring(0, 10) === parameters.GameDateTimeUTC);
 
 		if (!Array.isArray(schedule) || !schedule.length) {
 			schedule = [{ no: 'games' }];
@@ -233,7 +233,7 @@ module.exports = {
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor(parameters.tourneyTitle, 'https://i.imgur.com/udUeTlY.png');
-		embed.addField(`:hockey: ${moment(parameters.tourneyDate).format('ddd, MMM DD')}`, gamesList);
+		embed.addField(`:hockey: ${moment(parameters.GameDateTime).format('ddd, MMM DD')}`, gamesList);
 
 		message.channel.send(embed);
 	},
