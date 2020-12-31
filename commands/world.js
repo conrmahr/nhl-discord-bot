@@ -188,7 +188,7 @@ module.exports = {
 
 				};
 
-				if (['FINAL', 'LIVE', 'GAME OVER' ].includes(Status)) {
+				if (['FINAL', 'LIVE', 'F(OT)', 'F(SO)'].includes(Status)) {
 					const GetLatestStateObj = await fetch(`https://realtime.iihf.com/gamestate/GetLatestState/${GameId}`).then(response => response.json());
 					const possiblePeriod = {
 						'Period 1': '1st',
@@ -196,11 +196,13 @@ module.exports = {
 						'Period 2': '2nd',
 						'Period 2 Ended': '2nd Int',
 						'Period 3': '3rd',
-						'Period OT': 'OT',
+						'Overtime': 'OT',
+						'Shootout': 'SO',
 						'Final': 'F',
 						'Game Completed': 'F',
 					};
-					gameObj.eventStatus = Status === 'LIVE' ? 3 : Status === 'FINAL' ? 7 : Status;
+
+					gameObj.eventStatus = Status === 'LIVE' ? 3 : GetLatestStateObj.IsGameCompleted ? 7 : Status;
 					gameObj.awayScore = GetLatestStateObj.CurrentScore.Away;
 					gameObj.homeScore = GetLatestStateObj.CurrentScore.Home;
 					gameObj.isFinished = GetLatestStateObj.IsGameCompleted;
