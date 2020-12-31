@@ -156,7 +156,7 @@ module.exports = {
 						UKR: ':flag_ua:',
 					};
 
-					const flag = flagsObj[f] ? flagsObj[f] : `:flag_${f.toLowerCase().substring(0, 2)}:`;
+					const flag = flagsObj[f] ? flagsObj[f] : f.length === 3 ? `:flag_${f.toLowerCase().substring(0, 2)}:` : f;
 
 					return flag;
 				}
