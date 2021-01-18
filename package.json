@@ -30,7 +30,7 @@
     "discord.js": "^12.5.1",
     "moment-timezone": "^0.5.32",
     "node-fetch": "^2.6.1",
-    "qs": "^6.9.4",
+    "qs": "^6.9.6",
     "turndown": "^7.0.0"
   },
   "devDependencies": {
