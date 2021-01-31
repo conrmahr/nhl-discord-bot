@@ -98,8 +98,12 @@ module.exports = {
 				central: 'https://i.imgur.com/3uVACx4.png',
 				metropolitan: 'https://i.imgur.com/bciivGM.png',
 				pacific: 'https://i.imgur.com/xQLkBaO.png',
+				'honda west': 'https://i.imgur.com/UZ1jE1t.png',
+				'scotia north': 'https://i.imgur.com/s98kwYD.png',
+				'discover central': 'https://i.imgur.com/czMqC3p.png',
+				'massmutual east': 'https://i.imgur.com/QNwCNdY.png',
 			};
-			const divShort = divisionLogos[divisionName.toLowerCase().split(' ').pop()];
+			const divShort = divisionLogos[divisionName.toLowerCase()];
 			if (divShort) standingsLogo = divShort;
 			if (flagPointsPercentage) standingsTitle = `${standingsTitle} Points Percentage`;
 		}
