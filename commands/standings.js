@@ -14,11 +14,10 @@ module.exports = {
 
 		const endpoint = 'https://statsapi.web.nhl.com/api/v1/standings/';
 		const parameters = {};
+		const tableNames = [];
 		let current = 'current';
 		let query = '';
 		let standingsType = '';
-		let teamsObj = '';
-		let tableObj = '';
 		let standingsObj = '';
 		let standingsLogo = 'https://i.imgur.com/zl8JzZc.png';
 		let standingsTitle = 'National Hockey League';
@@ -26,23 +25,22 @@ module.exports = {
 		let flagWildCard = false;
 		let flagPointsPercentage = false;
 
-		if (!args[0]) return message.reply(`no league, conference, or division was specified. Type \`${prefix}help standings\` for a list of arguments.`);
-
 		if (moment(args[0], 'YYYY', true).isValid()) {
 			const prevSeason = args[0] - 1;
 			parameters.season = `${prevSeason}${args[0]}`;
 			current = `${prevSeason}${args[0]}`;
-			if (!args[1]) return message.reply(`no league, conference, or division was specified. Type \`${prefix}help standings\` for a list of arguments.`);
-
+			args.push(args[0]);
 		}
 		else {
 			args.push(args[0]);
 		}
+
+		parameters.expand = 'standings.team';
 		query = qs.stringify(parameters, { addQueryPrefix: true });
-		teamsObj = await fetch(`https://statsapi.web.nhl.com/api/v1/teams/${query}`).then(response => response.json());
 		const { seasons } = await fetch(`https://statsapi.web.nhl.com/api/v1/seasons/${current}`).then(response => response.json());
 
 		if (!seasons[0]) return message.reply(`the \`${args[0]}\` season does not have any games associated with it. Type \`${prefix}help standings\` for a list of arguments.`);
+
 		const { seasonId, tiesInUse, conferencesInUse, divisionsInUse, wildCardInUse } = seasons[0];
 		humanSeason = `${seasonId.substring(0, 4)}-${seasonId.substring(6)}`;
 
@@ -58,120 +56,91 @@ module.exports = {
 			}
 		}
 
-		if (['eastern', 'east', 'western', 'west', 'wales', 'campbell' ].includes(args[1].toLowerCase()) && conferencesInUse) {
-			const conferenceShort = args[1].toLowerCase();
-			let conferenceName = '';
-			if (conferenceShort === 'east') {
-				conferenceName = 'eastern';
-			}
-			else if (conferenceShort === 'west') {
-				conferenceName = 'western';
-			}
-			else if (conferenceShort.includes('wales')) {
-				conferenceName = 'prince of wales';
-			}
-			else if (conferenceShort.includes('campbell')) {
-				conferenceName = 'clarence campbell';
-			}
-			else {
-				conferenceName = conferenceShort;
-			}
-
-			const conferenceLogos = {
-				Eastern: 'https://i.imgur.com/qgmpsVw.png',
-				Western: 'https://i.imgur.com/iPe1ISG.png',
-				'Prince of Wales': 'https://i.imgur.com/QbenYLo.gif',
-				'Clarence Campbell': 'https://i.imgur.com/Ia3S6M6.gif',
-			};
-
-			const conferenceId = teamsObj.teams.find(o => o.conference.name.toLowerCase() === conferenceName);
-
-			if (!conferenceId) return message.reply(`\`${args[1]}\` is not a valid conference for the ${humanSeason} season. Type \`${prefix}help standings\` for a list of arguments.`);
-
-			tableObj = await fetch(`https://statsapi.web.nhl.com/api/v1/conferences/${conferenceId.conference.id}`).then(response => response.json());
-			standingsType = flagWildCard ? 'wildCardWithLeaders' : 'byConference';
-			standingsLogo = conferenceLogos[tableObj.conferences[0].name];
-		}
-		else if (['metropolitan', 'metro', 'atlantic', 'atl', 'central', 'cen', 'pacific', 'pac', 'northeast', 'southeast', 'northwest', 'canadian', 'american', 'east', 'west', 'adams', 'norris', 'patrick', 'smythe'].includes(args[1].toLowerCase()) && divisionsInUse) {
-			const divisionShort = args[1].toLowerCase();
-			let divisionName = '';
-
-			if (divisionShort === 'metro') {
-				divisionName = 'metropolitan';
-			}
-			else if (divisionShort === 'atl') {
-				divisionName = 'atlantic';
-			}
-			else if (divisionShort.includes('cen')) {
-				divisionName = 'central';
-			}
-			else if (divisionShort === 'pac') {
-				divisionName = 'pacific';
-			}
-			else {
-				divisionName = divisionShort;
-			}
-
-			const divisionLogos = {
-				Atlantic: 'https://i.imgur.com/DfukSpN.png',
-				Central: 'https://i.imgur.com/3uVACx4.png',
-				Metropolitan: 'https://i.imgur.com/bciivGM.png',
-				Pacific: 'https://i.imgur.com/xQLkBaO.png',
-			};
-			const divisionId = teamsObj.teams.find(o => o.division.name.toLowerCase() === divisionName);
-			if (!divisionId) return message.reply(`\`${args[1]}\` is not a valid conference or division for the ${humanSeason} season. Type \`${prefix}help standings\` for a list of arguments.`);
-			tableObj = await fetch(`https://statsapi.web.nhl.com/api/v1/divisions/${divisionId.division.id}`).then(response => response.json());
-			standingsType = 'byDivision';
-			standingsLogo = divisionLogos[tableObj.divisions[0].name] ? divisionLogos[tableObj.divisions[0].name] : 'https://i.imgur.com/zl8JzZc.png';
-
-		}
-		else if (['league', 'nhl'].includes(args[1])) {
-			standingsType = 'byLeague';
-		}
-		else {
-			return message.reply(`no league, conference, or division was specified. Type \`${prefix}help standings\` for a list of arguments.`);
-		}
-
-		const { records } = await fetch(`${endpoint}${standingsType}${query}`).then(response => response.json());
+		const { records } = await fetch(`${endpoint}${query}`).then(response => response.json());
 
 		if (!records[0].standingsType) return message.reply('no standings available.');
 
-		if (standingsType === 'byConference') {
-			standingsObj = records.find(o => o.conference.id === tableObj.conferences[0].id);
-			standingsObj.teamRecords.sort((a, b) => Number(a.ppConferenceRank) - Number(b.ppConferenceRank));
-			standingsTitle = `${tableObj.conferences[0].name} Conference`;
+		const divisionTeams = records.filter(o => {
+
+			if (divisionsInUse) {
+				tableNames.push(o.division.name.toLowerCase().split(' ').pop());
+				const d = args[1] ? args[1] : 'none';
+				return o.division.name.toLowerCase().split(' ').pop().startsWith(d.toLowerCase());
+			}
+		},
+		).flatMap(({ teamRecords }) => teamRecords);
+
+		const conferenceTeams = records.filter(o => {
+			if (conferencesInUse) {
+				tableNames.push(o.conference.name.toLowerCase().split(' ').pop());
+				const c = args[1] ? args[1] : 'none';
+				return o.conference.name.toLowerCase().split(' ').pop().startsWith(c.toLowerCase());
+			}
+		},
+		).flatMap(({ teamRecords }) => teamRecords);
+
+		const leagueTeams = records.filter(o => {
+			if (o.league) {
+				tableNames.push('league');
+				const l = args[1] ? args[1] : 'none';
+				return o.league.name.toLowerCase().split(' ').includes(l);
+			}
+		},
+		).flatMap(({ teamRecords }) => teamRecords);
+
+		if (divisionTeams.length > 0) {
+			const divisionName = divisionTeams[0].team.division.name;
+			standingsObj = divisionTeams.sort((a, b) => Number(a.divisionRank) - Number(b.divisionRank));
+			standingsType = 'byDivision';
+			standingsTitle = `${divisionName} Conference`;
+			const divisionLogos = {
+				atlantic: 'https://i.imgur.com/DfukSpN.png',
+				central: 'https://i.imgur.com/3uVACx4.png',
+				metropolitan: 'https://i.imgur.com/bciivGM.png',
+				pacific: 'https://i.imgur.com/xQLkBaO.png',
+				'honda west': 'https://i.imgur.com/UZ1jE1t.png',
+				'scotia north': 'https://i.imgur.com/s98kwYD.png',
+				'discover central': 'https://i.imgur.com/czMqC3p.png',
+				'massmutual east': 'https://i.imgur.com/QNwCNdY.png',
+			};
+			const divShort = divisionLogos[divisionName.toLowerCase()];
+			if (divShort) standingsLogo = divShort;
 			if (flagPointsPercentage) standingsTitle = `${standingsTitle} Points Percentage`;
 		}
-		else if (standingsType === 'byDivision') {
-			standingsObj = records.find(o => o.division.id === tableObj.divisions[0].id);
-			standingsObj.teamRecords.sort((a, b) => Number(a.divisionRank) - Number(b.divisionRank));
-			standingsTitle = `${tableObj.divisions[0].name} Division`;
+		else if (conferenceTeams.length > 0) {
+			const conferenceName = conferenceTeams[0].team.conference.name;
+			standingsObj = conferenceTeams.sort((a, b) => Number(a.ppConferenceRank) - Number(b.ppConferenceRank));
+			standingsType = 'byConference';
+			standingsTitle = `${conferenceName} Conference`;
+			const conferenceLogos = {
+				eastern: 'https://i.imgur.com/qgmpsVw.png',
+				western: 'https://i.imgur.com/iPe1ISG.png',
+				wales: 'https://i.imgur.com/QbenYLo.gif',
+				campbell: 'https://i.imgur.com/Ia3S6M6.gif',
+			};
+			const confShort = conferenceLogos[conferenceName.toLowerCase().split(' ').pop()];
+			if (confShort) standingsLogo = confShort;
+			if (flagPointsPercentage) standingsTitle = `${standingsTitle} Points Percentage`;
 		}
-		else if (standingsType === 'wildCardWithLeaders') {
-			records.reverse();
-			const standingsPrepObj = records.filter((o => o.conference.id === tableObj.conferences[0].id), []);
-			standingsTitle = `${tableObj.conferences[0].name} Conference Wildcard`;
-			standingsObj = standingsPrepObj.reduce((c, i) => {
-				c.teamRecords.push(...i.teamRecords); return c;
-			}, { teamRecords: [] });
-
+		else if (leagueTeams.length > 0) {
+			standingsObj = leagueTeams.sort((a, b) => Number(a.leagueRank) - Number(b.leagueRank));
+			standingsType = 'byLeague';
 		}
 		else {
-			standingsObj = records[0];
-			standingsObj.teamRecords.sort((a, b) => Number(a.leagueRank) - Number(b.leagueRank));
+			const tableArr = [...new Set(tableNames)].filter(n => n);
+			return message.reply(`please define a table. \`${tableArr.join('` `')}\` are the available tables for the ${humanSeason} season. Type \`${prefix}help standings\` for a list of arguments.`);
 		}
 
 		const updated = records[0].teamRecords[0].lastUpdated;
-		const { teams } = teamsObj;
 
 		function getStandings(tables) {
 			let r = 0;
 			return tables.map(table => {
-				const { gamesPlayed, leagueRecord: { wins, losses, ties, ot }, points, regulationWins, goalsAgainst, goalsScored, divisionRank, conferenceRank, leagueRank, wildCardRank, row, streak: { streakCode }, pointsPercentage } = table;
+				const { team, gamesPlayed, leagueRecord: { wins, losses, ties, ot }, points, regulationWins, goalsAgainst, goalsScored, divisionRank, conferenceRank, leagueRank, wildCardRank, row, streak: { streakCode }, pointsPercentage } = table;
 				const ranks = { byDivision: divisionRank, byConference: conferenceRank, byLeague: leagueRank, wildCardWithLeaders: wildCardRank };
 				const rank = (ranks[standingsType] == 0) ? divisionRank : ranks[standingsType];
 				const clinch = table.clinchIndicator ? `${table.clinchIndicator}-` : '';
-				const teamAbbreviation = teams.find(o => o.id === table.team.id).abbreviation;
+				const teamAbbreviation = team.abbreviation;
 				const extra = tiesInUse ? ties : ot;
 				const pp = (flagPointsPercentage && pointsPercentage) ? pointsPercentage.toFixed(3).substring(1) : '';
 				const rw = (!flagPointsPercentage && regulationWins) ? regulationWins : '';
@@ -207,7 +176,7 @@ module.exports = {
 			}).join('\u200B\n');
 		}
 
-		const block = `\`\`\`md\n${getStandings(standingsObj.teamRecords)}\n\`\`\``;
+		const block = `\`\`\`md\n${getStandings(standingsObj)}\n\`\`\``;
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor(`${humanSeason} ${standingsTitle}`, standingsLogo);
