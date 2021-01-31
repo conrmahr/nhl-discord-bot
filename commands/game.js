@@ -196,7 +196,7 @@ module.exports = {
 				gameObj.overtime ? homeRowArr.push(gameObj.homeScoreOT, gameObj.homeScoreFinal, gameObj.homeShots) : homeRowArr.push(gameObj.homeScoreFinal, gameObj.homeShots);
 				gameObj.awayTeamLine = awayRowArr.join('   ');
 				gameObj.homeTeamLine = homeRowArr.join('   ');
-				const ot = linescore.currentPeriodOrdinal.padEnd(4);
+				const ot = linescore.currentPeriodOrdinal ? linescore.currentPeriodOrdinal.padEnd(4) : '';
 				const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
 				const gameTime = (statusCode > 2) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
 				gameObj.clock = gameTime;
@@ -229,12 +229,13 @@ module.exports = {
 			if (contentObj.messageNumber !== 10 && contentObj.editorial.preview.items[0]) {
 				const pre = contentObj.editorial.preview.items[0];
 				const turndownService = new turndown();
-				const contributorFooter = pre.contributor.source ? `By ${pre.contributor.contributors[0].name} / ${pre.contributor.source}` : `By ${pre.contributor.contributors[0].name}`;
+				const contributorFooter = pre.contributor.contributors[0] ? `By ${pre.contributor.contributors[0].name}` : 'By NHL.com';
 				embed.setTitle(pre.headline);
 				embed.setURL(`https://www.nhl.com${pre.url}`);
-				embed.setDescription(`${turndownService.turndown(pre.preview)}\n\n${pre.subhead}`);
+				const preTitle = `${turndownService.turndown(pre.preview)}\n\n${pre.subhead}`;
+				embed.setDescription(preTitle.replace(/#/g, ''));
 				embed.setAuthor('Game Preview', 'https://i.imgur.com/zl8JzZc.png');
-				if (Object.keys(pre.media).length > 0) { embed.setImage(pre.media.image.cuts['640x360'].src); }
+				if (Object.keys(pre.media).length > 0) embed.setImage(pre.media.image.cuts['640x360'].src);
 				embed.setTimestamp(pre.date);
 				embed.setFooter(contributorFooter);
 			}
