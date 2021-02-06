@@ -45,8 +45,13 @@ module.exports = {
 		humanSeason = `${seasonId.substring(0, 4)}-${seasonId.substring(6)}`;
 
 		for (const flag of flags) {
-			if (wildCardInUse && ['wildcard', 'wc'].includes(flag)) {
-				flagWildCard = true;
+			if (['wildcard', 'wc'].includes(flag)) {
+				if (wildCardInUse) {
+					flagWildCard = true;
+				}
+				else {
+					return message.reply(`the \`${args[0]}\` season does not have a wild card format. Type \`${prefix}help standings\` for list of arguments.`);
+				}
 			}
 			else if (['percentage', 'p'].includes(flag)) {
 				flagPointsPercentage = true;
@@ -121,7 +126,12 @@ module.exports = {
 			const confShort = conferenceLogos[conferenceName.toLowerCase().split(' ').pop()];
 			if (confShort) standingsLogo = confShort;
 
-			if (flagPointsPercentage) {
+			if (flagWildCard) {
+				standingsType = 'wildCardWithLeaders';
+				standingsTitle = `${standingsTitle} Wild Card`;
+				standingsObj = conferenceTeams.sort((a, b) => Number(a.wildCardRank) - Number(b.wildCardRank));
+			}
+			else if (flagPointsPercentage) {
 				standingsTitle = `${standingsTitle} Points Percentage`;
 				standingsObj = conferenceTeams.sort((a, b) => Number(a.ppConferenceRank) - Number(b.ppConferenceRank));
 			}
@@ -169,8 +179,8 @@ module.exports = {
 					return diff;
 				}
 				function getLine(loop, wc, percent) {
-					const wcBreak = [3, 6];
-					if (wcBreak.includes(loop) && wc) return '\n';
+					const wcBreak = {3: "\n", 6: "\n", 8: "\n--"};
+					if (wcBreak[loop] && wc) return wcBreak[loop];
 					if (loop === 12 && percent) return '\n--';
 					return '';
 				}
