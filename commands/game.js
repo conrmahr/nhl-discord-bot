@@ -136,8 +136,8 @@ module.exports = {
 					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
 					gameObj.clock = gameTimeEST;
 				}
-				else if (gameObj.status < 8){
-					gameObj.clock = formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)
+				else if (gameObj.status < 8) {
+					gameObj.clock = formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal);
 				}
 				else if (gameObj.status === 8) {
 					gameObj.clock = `${gameObj.awayTeam} @ ${gameObj.homeTeam} TBD`;

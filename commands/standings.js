@@ -109,8 +109,8 @@ module.exports = {
 			};
 			const divShort = divisionLogos[divisionName.toLowerCase()];
 			if (divShort) standingsLogo = divShort;
-			if (flagWildCard) return message.reply(`\`-wildcard\` is not a valid flag for this division table. Type \`${prefix}help standings\` for a list of arguments.`); 
-			if (flagPointsPercentage) return message.reply(`\`-percentage\` is not a valid flag for this division table. Type \`${prefix}help standings\` for a list of arguments.`); 
+			if (flagWildCard) return message.reply(`\`-wildcard\` is not a valid flag for this division table. Type \`${prefix}help standings\` for a list of arguments.`);
+			if (flagPointsPercentage) return message.reply(`\`-percentage\` is not a valid flag for this division table. Type \`${prefix}help standings\` for a list of arguments.`);
 			standingsObj = divisionTeams.sort((a, b) => Number(a.DivisionRank) - Number(b.DivisionRank));
 		}
 		else if (conferenceTeams.length > 0) {
@@ -179,7 +179,11 @@ module.exports = {
 					return diff;
 				}
 				function getLine(loop, wc, percent) {
-					const wcBreak = {3: "\n", 6: "\n", 8: "\n--"};
+					const wcBreak = {
+						3: '\n',
+						6: '\n',
+						8: '\n--',
+					};
 					if (wcBreak[loop] && wc) return wcBreak[loop];
 					if (loop === 12 && percent) return '\n--';
 					return '';
