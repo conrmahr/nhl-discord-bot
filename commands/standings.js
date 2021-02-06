@@ -105,11 +105,17 @@ module.exports = {
 			};
 			const divShort = divisionLogos[divisionName.toLowerCase()];
 			if (divShort) standingsLogo = divShort;
-			if (flagPointsPercentage) standingsTitle = `${standingsTitle} Points Percentage`;
+
+			if (flagPointsPercentage) {
+				standingsTitle = `${standingsTitle} Points Percentage`;
+				standingsObj = divisionTeams.sort((a, b) => Number(a.ppDivisionRank) - Number(b.ppDivisonRank));
+			}
+			else {
+				standingsObj = divisionTeams.sort((a, b) => Number(a.DivisionRank) - Number(b.DivisionRank));
+			}
 		}
 		else if (conferenceTeams.length > 0) {
 			const conferenceName = conferenceTeams[0].team.conference.name;
-			standingsObj = conferenceTeams.sort((a, b) => Number(a.ppConferenceRank) - Number(b.ppConferenceRank));
 			standingsType = 'byConference';
 			standingsTitle = `${conferenceName} Conference`;
 			const conferenceLogos = {
@@ -120,7 +126,14 @@ module.exports = {
 			};
 			const confShort = conferenceLogos[conferenceName.toLowerCase().split(' ').pop()];
 			if (confShort) standingsLogo = confShort;
-			if (flagPointsPercentage) standingsTitle = `${standingsTitle} Points Percentage`;
+
+			if (flagPointsPercentage) {
+				standingsTitle = `${standingsTitle} Points Percentage`;
+				standingsObj = conferenceTeams.sort((a, b) => Number(a.ppConferenceRank) - Number(b.ppConferenceRank));
+			}
+			else {
+				standingsObj = conferenceTeams.sort((a, b) => Number(a.conferenceRank) - Number(b.conferenceRank));
+			}
 		}
 		else if (leagueTeams.length > 0) {
 			standingsObj = leagueTeams.sort((a, b) => Number(a.leagueRank) - Number(b.leagueRank));
