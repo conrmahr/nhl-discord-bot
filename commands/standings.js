@@ -131,7 +131,7 @@ module.exports = {
 			return message.reply(`please define a table. \`${tableArr.join('` `')}\` are the available tables for the ${humanSeason} season. Type \`${prefix}help standings\` for a list of arguments.`);
 		}
 
-		const updated = records[0].teamRecords[0].lastUpdated;
+		const updated = moment(Math.max(...standingsObj.map(e => moment(e.lastUpdated)))).format();
 
 		function getStandings(tables) {
 			let r = 0;
