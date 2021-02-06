@@ -103,7 +103,7 @@ module.exports = {
 				const gameObj = {
 					author: '',
 					authorURL: 'https://i.imgur.com/zl8JzZc.png',
-					status: statusCode,
+					status: Number(statusCode),
 					date: gameDate,
 					awayTeam: away.team.abbreviation,
 					homeTeam: home.team.abbreviation,
@@ -132,10 +132,17 @@ module.exports = {
 					venue: venue.name,
 				};
 
-				if (statusCode === '8') {
+				if (gameObj.status < 3) {
+					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
+					gameObj.clock = gameTimeEST;
+				}
+				else if (gameObj.status < 8) {
+					gameObj.clock = formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal);
+				}
+				else if (gameObj.status === 8) {
 					gameObj.clock = `${gameObj.awayTeam} @ ${gameObj.homeTeam} TBD`;
 				}
-				else if (statusCode === '9') {
+				else if (gameObj.status === 9) {
 					gameObj.clock = `${gameObj.awayTeam} @ ${gameObj.homeTeam} PPD`;
 				}
 				else {
@@ -197,9 +204,6 @@ module.exports = {
 				gameObj.awayTeamLine = awayRowArr.join('   ');
 				gameObj.homeTeamLine = homeRowArr.join('   ');
 				const ot = linescore.currentPeriodOrdinal ? linescore.currentPeriodOrdinal.padEnd(4) : '';
-				const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
-				const gameTime = (statusCode > 2) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
-				gameObj.clock = gameTime;
 				const b = hasShootout ? [41, 20] : gameObj.overtime ? [35, 14] : [35, 14];
 				const o = gameObj.overtime ? 4 : 0;
 				const periodsRow = hasShootout ? '1   2   3   SO        T   SOG ' : gameObj.overtime ? `1   2   3   ${ot}T   SOG ` : '1   2   3   T   SOG ';
@@ -246,7 +250,6 @@ module.exports = {
 		else if ((gameData.status > 2 && gameData.status < 5) || gameData.status > 7 || flagBoxscore) {
 			embed.setAuthor('Boxscore', 'https://i.imgur.com/zl8JzZc.png');
 			embed.setDescription(gameData.scoreboard);
-			embed.setTimestamp(gameData.date);
 			embed.setFooter(gameData.venue);
 		}
 		else if ((gameData.status > 4 && gameData.status < 8) || flagRecap) {

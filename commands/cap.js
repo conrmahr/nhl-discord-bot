@@ -61,29 +61,15 @@ module.exports = {
 			if (isTeam) {
 				const teamName = $('body > div.wrap > div > div > h1').text().split(' ');
 				const teamDollars = $('div.mb5 > div.c').first();
-				const projectedCapHit = teamDollars.find('h5:nth-child(1)').text().split(':')[1];
-				const projectedLTIRUsed = teamDollars.find('h5:nth-child(2)').text().split(':')[1];
-				const projectedCapSpace = teamDollars.find('h5:nth-child(3)').text().split(':')[1];
-				const currentCapSpace = teamDollars.find('div:nth-child(4) > span').text();
-				const deadlineCapSpace = teamDollars.find('div:nth-child(5) > span').text();
-				const todaysCapHit = teamDollars.find('div:nth-child(6) > span').text();
-				const rosterSize = teamDollars.find('div:nth-child(7)').text().split(':')[1];
-				const contracts = teamDollars.find('div:nth-child(8)').text().split(':')[1];
-				const reserveList = teamDollars.find('div:nth-child(9)').text().split(':')[1];
-				const capArr = {
-					'Projected Cap Hit': projectedCapHit.trim(),
-					'Projected LTIR Used': projectedLTIRUsed.trim(),
-					'Projected Cap Space': projectedCapSpace.trim(),
-					'Current Cap Space': currentCapSpace.trim(),
-					'Deadline Cap Space': deadlineCapSpace.trim(),
-					'Todays Cap Hit': todaysCapHit.trim(),
-					'Roster Size': rosterSize.trim(),
-					'Contracts': contracts.trim(),
-					'Reserve List': reserveList.trim(),
-				};
+				const capArr = {};
+
+				teamDollars.find('h5, div').each(function() {
+					const title = $(this).text().split(':')[0].trim();
+					const value = $(this).text().split(':')[1].trim();
+					capArr[title] = value;
+				});
 
 				embed.setAuthor(teamName.join(' '), 'https://i.imgur.com/RFALbw5.png', link);
-
 
 				for (const [key, value] of Object.entries(capArr)) {
 					embed.addField(key, value, true);
@@ -126,7 +112,7 @@ module.exports = {
 				let contract = '';
 				playerObj.name = $('.ofh:nth-child(1) > h1').text();
 				playerObj.team = $('.ofh:nth-child(1) > h3').text();
-				playerObj.signed = $('.table_c').prev().find('h4').first().text();
+				playerObj.signed = $('div.p10').find('h4').first().text();
 
 				if (playerObj.signed.includes('FUTURE')) {
 					contract = $('.table_c').filter(function() {

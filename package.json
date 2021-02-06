@@ -1,6 +1,6 @@
 {
   "name": "nhl-discord-bot",
-  "version": "2.3.1",
+  "version": "2.3.3",
   "description": "🏒 Self-Hosted NHL Discord Bot",
   "main": "index.js",
   "scripts": {
@@ -28,12 +28,12 @@
     "bitly": "^7.1.2",
     "cheerio": "^1.0.0-rc.5",
     "discord.js": "^12.5.1",
-    "moment-timezone": "^0.5.32",
+    "moment-timezone": "^0.5.33",
     "node-fetch": "^2.6.1",
     "qs": "^6.9.6",
     "turndown": "^7.0.0"
   },
   "devDependencies": {
-    "eslint": "^7.18.0"
+    "eslint": "^7.19.0"
   }
 }

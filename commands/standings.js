@@ -45,8 +45,13 @@ module.exports = {
 		humanSeason = `${seasonId.substring(0, 4)}-${seasonId.substring(6)}`;
 
 		for (const flag of flags) {
-			if (wildCardInUse && ['wildcard', 'wc'].includes(flag)) {
-				flagWildCard = true;
+			if (['wildcard', 'wc'].includes(flag)) {
+				if (wildCardInUse) {
+					flagWildCard = true;
+				}
+				else {
+					return message.reply(`the \`${args[0]}\` season does not have a wild card format. Type \`${prefix}help standings\` for list of arguments.`);
+				}
 			}
 			else if (['percentage', 'p'].includes(flag)) {
 				flagPointsPercentage = true;
@@ -90,7 +95,6 @@ module.exports = {
 
 		if (divisionTeams.length > 0) {
 			const divisionName = divisionTeams[0].team.division.name;
-			standingsObj = divisionTeams.sort((a, b) => Number(a.divisionRank) - Number(b.divisionRank));
 			standingsType = 'byDivision';
 			standingsTitle = `${divisionName} Conference`;
 			const divisionLogos = {
@@ -105,11 +109,12 @@ module.exports = {
 			};
 			const divShort = divisionLogos[divisionName.toLowerCase()];
 			if (divShort) standingsLogo = divShort;
-			if (flagPointsPercentage) standingsTitle = `${standingsTitle} Points Percentage`;
+			if (flagWildCard) return message.reply(`\`-wildcard\` is not a valid flag for this division table. Type \`${prefix}help standings\` for a list of arguments.`);
+			if (flagPointsPercentage) return message.reply(`\`-percentage\` is not a valid flag for this division table. Type \`${prefix}help standings\` for a list of arguments.`);
+			standingsObj = divisionTeams.sort((a, b) => Number(a.DivisionRank) - Number(b.DivisionRank));
 		}
 		else if (conferenceTeams.length > 0) {
 			const conferenceName = conferenceTeams[0].team.conference.name;
-			standingsObj = conferenceTeams.sort((a, b) => Number(a.ppConferenceRank) - Number(b.ppConferenceRank));
 			standingsType = 'byConference';
 			standingsTitle = `${conferenceName} Conference`;
 			const conferenceLogos = {
@@ -120,7 +125,19 @@ module.exports = {
 			};
 			const confShort = conferenceLogos[conferenceName.toLowerCase().split(' ').pop()];
 			if (confShort) standingsLogo = confShort;
-			if (flagPointsPercentage) standingsTitle = `${standingsTitle} Points Percentage`;
+
+			if (flagWildCard) {
+				standingsType = 'wildCardWithLeaders';
+				standingsTitle = `${standingsTitle} Wild Card`;
+				standingsObj = conferenceTeams.sort((a, b) => Number(a.wildCardRank) - Number(b.wildCardRank));
+			}
+			else if (flagPointsPercentage) {
+				standingsTitle = `${standingsTitle} Points Percentage`;
+				standingsObj = conferenceTeams.sort((a, b) => Number(a.ppConferenceRank) - Number(b.ppConferenceRank));
+			}
+			else {
+				standingsObj = conferenceTeams.sort((a, b) => Number(a.conferenceRank) - Number(b.conferenceRank));
+			}
 		}
 		else if (leagueTeams.length > 0) {
 			standingsObj = leagueTeams.sort((a, b) => Number(a.leagueRank) - Number(b.leagueRank));
@@ -131,7 +148,7 @@ module.exports = {
 			return message.reply(`please define a table. \`${tableArr.join('` `')}\` are the available tables for the ${humanSeason} season. Type \`${prefix}help standings\` for a list of arguments.`);
 		}
 
-		const updated = records[0].teamRecords[0].lastUpdated;
+		const updated = moment(Math.max(...standingsObj.map(e => moment(e.lastUpdated)))).format();
 
 		function getStandings(tables) {
 			let r = 0;
@@ -162,8 +179,12 @@ module.exports = {
 					return diff;
 				}
 				function getLine(loop, wc, percent) {
-					const wcBreak = [3, 6];
-					if (wcBreak.includes(loop) && wc) return '\n';
+					const wcBreak = {
+						3: '\n',
+						6: '\n',
+						8: '\n--',
+					};
+					if (wcBreak[loop] && wc) return wcBreak[loop];
 					if (loop === 12 && percent) return '\n--';
 					return '';
 				}
