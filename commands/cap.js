@@ -126,7 +126,7 @@ module.exports = {
 				let contract = '';
 				playerObj.name = $('.ofh:nth-child(1) > h1').text();
 				playerObj.team = $('.ofh:nth-child(1) > h3').text();
-				playerObj.signed = $('.table_c').prev().find('h4').first().text();
+				playerObj.signed = $('div.p10').find('h4').first().text();
 
 				if (playerObj.signed.includes('FUTURE')) {
 					contract = $('.table_c').filter(function() {
