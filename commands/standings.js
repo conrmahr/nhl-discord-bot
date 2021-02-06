@@ -90,7 +90,6 @@ module.exports = {
 
 		if (divisionTeams.length > 0) {
 			const divisionName = divisionTeams[0].team.division.name;
-			standingsObj = divisionTeams.sort((a, b) => Number(a.divisionRank) - Number(b.divisionRank));
 			standingsType = 'byDivision';
 			standingsTitle = `${divisionName} Conference`;
 			const divisionLogos = {
@@ -105,14 +104,9 @@ module.exports = {
 			};
 			const divShort = divisionLogos[divisionName.toLowerCase()];
 			if (divShort) standingsLogo = divShort;
-
-			if (flagPointsPercentage) {
-				standingsTitle = `${standingsTitle} Points Percentage`;
-				standingsObj = divisionTeams.sort((a, b) => Number(a.ppDivisionRank) - Number(b.ppDivisonRank));
-			}
-			else {
-				standingsObj = divisionTeams.sort((a, b) => Number(a.DivisionRank) - Number(b.DivisionRank));
-			}
+			if (flagWildCard) return message.reply(`\`-wildcard\` is not a valid flag for this division table. Type \`${prefix}help standings\` for a list of arguments.`); 
+			if (flagPointsPercentage) return message.reply(`\`-percentage\` is not a valid flag for this division table. Type \`${prefix}help standings\` for a list of arguments.`); 
+			standingsObj = divisionTeams.sort((a, b) => Number(a.DivisionRank) - Number(b.DivisionRank));
 		}
 		else if (conferenceTeams.length > 0) {
 			const conferenceName = conferenceTeams[0].team.conference.name;
