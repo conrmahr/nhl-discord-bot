@@ -7,14 +7,14 @@ const turndown = require('turndown');
 module.exports = {
 	name: 'game',
 	usage: '[<date>] <team> [-<flag>]',
-	description: 'Get game editorials and boxscores. Add one flag `-preview`, `-boxscore`, or `-recap` to isolate.',
+	description: 'Get game boxscores, scoring, and penalty summaries. Add one flag `-scoring`, `-penalties`, `-lineups`, or `-recap` for more options.',
 	category: 'stats',
 	aliases: ['game', 'g'],
-	examples: ['phi', 'yesterday phi -boxscore'],
+	examples: ['phi', '1985-12-11 edm -scoring', '1981-02-26 bos -penalties'],
 	async execute(message, args, flags, prefix) {
 
-		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
-		const endpoint = 'https://statsapi.web.nhl.com/api/v1/schedule/';
+		const endpoint = 'https://statsapi.web.nhl.com';
+		const { teams } = await fetch(`${endpoint}/api/v1/teams/`).then(response => response.json());
 		const parameters = {};
 
 		if (args[0]) {
@@ -59,16 +59,20 @@ module.exports = {
 		if (!parameters.teamId) return message.reply(`no team was defined. Type \`${prefix}help game\` for a list of arguments.`);
 
 		parameters.expand = ['schedule.teams', 'schedule.linescore'];
-		let flagPreview = false;
-		let flagBoxscore = false;
+		let flagLineup = false;
+		let flagScoring = false;
+		let flagPenalty = false;
 		let flagRecap = false;
 
 		for (const flag of flags) {
-			if (['preview', 'p'].includes(flag)) {
-				flagPreview = true;
+			if (['lineups', 'l'].includes(flag)) {
+				flagLineup = true;
 			}
-			else if (['boxscore', 'b'].includes(flag)) {
-				flagBoxscore = true;
+			else if (['scoring', 's'].includes(flag)) {
+				flagScoring = true;
+			}
+			else if (['penalties', 'p'].includes(flag)) {
+				flagPenalty = true;
 			}
 			else if (['recap', 'r'].includes(flag)) {
 				flagRecap = true;
@@ -79,7 +83,7 @@ module.exports = {
 		}
 
 		const query = qs.stringify(parameters, { arrayFormat: 'comma', addQueryPrefix: true });
-		const schedule = await fetch(`${endpoint}${query}`).then(response => response.json());
+		const schedule = await fetch(`${endpoint}/api/v1/schedule/${query}`).then(response => response.json());
 
 		if (!schedule.totalGames) return message.reply('no games scheduled.');
 
@@ -99,7 +103,7 @@ module.exports = {
 					return `${remain}${spacer}${ordinal}`;
 				}
 
-				const { status: { statusCode }, gameDate, teams: { away, home }, linescore, venue, content } = game;
+				const { link, status: { statusCode }, gameDate, teams: { away, home }, linescore, venue, content } = game;
 				const gameObj = {
 					author: '',
 					authorURL: 'https://i.imgur.com/zl8JzZc.png',
@@ -128,6 +132,7 @@ module.exports = {
 					homeEN: '',
 					overtime: false,
 					scoreboard: '',
+					live: link,
 					content: content.link,
 					venue: venue.name,
 				};
@@ -155,7 +160,6 @@ module.exports = {
 				const homeEN = linescore.teams.home.goaliePulled ? '[EN]' : '';
 				const hasShootout = linescore.hasShootout;
 				let firstPeriod, secondPeriod, thirdPeriod;
-
 
 				if (linescore.currentPeriod > 0) {
 					firstPeriod = linescore.periods.filter(p => p.num === 1);
@@ -207,7 +211,7 @@ module.exports = {
 				const b = hasShootout ? [41, 20] : gameObj.overtime ? [35, 14] : [35, 14];
 				const o = gameObj.overtime ? 4 : 0;
 				const periodsRow = hasShootout ? '1   2   3   SO        T   SOG ' : gameObj.overtime ? `1   2   3   ${ot}T   SOG ` : '1   2   3   T   SOG ';
-				let scoreboardStr = '```\n';
+				let scoreboardStr = '```md\n';
 				scoreboardStr += `┌${''.padEnd(b[0] + o, '─')}┐\n`;
 				scoreboardStr += `| ${gameObj.clock.padEnd(14, ' ')}${periodsRow}│\n`;
 				scoreboardStr += `├${''.padEnd(b[1], '─')}${''.padEnd(20 + o, '────')}─┤\n`;
@@ -224,11 +228,22 @@ module.exports = {
 
 		let gameData = schedule.dates.map(({ games }) => getScores(games));
 		gameData = gameData[0][0];
-		const contentObj = await fetch(`https://statsapi.web.nhl.com${gameData.content}`).then(response => response.json());
+		const feedObj = await fetch(`${endpoint}${gameData.live}`).then(response => response.json());
+		const contentObj = await fetch(`${endpoint}${gameData.content}`).then(response => response.json());
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
+		const periodName = { 0: '1st Period', 1: '2nd Period', 2: '3rd Period', 3: 'OT', 4: 'SO' };
+		const allPlays = feedObj.liveData.plays.allPlays;
+		const playsByPeriod = feedObj.liveData.plays.playsByPeriod;
+		const scoringPlays = feedObj.liveData.plays.scoringPlays;
+		const penaltyPlays = feedObj.liveData.plays.penaltyPlays;
+		const decisions = feedObj.liveData.decisions;
+		const datetime = feedObj.gameData.datetime;
+		const eventsMethod = (y, z) => z.filter((e, i)=>{
+			return (y.includes(i));
+		});
 
-		if (gameData.status < 3 || flagPreview) {
+		if (flagLineup) {
 
 			if (contentObj.messageNumber !== 10 && contentObj.editorial.preview.items[0]) {
 				const pre = contentObj.editorial.preview.items[0];
@@ -244,15 +259,10 @@ module.exports = {
 				embed.setFooter(contributorFooter);
 			}
 			else {
-				return message.reply('no `Game Summary` found.');
+				return message.reply('no `Game Preview` found.');
 			}
 		}
-		else if ((gameData.status > 2 && gameData.status < 5) || gameData.status > 7 || flagBoxscore) {
-			embed.setAuthor('Boxscore', 'https://i.imgur.com/zl8JzZc.png');
-			embed.setDescription(gameData.scoreboard);
-			embed.setFooter(gameData.venue);
-		}
-		else if ((gameData.status > 4 && gameData.status < 8) || flagRecap) {
+		else if (flagRecap) {
 
 			if (contentObj.messageNumber !== 10 && contentObj.editorial.recap.items[0]) {
 				const post = contentObj.editorial.recap.items[0];
@@ -270,8 +280,53 @@ module.exports = {
 				return message.reply('no `Game Recap` found.');
 			}
 		}
+		else if (flagScoring) {
+			embed.setDescription(`:hockey: ${gameData.awayTeam} ${gameData.awayScoreFinal} ${gameData.homeTeam} ${gameData.homeScoreFinal} (${gameData.clock})`);
+			embed.setAuthor('Scoring Summary', 'https://i.imgur.com/zl8JzZc.png');
+			embed.setFooter(gameData.venue);
+			embed.setTimestamp(datetime.dateTime);
+
+			if (scoringPlays.length && gameData.status > 2 && gameData.status < 8) {
+				const shootoutStr = allPlays.filter(({ players, about: { period } }) => period === 5 && players).map(({ players, team: { triCode }, result: { description } }) => `${players.filter(({ playerType }) => playerType === 'Shooter' || playerType === 'Scorer').map(({ playerType }) => `${playerType === 'Shooter' ? ':x:' : ':white_check_mark:'} ${triCode}`)} ${description}`).join('\n');
+				playsByPeriod.slice(0, 4).forEach((e, i) => {
+					const scoringStr = eventsMethod(scoringPlays, allPlays).filter(({ about: { period } }) => period === i + 1).map(({ players, result: { strength, emptyNet }, about: { periodTimeRemaining, goals: { away, home } }, team: { triCode } }) => `:rotating_light: ${periodTimeRemaining} ${away}-${home} ${triCode} ${players.filter(({ playerType }) => playerType === 'Scorer').map(({ player: { fullName }, seasonTotal }) => `**${fullName} ${seasonTotal}**${strength.code === 'EVEN' ? '' : ` [${strength.code}]`}${emptyNet ? ' [EN]' : ''}`).join('')} (${players.filter(({ playerType }) => playerType === 'Assist').map(({ player: { fullName }, seasonTotal }) => `${fullName.split(' ').slice(1).join(' ')} ${seasonTotal}`).join(', ') || 'Unassisted'})`).join('\n') || 'No goals';
+					embed.addField(periodName[i], scoringStr);
+				});
+
+				if (shootoutStr) embed.addField('Shootout', shootoutStr);
+			}
+		}
+		else if (flagPenalty) {
+			const officialsStr = feedObj.liveData.boxscore.officials.map(({ official: { fullName }, officialType }) => `${officialType}: ${fullName}`).join('\n');
+			embed.setDescription(`:hockey: ${gameData.awayTeam} ${gameData.awayScoreFinal} ${gameData.homeTeam} ${gameData.homeScoreFinal} (${gameData.clock})`);
+			embed.setAuthor('Penalty Summary', 'https://i.imgur.com/zl8JzZc.png');
+			embed.setFooter(gameData.venue);
+			embed.setTimestamp(datetime.dateTime);
+
+			if (penaltyPlays.length && gameData.status > 2 && gameData.status < 8) {
+				const penaltyObj = eventsMethod(penaltyPlays, allPlays);
+				playsByPeriod.slice(0, 4).forEach((e, i) => {
+					let penaltyStr = penaltyObj.filter(({ about: { period } }) => period === i + 1).map(({ about: { periodTimeRemaining }, result: { description }, team: { triCode } }) => `:warning: ${triCode}${periodTimeRemaining ? ` ${periodTimeRemaining} ` : ' '}${description}`).join('\n') || 'No penalties';
+
+					if (penaltyStr.length > 1023) penaltyStr = `${penaltyObj.filter(({ about: { period } }) => period === i + 1).length} penalties called this period`;
+					embed.addField(periodName[i], penaltyStr);
+				});
+
+			}
+			if (officialsStr) embed.addField('Officials', officialsStr);
+		}
 		else {
-			return message.reply('no game found.');
+			embed.setAuthor('Boxscore', 'https://i.imgur.com/zl8JzZc.png');
+			embed.setDescription(gameData.scoreboard);
+			embed.setFooter(gameData.venue);
+			embed.setTimestamp(datetime.dateTime);
+
+			if (decisions.winner && decisions.firstStar) {
+				const goalies = [`:regional_indicator_w: ${decisions.winner.fullName}`, `:regional_indicator_l: ${decisions.loser.fullName}`].join('\n');
+				const stars = [`:star: ${decisions.firstStar.fullName}`, `:star::star: ${decisions.secondStar.fullName}`, `:star::star::star: ${decisions.thirdStar.fullName}`].join('\n');
+				embed.addField('Goalies', goalies, true);
+				embed.addField('Three Stars of the Game', stars, true);
+			}
 		}
 
 		message.channel.send(embed);
