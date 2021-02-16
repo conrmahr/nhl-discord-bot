@@ -85,7 +85,7 @@ https://discordapp.com/oauth2/authorize?client_id={YOUR_CLIENT_ID}&scope=bot
 |**`about`** | Shows information about `nhl-discord-bot`.|
 |**`cap <name>\|<team> [-<flag>]`** | Get players and teams contract information.|
 |**`draft [<year>] [<round>\|<team>]`** | Get draft picks by round or team.|
-|**`game [<date>] <team> [-<flag>]`** | Get game editorials and boxscores.|
+|**`game [<date>] <team> [-<flag>]`** | Get game boxscores, scoring, and penalty summaries.|
 |**`help <command>`** | List all of commands or info about a specific command.|
 |**`nhl [<date>] [<team> <opponent>] [-<flag>]`** | Get game schedules and scores.|
 |**`official [<#>]`** | Get active officials information.|
