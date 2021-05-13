@@ -58,7 +58,7 @@ module.exports = {
 
 		if (!parameters.teamId) return message.reply(`no team was defined. Type \`${prefix}help game\` for a list of arguments.`);
 
-		parameters.expand = ['schedule.teams', 'schedule.linescore'];
+		parameters.expand = ['schedule.teams', 'schedule.linescore', 'schedule.game.seriesSummary'];
 		let flagLineup = false;
 		let flagScoring = false;
 		let flagPenalty = false;
@@ -103,10 +103,11 @@ module.exports = {
 					return `${remain}${spacer}${ordinal}`;
 				}
 
-				const { link, status: { statusCode }, gameDate, teams: { away, home }, linescore, venue, content } = game;
+				const { link, gameType, status: { statusCode }, gameDate, teams: { away, home }, linescore, venue, content, seriesSummary } = game;
 				const gameObj = {
 					author: '',
 					authorURL: 'https://i.imgur.com/zl8JzZc.png',
+					type: gameType,
 					status: Number(statusCode),
 					date: gameDate,
 					awayTeam: away.team.abbreviation,
@@ -135,7 +136,18 @@ module.exports = {
 					live: link,
 					content: content.link,
 					venue: venue.name,
+					match: '',
 				};
+
+				if (gameObj.type === 'PR') {
+					gameObj.match = ' *Pre-season\n';
+				}
+				else if (gameObj.type === 'A') {
+					gameObj.match = ` *All-Star game\n`;
+				}
+				else if (gameObj.type === 'P' && seriesSummary) {
+					gameObj.match = ` *${seriesSummary.seriesStatus}\n`;
+				}
 
 				if (gameObj.status < 3) {
 					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
@@ -219,6 +231,7 @@ module.exports = {
 				scoreboardStr += `├${''.padEnd(b[1], '─')}${''.padEnd(20 + o, '────')}─┤\n`;
 				scoreboardStr += `│ ${gameObj.homeTeamLine}  │\n`;
 				scoreboardStr += `└${''.padEnd(b[0] + o, '─')}┘\n`;
+				scoreboardStr += gameObj.match;
 				scoreboardStr += '```';
 				gameObj.scoreboard = scoreboardStr;
 
