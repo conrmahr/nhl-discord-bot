@@ -169,7 +169,7 @@ module.exports = {
 					const awayEN = linescore.teams.away.goaliePulled ? ' [*EN*] ' : '';
 					const homeEN = linescore.teams.home.goaliePulled ? ' [*EN*] ' : '';
 					const intermission = linescore.intermissionInfo.inIntermission ? clock(linescore.intermissionInfo.intermissionTimeRemaining, 'int') : '';
-					return `${awayTeam} ${away.score} ${awayPP}${awayEN} ${homeTeam} ${home.score} ${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${intermission}${arena}${tv}`;
+					return `${match}${awayTeam} ${away.score} ${awayPP}${awayEN} ${homeTeam} ${home.score} ${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${intermission}${arena}${tv}`;
 				}
 				else if (statusCode > 4 && statusCode < 8) {
 					return `${match}${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${arena}${series}`;
