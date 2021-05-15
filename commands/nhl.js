@@ -79,7 +79,7 @@ module.exports = {
 			}
 		}
 
-		parameters.expand = ['schedule.teams', 'schedule.linescore'];
+		parameters.expand = ['schedule.teams', 'schedule.linescore', 'schedule.game.seriesSummary'];
 		let flagVenue = false;
 		let flagHide = false;
 		for (const flag of flags) {
@@ -123,13 +123,27 @@ module.exports = {
 					return `(${remain}${spacer}${ordinal})`;
 				}
 
-				const { status: { statusCode }, teams: { away, home }, linescore, broadcasts, venue } = game;
+				const { gameType, status: { statusCode }, teams: { away, home }, linescore, broadcasts, venue, seriesSummary } = game;
 				const awayTeam = away.team.abbreviation;
 				const homeTeam = home.team.abbreviation;
 				const awayBB = isBold(away.score, home.score);
 				const homeBB = isBold(home.score, away.score);
+				let match = '';
+				let series = '';
 				let tv = '';
 				let arena = '';
+
+				if (gameType === 'P' && seriesSummary) {
+					match = '[Playoffs] ';
+					series = seriesSummary.seriesStatus && !flagHide ? ` **${seriesSummary.seriesStatus}**` : '';
+				}
+				else if (gameType === 'A') {
+					match = '[ASG] ';
+				}
+				else if (gameType !== 'R') {
+					match = `[${gameType}] `;
+				}
+
 				if (broadcasts) {
 					const channels = broadcasts.map(i => i.name).join(', ');
 					tv = ` :tv: [${channels}] `;
@@ -141,8 +155,8 @@ module.exports = {
 
 				if (statusCode < 3 || flagHide) {
 					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
-					const gameTime = (statusCode > 2) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
-					return `${awayTeam} @ ${homeTeam} ${gameTime}${arena}${tv}`;
+					const gameTime = (statusCode > 2 && !flagHide) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
+					return `${match}${awayTeam} @ ${homeTeam} ${gameTime}${arena}${tv}${series}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {
 					const clock = function getClock(timeLeft, type) {
@@ -158,13 +172,13 @@ module.exports = {
 					return `${awayTeam} ${away.score} ${awayPP}${awayEN} ${homeTeam} ${home.score} ${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${intermission}${arena}${tv}`;
 				}
 				else if (statusCode > 4 && statusCode < 8) {
-					return `${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${arena}`;
+					return `${match}${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${arena}${series}`;
 				}
 				else if (statusCode === '8') {
-					return `${awayTeam} @ ${homeTeam} TBD`;
+					return `${match}${awayTeam} @ ${homeTeam} TBD ${series}`;
 				}
 				else if (statusCode === '9') {
-					return `${awayTeam} @ ${homeTeam} PPD`;
+					return `${match}${awayTeam} @ ${homeTeam} PPD ${series}`;
 				}
 				else {
 					return 'Game status not found.';
