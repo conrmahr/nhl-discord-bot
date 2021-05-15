@@ -135,7 +135,7 @@ module.exports = {
 
 				if (gameType === 'P' && seriesSummary) {
 					match = '[Playoffs] ';
-					series = ` **${seriesSummary.seriesStatusShort}** `;
+					series = seriesSummary.seriesStatus && !flagHide ? ` **${seriesSummary.seriesStatus}**` : '';
 				}
 				else if (gameType === 'A') {
 					match = '[ASG] ';
@@ -155,7 +155,7 @@ module.exports = {
 
 				if (statusCode < 3 || flagHide) {
 					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
-					const gameTime = (statusCode > 2) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
+					const gameTime = (statusCode > 2 && !flagHide) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
 					return `${match}${awayTeam} @ ${homeTeam} ${gameTime}${arena}${tv}${series}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {
@@ -175,10 +175,10 @@ module.exports = {
 					return `${match}${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${arena}${series}`;
 				}
 				else if (statusCode === '8') {
-					return `${match}${awayTeam} @ ${homeTeam} TBD`;
+					return `${match}${awayTeam} @ ${homeTeam} TBD ${series}`;
 				}
 				else if (statusCode === '9') {
-					return `${awayTeam} @ ${homeTeam} PPD`;
+					return `${match}${awayTeam} @ ${homeTeam} PPD ${series}`;
 				}
 				else {
 					return 'Game status not found.';
