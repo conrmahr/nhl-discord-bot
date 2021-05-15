@@ -133,14 +133,14 @@ module.exports = {
 				let tv = '';
 				let arena = '';
 
-				if ( gameType === 'P' && seriesSummary) {
+				if (gameType === 'P' && seriesSummary) {
 					match = '[Playoffs] ';
-					series = ` ${seriesSummary.seriesStatusShort} `;
+					series = ` **${seriesSummary.seriesStatusShort}** `;
 				}
 				else if (gameType === 'A') {
-					match = '[ASG] '
+					match = '[ASG] ';
 				}
-				else if ( gameType !== 'R') {
+				else if (gameType !== 'R') {
 					match = `[${gameType}] `;
 				}
 
@@ -156,7 +156,7 @@ module.exports = {
 				if (statusCode < 3 || flagHide) {
 					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
 					const gameTime = (statusCode > 2) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
-					return `${match}${awayTeam} @ ${homeTeam} ${gameTime}${series}${arena}${tv}`;
+					return `${match}${awayTeam} @ ${homeTeam} ${gameTime}${arena}${tv}${series}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {
 					const clock = function getClock(timeLeft, type) {
@@ -172,7 +172,7 @@ module.exports = {
 					return `${awayTeam} ${away.score} ${awayPP}${awayEN} ${homeTeam} ${home.score} ${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${intermission}${arena}${tv}`;
 				}
 				else if (statusCode > 4 && statusCode < 8) {
-					return `${match}${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${series}${arena}`;
+					return `${match}${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${arena}${series}`;
 				}
 				else if (statusCode === '8') {
 					return `${match}${awayTeam} @ ${homeTeam} TBD`;

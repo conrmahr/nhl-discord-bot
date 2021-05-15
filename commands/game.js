@@ -144,7 +144,7 @@ module.exports = {
 					gameObj.match = ' *Pre-season\n';
 				}
 				else if (gameObj.type === 'A') {
-					gameObj.match = ` *All-Star game\n`;
+					gameObj.match = ' *All-Star game\n';
 				}
 				else if (gameObj.type === 'P' && seriesSummary) {
 					gameObj.match = seriesSummary.gameLabel ? ` Playoffs - ${seriesSummary.gameLabel}\n` : '';
@@ -226,7 +226,7 @@ module.exports = {
 				const o = gameObj.overtime ? 4 : 0;
 				const periodsRow = hasShootout ? '1   2   3   SO        T   SOG ' : gameObj.overtime ? `1   2   3   ${ot}T   SOG ` : '1   2   3   T   SOG ';
 				let scoreboardStr = '```md\n';
-				scoreboardStr += `${gameObj.match}`
+				scoreboardStr += `${gameObj.match}`;
 				scoreboardStr += `┌${''.padEnd(b[0] + o, '─')}┐\n`;
 				scoreboardStr += `| ${gameObj.clock.padEnd(14, ' ')}${periodsRow}│\n`;
 				scoreboardStr += `├${''.padEnd(b[1], '─')}${''.padEnd(20 + o, '────')}─┤\n`;
