@@ -134,8 +134,10 @@ module.exports = {
 				let arena = '';
 
 				if (gameType === 'P' && seriesSummary) {
+					if (limit === 1 && !flagHide) {
+						series = seriesSummary.seriesStatus ? ` **${seriesSummary.seriesStatus}** ` : ' **Series tied 0-0** ';
+					}
 					match = '[Playoffs] ';
-					series = seriesSummary.seriesStatus && !flagHide ? ` **${seriesSummary.seriesStatus}**` : '';
 				}
 				else if (gameType === 'A') {
 					match = '[ASG] ';
@@ -156,7 +158,7 @@ module.exports = {
 				if (statusCode < 3 || flagHide) {
 					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
 					const gameTime = (statusCode > 2 && !flagHide) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
-					return `${match}${awayTeam} @ ${homeTeam} ${gameTime}${arena}${tv}${series}`;
+					return `${match}${awayTeam} @ ${homeTeam} ${gameTime}${series}${arena}${tv}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {
 					const clock = function getClock(timeLeft, type) {
@@ -169,10 +171,10 @@ module.exports = {
 					const awayEN = linescore.teams.away.goaliePulled ? ' [*EN*] ' : '';
 					const homeEN = linescore.teams.home.goaliePulled ? ' [*EN*] ' : '';
 					const intermission = linescore.intermissionInfo.inIntermission ? clock(linescore.intermissionInfo.intermissionTimeRemaining, 'int') : '';
-					return `${awayTeam} ${away.score} ${awayPP}${awayEN} ${homeTeam} ${home.score} ${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${intermission}${arena}${tv}`;
+					return `${match}${awayTeam} ${away.score} ${awayPP}${awayEN} ${homeTeam} ${home.score} ${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${intermission}${series}${arena}${tv}`;
 				}
 				else if (statusCode > 4 && statusCode < 8) {
-					return `${match}${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${arena}${series}`;
+					return `${match}${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${series}${arena}`;
 				}
 				else if (statusCode === '8') {
 					return `${match}${awayTeam} @ ${homeTeam} TBD ${series}`;
