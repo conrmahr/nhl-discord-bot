@@ -147,8 +147,8 @@ module.exports = {
 					gameObj.match = ' *All-Star game\n';
 				}
 				else if (gameObj.type === 'P' && seriesSummary) {
-					gameObj.match = seriesSummary.gameLabel ? ` Playoffs - ${seriesSummary.gameLabel}\n` : '';
-					gameObj.series = seriesSummary.seriesStatus ? ` *${seriesSummary.seriesStatus}\n` : '';
+					gameObj.series = seriesSummary.seriesStatus ? seriesSummary.seriesStatus : 'Series tied 0-0';
+					gameObj.match = seriesSummary.gameLabel ? ` Playoffs - ${gameObj.series}\n` : '';
 				}
 
 				if (gameObj.status < 3) {
@@ -234,7 +234,6 @@ module.exports = {
 				scoreboardStr += `├${''.padEnd(b[1], '─')}${''.padEnd(20 + o, '────')}─┤\n`;
 				scoreboardStr += `│ ${gameObj.homeTeamLine}  │\n`;
 				scoreboardStr += `└${''.padEnd(b[0] + o, '─')}┘\n`;
-				scoreboardStr += gameObj.series;
 				scoreboardStr += '```';
 				gameObj.scoreboard = scoreboardStr;
 

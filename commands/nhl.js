@@ -135,7 +135,7 @@ module.exports = {
 
 				if (gameType === 'P' && seriesSummary) {
 					match = '[Playoffs] ';
-					series = seriesSummary.seriesStatus && !flagHide && limit === 1 ? ` **${seriesSummary.seriesStatus}**` : '';
+					series = seriesSummary.seriesStatus && !flagHide && limit === 1 ? ` **${seriesSummary.seriesStatus}**` : ' **Series tied 0-0** ';
 				}
 				else if (gameType === 'A') {
 					match = '[ASG] ';
