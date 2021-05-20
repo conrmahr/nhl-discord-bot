@@ -134,8 +134,10 @@ module.exports = {
 				let arena = '';
 
 				if (gameType === 'P' && seriesSummary) {
+					if (limit === 1 && !flagHide) {
+						series = seriesSummary.seriesStatus ? ` **${seriesSummary.seriesStatus}** ` : ' **Series tied 0-0** ';
+					}
 					match = '[Playoffs] ';
-					series = seriesSummary.seriesStatus && !flagHide && limit === 1 ? ` **${seriesSummary.seriesStatus}**` : ' **Series tied 0-0** ';
 				}
 				else if (gameType === 'A') {
 					match = '[ASG] ';
