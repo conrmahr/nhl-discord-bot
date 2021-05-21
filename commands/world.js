@@ -16,7 +16,7 @@ module.exports = {
 	async execute(message, args, flags, prefix) {
 
 		const parameters = {
-			tourneyURLBase: 'https://www.iihf.com',
+			tourneyURLBase: 'https://www.iihf.com/en',
 			tourneyURL: '',
 			GameDateTimeUTC: '',
 			tourneyTitleCode: '',
@@ -45,10 +45,10 @@ module.exports = {
 		const link = bitlyObj.link;
 		const html = await fetch(link).then(response => response.text());
 		const $ = cheerio.load(html);
-		parameters.tourneyTitleCode = $('#live-championship-container > div.s-filter > div.b-tabs > div > a > span.is-show').text();
+		parameters.tourneyTitleCode = $('#live-championship-container > div.s-filter > div.b-tabs > div > a > span.is-show').first().text();
 		const tourneyIds = $('.m-footer').attr('data-eventids');
-		parameters.tourneyId = tourneyIds.split(' ')[0];
-		const getLatestScoresState = 'http://realtime.iihf.com/gamestate/GetLatestScoresState/';
+		parameters.tourneyId = tourneyIds.split(';')[0];
+		const getLatestScoresState = 'https://realtime.iihf.com/gamestate/GetLatestScoresState/';
 		const fullSchedule = await fetch(`${getLatestScoresState}${parameters.tourneyId}`).then(response => response.json());
 
 		if (!Array.isArray(fullSchedule) || !fullSchedule.length) return message.reply('no tournament found.');
