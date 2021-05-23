@@ -304,7 +304,7 @@ module.exports = {
 			if (scoringPlays.length && gameData.status > 2 && gameData.status < 8) {
 				const shootoutStr = allPlays.filter(({ players, about: { period } }) => period === 5 && players).map(({ players, team: { triCode }, result: { description } }) => `${players.filter(({ playerType }) => playerType === 'Shooter' || playerType === 'Scorer').map(({ playerType }) => `${playerType === 'Shooter' ? ':x:' : ':white_check_mark:'} ${triCode}`)} ${description}`).join('\n');
 				playsByPeriod.slice(0, 4).forEach((e, i) => {
-					const scoringStr = eventsMethod(scoringPlays, allPlays).filter(({ about: { period } }) => period === i + 1).map(({ players, result: { strength, emptyNet }, about: { periodTimeRemaining, goals: { away, home } }, team: { triCode } }) => `:rotating_light: ${periodTimeRemaining} ${away}-${home} ${triCode} ${players.filter(({ playerType }) => playerType === 'Scorer').map(({ player: { fullName }, seasonTotal }) => `**${fullName} ${seasonTotal}**${strength.code === 'EVEN' ? '' : ` [${strength.code}]`}${emptyNet ? ' [EN]' : ''}`).join('')} (${players.filter(({ playerType }) => playerType === 'Assist').map(({ player: { fullName }, seasonTotal }) => `${fullName.split(' ').slice(1).join(' ')} ${seasonTotal}`).join(', ') || 'Unassisted'})`).join('\n') || 'No goals';
+					const scoringStr = eventsMethod(scoringPlays, allPlays).filter(({ about: { period } }) => period === i + 1).map(({ players, result: { strength, emptyNet }, about: { periodTime, goals: { away, home } }, team: { triCode } }) => `:rotating_light: ${periodTime} ${away}-${home} ${triCode} ${players.filter(({ playerType }) => playerType === 'Scorer').map(({ player: { fullName }, seasonTotal }) => `**${fullName} ${seasonTotal}**${strength.code === 'EVEN' ? '' : ` [${strength.code}]`}${emptyNet ? ' [EN]' : ''}`).join('')} (${players.filter(({ playerType }) => playerType === 'Assist').map(({ player: { fullName }, seasonTotal }) => `${fullName.split(' ').slice(1).join(' ')} ${seasonTotal}`).join(', ') || 'Unassisted'})`).join('\n') || 'No goals';
 					embed.addField(periodName[i], scoringStr);
 				});
 
@@ -321,7 +321,7 @@ module.exports = {
 			if (penaltyPlays.length && gameData.status > 2 && gameData.status < 8) {
 				const penaltyObj = eventsMethod(penaltyPlays, allPlays);
 				playsByPeriod.slice(0, 4).forEach((e, i) => {
-					let penaltyStr = penaltyObj.filter(({ about: { period } }) => period === i + 1).map(({ about: { periodTimeRemaining }, result: { description }, team: { triCode } }) => `:warning: ${triCode}${periodTimeRemaining ? ` ${periodTimeRemaining} ` : ' '}${description}`).join('\n') || 'No penalties';
+					let penaltyStr = penaltyObj.filter(({ about: { period } }) => period === i + 1).map(({ about: { periodTime }, result: { description }, team: { triCode } }) => `:warning: ${triCode}${periodTime ? ` ${periodTime} ` : ' '}${description}`).join('\n') || 'No penalties';
 
 					if (penaltyStr.length > 1023) penaltyStr = `${penaltyObj.filter(({ about: { period } }) => period === i + 1).length} penalties called this period`;
 					embed.addField(periodName[i], penaltyStr);
