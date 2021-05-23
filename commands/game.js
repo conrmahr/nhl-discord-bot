@@ -321,7 +321,7 @@ module.exports = {
 			if (penaltyPlays.length && gameData.status > 2 && gameData.status < 8) {
 				const penaltyObj = eventsMethod(penaltyPlays, allPlays);
 				playsByPeriod.slice(0, 4).forEach((e, i) => {
-					let penaltyStr = penaltyObj.filter(({ about: { period } }) => period === i + 1).map(({ about: { periodTime }, result: { description, penaltySeverity, penaltyMinutes }, team: { triCode } }) => `:warning: ${triCode}${periodTime ? ` ${periodTime} ` : ' '}[${penaltyMinutes} min] ${description}`).join('\n') || 'No penalties';
+					let penaltyStr = penaltyObj.filter(({ about: { period } }) => period === i + 1).map(({ about: { periodTime }, result: { description, penaltyMinutes }, team: { triCode } }) => `:warning: ${triCode}${periodTime ? ` ${periodTime} ` : ' '}[${penaltyMinutes} min] ${description}`).join('\n') || 'No penalties';
 
 					if (penaltyStr.length > 1023) penaltyStr = `${penaltyObj.filter(({ about: { period } }) => period === i + 1).length} penalties called this period`;
 					embed.addField(periodName[i], penaltyStr);
