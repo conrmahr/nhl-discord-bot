@@ -25,16 +25,16 @@ module.exports = {
 		};
 
 		if (moment(args[0], 'YYYY-MM-DD', true).isValid()) {
-			parameters.GameDateTimeUTC = moment.utc(args[0]).format('YYYY-MM-DD');
+			parameters.GameDateTimeEST = moment.tz(args[0], 'America/New_York');
 		}
 		else if (args[0] === 'today') {
-			parameters.GameDateTimeUTC = moment.utc().format('YYYY-MM-DD');
+			parameters.GameDateTimeEST = moment.tz('America/New_York');
 		}
 		else if (args[0] === 'tomorrow') {
-			parameters.GameDateTimeUTC = moment.utc().add(1, 'day').format('YYYY-MM-DD');
+			parameters.GameDateTimeEST = moment.tz('America/New_York').add(1, 'day');
 		}
 		else if (!args[0]) {
-			parameters.GameDateTimeUTC = moment.utc().format('YYYY-MM-DD');
+			parameters.GameDateTimeEST = moment.tz('America/New_York');
 			args.push(args[0]);
 		}
 		else {
@@ -53,7 +53,7 @@ module.exports = {
 
 		if (!Array.isArray(fullSchedule) || !fullSchedule.length) return message.reply('no tournament found.');
 
-		const gameDateEST = moment(parameters.GameDateTimeUTC).tz('America/New_York').format('YYYY-MM-DD');
+		const gameDateEST = moment(parameters.GameDateTimeEST).format('YYYY-MM-DD');
 		let schedule = fullSchedule.filter(o => o.GameDateTime.substring(0, 10) === gameDateEST);
 
 		if (!Array.isArray(schedule) || !schedule.length) {
@@ -141,14 +141,15 @@ module.exports = {
 					const flagsObj = {
 						AUT: ':flag_at:',
 						BLR: ':flag_by:',
-						DNK: ':flag_dk:',
+						DEN: ':flag_dk:',
 						EST: ':flag_ee:',
 						GER: ':flag_de:',
 						IRL: ':flag_ie:',
-						KAZ: ':flag_kz:',
 						JAM: ':flag_jm:',
 						JPN: ':flag_jp:',
+						KAZ: ':flag_kz:',
 						KOR: ':flag_kr:',
+						LAT: ':flag_lv:',
 						POL: ':flag_pl:',
 						SUI: ':flag_ch:',
 						SVK: ':flag_sk:',
@@ -236,7 +237,7 @@ module.exports = {
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor(parameters.tourneyTitle, 'https://i.imgur.com/udUeTlY.png');
-		embed.addField(`:hockey: ${moment(parameters.GameDateTimeUTC).tz('America/New_York').format('ddd, MMM DD')}`, gamesList);
+		embed.addField(`:hockey: ${moment(parameters.GameDateTimeEST).format('ddd, MMM DD')}`, gamesList);
 
 		message.channel.send(embed);
 	},
