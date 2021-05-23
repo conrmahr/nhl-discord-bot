@@ -78,7 +78,7 @@ module.exports = {
 				flagRecap = true;
 			}
 			else {
-				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
+				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help game\` for list of flags.`);
 			}
 		}
 
