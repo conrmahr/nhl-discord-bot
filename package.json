@@ -26,7 +26,7 @@
   "homepage": "https://github.com/conrmahr/nhl-discord-bot#readme",
   "dependencies": {
     "bitly": "^7.1.2",
-    "cheerio": "^1.0.0-rc.9",
+    "cheerio": "^1.0.0-rc.10",
     "discord.js": "^12.5.3",
     "moment-timezone": "^0.5.33",
     "node-fetch": "^2.6.1",
