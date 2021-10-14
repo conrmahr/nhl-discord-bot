@@ -10,7 +10,7 @@ module.exports = {
 	category: 'scores',
 	aliases: ['nhl', 'n'],
 	examples: ['', 'nyi -hide', 'tomorrow -tv -venue', 'next nyi nyr'],
-	async execute(message, args, flags, prefix) {
+	async execute(message, args, flags, prefix, timezone) {
 
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
 		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current/').then(response => response.json());
@@ -156,8 +156,8 @@ module.exports = {
 				}
 
 				if (statusCode < 3 || flagHide) {
-					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
-					const gameTime = (statusCode > 2 && !flagHide) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
+					const gameTimeTZ = moment(game.gameDate).tz(timezone).format('h:mm A z');
+					const gameTime = (statusCode > 2 && !flagHide) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeTZ;
 					return `${match}${awayTeam} @ ${homeTeam} ${gameTime}${series}${arena}${tv}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {

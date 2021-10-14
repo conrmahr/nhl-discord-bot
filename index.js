@@ -1,6 +1,6 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const { prefix, token, activity } = require('./config.json');
+const { prefix, token, timezone, activity } = require('./config.json');
 
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
@@ -41,7 +41,7 @@ client.on('message', message => {
 		return message.reply(reply);
 	}
 	try {
-		command.execute(message, args, flags, prefix);
+		command.execute(message, args, flags, prefix, timezone);
 	}
 	catch (error) {
 		console.error(error);
