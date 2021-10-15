@@ -63,6 +63,7 @@ module.exports = {
 		let flagScoring = false;
 		let flagPenalty = false;
 		let flagRecap = false;
+		let flagZone = timezone;
 
 		for (const flag of flags) {
 			if (['lineups', 'l'].includes(flag)) {
@@ -76,6 +77,9 @@ module.exports = {
 			}
 			else if (['recap', 'r'].includes(flag)) {
 				flagRecap = true;
+			}
+			else if (['zone', 'z'].includes(flag.substring(0, 1))) {
+				flagZone = (flag.length > 0) ? flag.split('=', 2)[1] : timezone;
 			}
 			else {
 				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help game\` for list of flags.`);
@@ -152,8 +156,11 @@ module.exports = {
 				}
 
 				if (gameObj.status < 3) {
-					const gameTimeTZ = moment(game.gameDate).tz(timezone).format('h:mm A z');
-					gameObj.clock = gameTimeTZ;
+					const gameTimeTZ = moment(game.gameDate).tz(flagZone);
+					const gameTimeNY = moment(game.gameDate);
+					const extra = moment(gameTimeTZ.format('YYYY-MM-DD')).diff(gameTimeNY.format('YYYY-MM-DD'), 'days') ? '+1' : '';
+					const gameTime = `${moment(game.gameDate).tz(flagZone).format('h:mm A z')}${extra}`;
+					gameObj.clock = gameTime;
 				}
 				else if (gameObj.status < 8) {
 					gameObj.clock = formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal);
