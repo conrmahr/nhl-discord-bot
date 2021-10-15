@@ -1,6 +1,7 @@
 {
   "prefix": "ONE-CHARACTER-SYMBOL",
   "token": "DISCORD-BOT-TOKEN",
+  "timezone": "COUNTRY/CITY",
   "activity": {
     "type": "WATCHING-OR-LISTENING",
     "name": "ANY-TEXT-STRING"
