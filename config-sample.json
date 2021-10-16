@@ -1,16 +1,16 @@
 {
-  "prefix": "ONE-CHARACTER-SYMBOL",
-  "token": "DISCORD-BOT-TOKEN",
-  "timezone": "COUNTRY/CITY",
+  "prefix": "",
+  "token": "",
+  "timezone": "",
   "activity": {
-    "type": "WATCHING-OR-LISTENING",
-    "name": "ANY-TEXT-STRING"
+    "type": "",
+    "name": ""
   },
   "googleSearch": {
-    "cx": "GOOGLE-SEARCH-ENGINE-ID",
-    "key": "GOOGLE-APIS-KEY"
+    "cx": "",
+    "key": ""
   },
   "bitlyAccess": {
-    "token": "BITLY-GENERIC-ACCESS-TOKEN"
+    "token": ""
   }
 }
