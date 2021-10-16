@@ -11,7 +11,7 @@ module.exports = {
 	category: 'stats',
 	aliases: ['game', 'g'],
 	examples: ['phi', '1985-12-11 edm -scoring', '1981-02-26 bos -penalties'],
-	async execute(message, args, flags, prefix) {
+	async execute(message, args, flags, prefix, timezone) {
 
 		const endpoint = 'https://statsapi.web.nhl.com';
 		const { teams } = await fetch(`${endpoint}/api/v1/teams/`).then(response => response.json());
@@ -152,8 +152,8 @@ module.exports = {
 				}
 
 				if (gameObj.status < 3) {
-					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
-					gameObj.clock = gameTimeEST;
+					const gameTime = `${moment(game.gameDate).tz(timezone).format('h:mm A z')}`;
+					gameObj.clock = gameTime;
 				}
 				else if (gameObj.status < 8) {
 					gameObj.clock = formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal);

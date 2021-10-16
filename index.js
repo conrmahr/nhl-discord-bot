@@ -1,6 +1,11 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const { prefix, token, activity } = require('./config.json');
+const { prefix, token, timezone, activity } = require('./config.json');
+
+if (!prefix || prefix.length !== 1) throw 'Prefix must be exactly 1 character.';
+if (!token || token.length !== 59) throw 'Token must be exactly 59 characters.';
+if (!timezone) throw 'Default timezone is not defined.';
+if (!activity) throw 'Activity is not defined.';
 
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
@@ -41,7 +46,7 @@ client.on('message', message => {
 		return message.reply(reply);
 	}
 	try {
-		command.execute(message, args, flags, prefix);
+		command.execute(message, args, flags, prefix, timezone);
 	}
 	catch (error) {
 		console.error(error);

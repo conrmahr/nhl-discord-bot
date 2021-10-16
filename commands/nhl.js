@@ -6,11 +6,11 @@ const qs = require('qs');
 module.exports = {
 	name: 'nhl',
 	usage: '[<date>] [<team> <opponent>] [-<flag>]',
-	description: 'Get games for `today`, `tomorrow`, `yesterday`, `next` 5 games, `last` 5 games, or a given date `YYYY-MM-DD`. If nothing is specified, games scheduled for today will return. Filter with a specific team and opponent abbreviations. Add flags `-tv`, `-venue`, `-hide` for more options.',
+	description: 'Get games for `today`, `tomorrow`, `yesterday`, `next` 5 games, `last` 5 games, or a given date `YYYY-MM-DD`. If nothing is specified, games scheduled for today will return. Filter with a specific team and opponent abbreviations. Add flags `-tv`, `-venue`, `-hide`, `-zone` for more options.',
 	category: 'scores',
 	aliases: ['nhl', 'n'],
-	examples: ['', 'nyi -hide', 'tomorrow -tv -venue', 'next nyi nyr'],
-	async execute(message, args, flags, prefix) {
+	examples: ['', 'nyi -hide', 'tomorrow -tv -venue', 'next nyi nyr', '-zone=europe/stockholm'],
+	async execute(message, args, flags, prefix, timezone) {
 
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
 		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current/').then(response => response.json());
@@ -82,6 +82,8 @@ module.exports = {
 		parameters.expand = ['schedule.teams', 'schedule.linescore', 'schedule.game.seriesSummary'];
 		let flagVenue = false;
 		let flagHide = false;
+		let flagZone = timezone;
+
 		for (const flag of flags) {
 			if (['tv', 't'].includes(flag)) {
 				parameters.expand.push('schedule.broadcasts');
@@ -91,6 +93,13 @@ module.exports = {
 			}
 			else if (['hide', 'h'].includes(flag)) {
 				flagHide = true;
+			}
+			else if (['zone', 'z'].includes(flag.substring(0, 1))) {
+				flagZone = (flag.length > 0) ? flag.split('=', 2)[1] : timezone;
+
+				if (!moment.tz.zone(flagZone)) {
+					return message.reply(`\`${flagZone}\` is not a valid timezone database name. ${prefix}help nhl\` for an example.`);
+				}
 			}
 			else {
 				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
@@ -156,8 +165,10 @@ module.exports = {
 				}
 
 				if (statusCode < 3 || flagHide) {
-					const gameTimeEST = moment(game.gameDate).tz('America/New_York').format('h:mm A z');
-					const gameTime = (statusCode > 2 && !flagHide) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : gameTimeEST;
+					const gameTimeTZ = moment(game.gameDate).tz(flagZone);
+					const gameTimeNY = moment(game.gameDate);
+					const extra = moment(gameTimeTZ.format('YYYY-MM-DD')).diff(gameTimeNY.format('YYYY-MM-DD'), 'days') ? ' +1' : '';
+					const gameTime = (statusCode > 2 && !flagHide) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : `${gameTimeTZ.format('h:mm A z')}${extra}`;
 					return `${match}${awayTeam} @ ${homeTeam} ${gameTime}${series}${arena}${tv}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {

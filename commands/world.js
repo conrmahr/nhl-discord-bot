@@ -13,7 +13,7 @@ module.exports = {
 	category: 'scores',
 	aliases: ['world', 'w'],
 	examples: ['', 'tomorrow', '-hide', '-venue'],
-	async execute(message, args, flags, prefix) {
+	async execute(message, args, flags, prefix, timezone) {
 
 		const parameters = {
 			tourneyURLBase: 'https://www.iihf.com/en',
@@ -25,16 +25,16 @@ module.exports = {
 		};
 
 		if (moment(args[0], 'YYYY-MM-DD', true).isValid()) {
-			parameters.GameDateTimeEST = moment.tz(args[0], 'America/New_York');
+			parameters.GameDateTimeTZ = moment.tz(args[0], timezone);
 		}
 		else if (args[0] === 'today') {
-			parameters.GameDateTimeEST = moment.tz('America/New_York');
+			parameters.GameDateTimeTZ = moment.tz(timezone);
 		}
 		else if (args[0] === 'tomorrow') {
-			parameters.GameDateTimeEST = moment.tz('America/New_York').add(1, 'day');
+			parameters.GameDateTimeTZ = moment.tz(timezone).add(1, 'day');
 		}
 		else if (!args[0]) {
-			parameters.GameDateTimeEST = moment.tz('America/New_York');
+			parameters.GameDateTimeTZ = moment.tz(timezone);
 			args.push(args[0]);
 		}
 		else {
@@ -53,7 +53,7 @@ module.exports = {
 
 		if (!Array.isArray(fullSchedule) || !fullSchedule.length) return message.reply('no tournament found.');
 
-		const gameDateEST = moment(parameters.GameDateTimeEST).format('YYYY-MM-DD');
+		const gameDateEST = moment(parameters.GameDateTimeTZ).format('YYYY-MM-DD');
 		let schedule = fullSchedule.filter(o => o.GameDateTime.substring(0, 10) === gameDateEST);
 
 		if (!Array.isArray(schedule) || !schedule.length) {
@@ -218,7 +218,7 @@ module.exports = {
 				}
 
 				if (gameObj.eventStatus < 3 || flagHide) {
-					const gameTimeEST = moment(gameObj.gameUTC).tz('America/New_York').format('h:mm A z');
+					const gameTimeEST = moment(gameObj.gameUTC).tz(timezone).format('h:mm A z');
 					gameObj.gameTime = gameTimeEST;
 					return `*${gameObj.round}${gameObj.groupId}*: ${gameObj.awayTeam} @ ${gameObj.homeTeam} ${gameObj.gameTime} ${gameObj.arena}`;
 				}
@@ -237,7 +237,7 @@ module.exports = {
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
 		embed.setAuthor(parameters.tourneyTitle, 'https://i.imgur.com/udUeTlY.png');
-		embed.addField(`:hockey: ${moment(parameters.GameDateTimeEST).format('ddd, MMM DD')}`, gamesList);
+		embed.addField(`:hockey: ${moment(parameters.GameDateTimeTZ).format('ddd, MMM DD')}`, gamesList);
 
 		message.channel.send(embed);
 	},
