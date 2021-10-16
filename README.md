@@ -17,7 +17,7 @@ NHL Discord Bot is a self-hosted bot that fetches data from live public [NHL API
 - [Google Search Engine ID](https://developers.google.com/custom-search/docs/tutorial/creatingcse)
 - [Google APIs Key](https://developers.google.com/custom-search/v1/introduction)
 - [Bitly Generic Access Token](https://support.bitly.com/hc/en-us/articles/230647907-How-do-I-generate-an-OAuth-access-token-for-the-Bitly-API-)
-- [Timezone Database Name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)
+- [Timezone Database Name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
 
 ### :computer: Installation
 

@@ -96,6 +96,10 @@ module.exports = {
 			}
 			else if (['zone', 'z'].includes(flag.substring(0, 1))) {
 				flagZone = (flag.length > 0) ? flag.split('=', 2)[1] : timezone;
+
+				if (!moment.tz.zone(flagZone)) {
+					return message.reply(`\`${flagZone}\` is not a valid timezone database name. ${prefix}help nhl\` for an example.`);
+				}
 			}
 			else {
 				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
