@@ -153,7 +153,7 @@ module.exports = {
 		function getStandings(tables) {
 			let r = 0;
 			return tables.map(table => {
-				const { team, gamesPlayed, leagueRecord: { wins, losses, ties, ot }, points, regulationWins, goalsAgainst, goalsScored, divisionRank, conferenceRank, leagueRank, wildCardRank, row, streak: { streakCode }, pointsPercentage } = table;
+				const { team, gamesPlayed, leagueRecord: { wins, losses, ties, ot }, points, regulationWins, goalsAgainst, goalsScored, divisionRank, conferenceRank, leagueRank, wildCardRank, row, streak, pointsPercentage } = table;
 				const ranks = { byDivision: divisionRank, byConference: conferenceRank, byLeague: leagueRank, wildCardWithLeaders: wildCardRank };
 				const rank = (ranks[standingsType] == 0) ? divisionRank : ranks[standingsType];
 				const clinch = table.clinchIndicator ? `${table.clinchIndicator}-` : '';
@@ -162,7 +162,7 @@ module.exports = {
 				const pp = (flagPointsPercentage && pointsPercentage) ? pointsPercentage.toFixed(3).substring(1) : '';
 				const rw = (!flagPointsPercentage && regulationWins) ? regulationWins : '';
 				const rowe = (!flagPointsPercentage && !regulationWins && row) ? row : '';
-				const strk = streakCode ? `${streakCode}` : '';
+				const strk = typeof streak !== 'undefined' ? streak.streakCode : '';
 				r++;
 				function getHeader(loop, xrw, xrow, xpp, tiu) {
 					if (loop === 1 && xrw && !xpp) return '#  TEAM  GP W  L  OT PTS RW DIFF STRK\n';
