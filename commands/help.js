@@ -6,7 +6,7 @@ module.exports = {
 	description: 'List all of my commands or info about a specific command.',
 	category: 'help',
 	aliases: ['help', 'h'],
-	examples: ['nhl', 'teams'],
+	examples: ['nhl', 'team'],
 	execute(message, args, flags, prefix) {
 		const { commands } = message.client;
 		const embed = new MessageEmbed();
