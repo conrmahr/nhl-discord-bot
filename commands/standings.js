@@ -153,20 +153,18 @@ module.exports = {
 		function getStandings(tables) {
 			let r = 0;
 			return tables.map(table => {
-				const { team, gamesPlayed, leagueRecord: { wins, losses, ties, ot }, points, regulationWins, goalsAgainst, goalsScored, divisionRank, conferenceRank, leagueRank, wildCardRank, row, streak, pointsPercentage } = table;
+				const { team, gamesPlayed, leagueRecord: { wins, losses, ties, ot }, points, regulationWins, goalsAgainst, goalsScored, divisionRank, conferenceRank, leagueRank, wildCardRank, streak, pointsPercentage } = table;
 				const ranks = { byDivision: divisionRank, byConference: conferenceRank, byLeague: leagueRank, wildCardWithLeaders: wildCardRank };
 				const rank = (ranks[standingsType] == 0) ? divisionRank : ranks[standingsType];
 				const clinch = table.clinchIndicator ? `${table.clinchIndicator}-` : '';
 				const teamAbbreviation = team.abbreviation;
 				const extra = tiesInUse ? ties : ot;
 				const pp = (flagPointsPercentage && pointsPercentage) ? pointsPercentage.toFixed(3).substring(1) : '';
-				const rw = (!flagPointsPercentage && regulationWins) ? regulationWins : '';
-				const rowe = (!flagPointsPercentage && !regulationWins && row) ? row : '';
+				const rw = (!flagPointsPercentage && regulationWins >= 0) ? regulationWins : '';
 				const strk = typeof streak !== 'undefined' ? streak.streakCode : '';
 				r++;
-				function getHeader(loop, xrw, xrow, xpp, tiu) {
+				function getHeader(loop, xrw, xpp, tiu) {
 					if (loop === 1 && xrw && !xpp) return '#  TEAM  GP W  L  OT PTS RW DIFF STRK\n';
-					if (loop === 1 && xrow && !xpp) return '#  TEAM  GP W  L  OT PTS ROW DIFF STRK\n';
 					if (loop === 1 && xpp) return '#  TEAM  GP W  L  OT PTS PTS% DIFF STRK\n';
 					if (loop === 1 && tiu) return '#  TEAM  GP W  L  T  PTS DIFF STRK\n';
 					if (loop === 1) return '#  TEAM  GP  W L  OT PTS DIFF STRK\n';
@@ -192,7 +190,7 @@ module.exports = {
 					if (stat === '') return '';
 					return stat.toString().padEnd(column, ' ');
 				}
-				return `${getHeader(r, regulationWins, row, flagPointsPercentage, tiesInUse)}${pad(rank, 3)}${pad(clinch + teamAbbreviation, 6)}${pad(gamesPlayed, 3)}${pad(wins, 3)}${pad(losses, 3)}${pad(extra, 3)}${pad(points, 4)}${pad(pp, 5)}${pad(rw, 3)}${pad(rowe, 4)}${pad(getDiff(goalsScored, goalsAgainst), 5)}${strk}${getLine(r, flagWildCard, flagPointsPercentage)}`;
+				return `${getHeader(r, regulationWins, flagPointsPercentage, tiesInUse)}${pad(rank, 3)}${pad(clinch + teamAbbreviation, 6)}${pad(gamesPlayed, 3)}${pad(wins, 3)}${pad(losses, 3)}${pad(extra, 3)}${pad(points, 4)}${pad(pp, 5)}${pad(rw, 3)}${pad(getDiff(goalsScored, goalsAgainst), 5)}${strk}${getLine(r, flagWildCard, flagPointsPercentage)}`;
 
 			}).join('\u200B\n');
 		}
