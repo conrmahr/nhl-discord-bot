@@ -23,7 +23,7 @@
   "bugs": {
     "url": "https://github.com/conrmahr/nhl-discord-bot/issues"
   },
-  "homepage": "https://github.com/conrmahr/nhl-discord-bot#readme",
+  "homepage": "https://github.com/conrmahr/nhl-discord-bot",
   "dependencies": {
     "bitly": "^7.1.2",
     "cheerio": "^1.0.0-rc.10",
