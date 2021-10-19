@@ -166,9 +166,7 @@ module.exports = {
 
 				if (statusCode < 3 || flagHide) {
 					const gameTimeTZ = moment(game.gameDate).tz(flagZone);
-					const gameTimeNY = moment(game.gameDate);
-					const extra = moment(gameTimeTZ.format('YYYY-MM-DD')).diff(gameTimeNY.format('YYYY-MM-DD'), 'days') ? ' +1' : '';
-					const gameTime = (statusCode > 2 && !flagHide) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : `${gameTimeTZ.format('h:mm A z')}${extra}`;
+					const gameTime = (statusCode > 2 && !flagHide) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : `${gameTimeTZ.format('h:mm A z')}`;
 					return `${match}${awayTeam} @ ${homeTeam} ${gameTime}${series}${arena}${tv}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {
