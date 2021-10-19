@@ -159,7 +159,7 @@ module.exports = {
 				const clinch = table.clinchIndicator ? `${table.clinchIndicator}-` : '';
 				const teamAbbreviation = team.abbreviation;
 				const extra = tiesInUse ? ties : ot;
-				const pp = (flagPointsPercentage && pointsPercentage) ? pointsPercentage.toFixed(3).substring(1) : '';
+				const pp = (flagPointsPercentage && pointsPercentage >= 0) ? (pointsPercentage === 1) ? '1.000' : (pointsPercentage === 0) ? '.000' : pointsPercentage.toFixed(3).substring(1) : '';
 				const rw = (!flagPointsPercentage && regulationWins >= 0) ? regulationWins : '';
 				const strk = typeof streak !== 'undefined' ? streak.streakCode : '';
 				r++;
