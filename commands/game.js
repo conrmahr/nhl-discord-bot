@@ -257,6 +257,15 @@ module.exports = {
 		const eventsMethod = (y, z) => z.filter((e, i)=>{
 			return (y.includes(i));
 		});
+		const getHighlightURL = (content, eid)=>{
+			let watch = '';
+			if (!content.media) return;
+			content.media.milestones.items.filter(x => x.statsEventId == eid).filter(plays => {
+				if (Object.keys(plays.highlight).length === 0) return;
+				watch = plays.highlight.playbacks.find(p => p.name === 'FLASH_1800K_896x504').url;
+			});
+			return watch;
+		};
 
 		if (flagLineup) {
 
@@ -304,7 +313,7 @@ module.exports = {
 			if (scoringPlays.length && gameData.status > 2 && gameData.status < 8) {
 				const shootoutStr = allPlays.filter(({ players, about: { period } }) => period === 5 && players).map(({ players, team: { triCode }, result: { description } }) => `${players.filter(({ playerType }) => playerType === 'Shooter' || playerType === 'Scorer').map(({ playerType }) => `${playerType === 'Shooter' ? ':x:' : ':white_check_mark:'} ${triCode}`)} ${description}`).join('\n');
 				playsByPeriod.slice(0, 4).forEach((e, i) => {
-					const scoringStr = eventsMethod(scoringPlays, allPlays).filter(({ about: { period } }) => period === i + 1).map(({ players, result: { strength, emptyNet }, about: { periodTime, goals: { away, home } }, team: { triCode } }) => `:rotating_light: ${periodTime} ${away}-${home} ${triCode} ${players.filter(({ playerType }) => playerType === 'Scorer').map(({ player: { fullName }, seasonTotal }) => `**${fullName} ${seasonTotal}**${strength.code === 'EVEN' ? '' : ` [${strength.code}]`}${emptyNet ? ' [EN]' : ''}`).join('')} (${players.filter(({ playerType }) => playerType === 'Assist').map(({ player: { fullName }, seasonTotal }) => `${fullName.split(' ').slice(1).join(' ')} ${seasonTotal}`).join(', ') || 'Unassisted'})`).join('\n') || 'No goals';
+					const scoringStr = eventsMethod(scoringPlays, allPlays).filter(({ about: { period } }) => period === i + 1).map(({ players, result: { strength, emptyNet }, about: { eventId, periodTime, goals: { away, home } }, team: { triCode } }) => `:rotating_light: ${periodTime} ${away}-${home} ${triCode} [${players.filter(({ playerType }) => playerType === 'Scorer').map(({ player: { fullName }, seasonTotal }) => `**${fullName} ${seasonTotal}**${strength.code === 'EVEN' ? '' : ` [${strength.code}]`}${emptyNet ? ' [EN]' : ''}`).join('')} (${players.filter(({ playerType }) => playerType === 'Assist').map(({ player: { fullName }, seasonTotal }) => `${fullName.split(' ').slice(1).join(' ')} ${seasonTotal}`).join(', ') || 'Unassisted'})](${getHighlightURL(contentObj, eventId)})`).join('\n') || 'No goals';
 					embed.addField(periodName[i], scoringStr);
 				});
 
