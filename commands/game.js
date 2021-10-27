@@ -349,7 +349,13 @@ module.exports = {
 				const goalies = [`:regional_indicator_w: ${decisions.winner.fullName}`, `:regional_indicator_l: ${decisions.loser.fullName}`].join('\n');
 				const stars = [`:star: ${decisions.firstStar.fullName}`, `:star::star: ${decisions.secondStar.fullName}`, `:star::star::star: ${decisions.thirdStar.fullName}`].join('\n');
 				embed.addField('Goalies', goalies, true);
-				embed.addField('Three Stars of the Game', stars, true);
+				embed.addField('Three Stars', stars, true);
+
+				if (typeof contentObj.media !== 'undefined') {
+					const shortPlayback = contentObj.media.epg.filter(x => x.title === 'Recap').map(({ items }) => items[0].playbacks.find(x => x.name === 'FLASH_1800K_896x504').url);
+					const longPlayback = contentObj.media.epg.filter(x => x.title === 'Extended Highlights').map(({ items }) => items[0].playbacks.find(x => x.name === 'FLASH_1800K_896x504').url);
+					embed.addField('Highlights', `:film_frames: [Recap](${shortPlayback})\n:film_frames: [Extended](${longPlayback})`, true);
+				}
 			}
 		}
 
