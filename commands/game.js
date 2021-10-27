@@ -262,7 +262,7 @@ module.exports = {
 			if (!content.media) return;
 			content.media.milestones.items.filter(x => x.statsEventId == eid).filter(plays => {
 				if (Object.keys(plays.highlight).length === 0) return;
-				watch = plays.highlight.playbacks.find(p => p.name === 'FLASH_1800K_896x504').url;
+				watch = plays.highlight.playbacks.find(({ name }) => name === 'FLASH_1800K_896x504' || name === 'FLASH_1800K_960X540').url;
 			});
 			return watch;
 		};
@@ -352,8 +352,8 @@ module.exports = {
 				embed.addField('Three Stars', stars, true);
 
 				if (typeof contentObj.media !== 'undefined') {
-					const shortPlayback = contentObj.media.epg.filter(x => x.title === 'Recap').map(({ items }) => items[0].playbacks.find(x => x.name === 'FLASH_1800K_896x504').url);
-					const longPlayback = contentObj.media.epg.filter(x => x.title === 'Extended Highlights').map(({ items }) => items[0].playbacks.find(x => x.name === 'FLASH_1800K_896x504').url);
+					const shortPlayback = contentObj.media.epg.filter(({ title }) => title === 'Recap').map(({ items }) => items[0].playbacks.find(({ name }) => name === 'FLASH_1800K_896x504' || name === 'FLASH_1800K_960X540').url);
+					const longPlayback = contentObj.media.epg.filter(({ title }) => title === 'Extended Highlights').map(({ items }) => items[0].playbacks.find(({ name }) => name === 'FLASH_1800K_896x504' || name === 'FLASH_1800K_960X540').url);
 					embed.addField('Highlights', `:film_frames: [Recap](${shortPlayback})\n:film_frames: [Extended](${longPlayback})`, true);
 				}
 			}
