@@ -262,8 +262,10 @@ module.exports = {
 		});
 		const getHighlightURL = (content, eid)=>{
 			let watch = '';
-			if (!content.media) return;
+
+			if (contentObj.messageNumber || Object.keys(content.media.milestones).length === 0) return;
 			content.media.milestones.items.filter(x => x.statsEventId == eid).filter(plays => {
+
 				if (Object.keys(plays.highlight).length === 0) return;
 				watch = plays.highlight.playbacks.find(({ name }) => name === 'FLASH_1800K_896x504' || name === 'FLASH_1800K_960X540').url;
 			});
@@ -272,7 +274,7 @@ module.exports = {
 
 		if (flagLineup) {
 
-			if (contentObj.messageNumber !== 10 && contentObj.editorial.preview.items[0]) {
+			if (!contentObj.messageNumber && contentObj.editorial.preview.items[0]) {
 				const pre = contentObj.editorial.preview.items[0];
 				const turndownService = new turndown();
 				const contributorFooter = pre.contributor.contributors[0] ? `By ${pre.contributor.contributors[0].name}` : 'By NHL.com';
@@ -291,7 +293,7 @@ module.exports = {
 		}
 		else if (flagRecap) {
 
-			if (contentObj.messageNumber !== 10 && contentObj.editorial.recap.items[0]) {
+			if (!contentObj.messageNumber && contentObj.editorial.recap.items[0]) {
 				const post = contentObj.editorial.recap.items[0];
 				const final = `**${gameData.awayTeam} ${gameData.awayScoreFinal} ${gameData.homeTeam} ${gameData.homeScoreFinal} (${gameData.clock})**`;
 				const contributorFooter = post.contributor.source ? `By ${post.contributor.contributors[0].name} / ${post.contributor.source}` : `By ${post.contributor.contributors[0].name}`;
