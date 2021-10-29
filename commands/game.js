@@ -197,30 +197,33 @@ module.exports = {
 				}
 
 				if (linescore.currentPeriod > 3) {
-					let awayOT = (linescore.teams.away.goals > linescore.teams.home.goals) ? 1 : 0;
-					let homeOT = (linescore.teams.away.goals < linescore.teams.home.goals) ? 1 : 0;
+					const awayOT = (linescore.teams.away.goals > linescore.teams.home.goals) ? '1' : '0';
+					const homeOT = (linescore.teams.away.goals < linescore.teams.home.goals) ? '1' : '0';
+					let awaySO = '   ';
+					let homeSO = '   ';
+
 					if (hasShootout) {
-						awayOT += ` (${linescore.shootoutInfo.away.scores}-${linescore.shootoutInfo.away.attempts})`;
-						homeOT += ` (${linescore.shootoutInfo.home.scores}-${linescore.shootoutInfo.home.attempts})`;
+						awaySO = ` (${linescore.shootoutInfo.away.scores}-${linescore.shootoutInfo.away.attempts})   `;
+						homeSO = ` (${linescore.shootoutInfo.home.scores}-${linescore.shootoutInfo.home.attempts})   `;
 					}
 
-					gameObj.awayScoreOT = awayOT;
-					gameObj.homeScoreOT = homeOT;
+					gameObj.awayScoreOT = `${awayOT}${awaySO}`;
+					gameObj.homeScoreOT = `${homeOT}${homeSO}`;
 					gameObj.overtime = true;
 				}
 
 				const awayTeamStr = [`${gameObj.awayTeam} `, awayPP, awayEN].join('');
-				const awayHomeStr = [`${gameObj.homeTeam} `, homePP, homeEN].join('');
-				const awayRowArr = [awayTeamStr.padEnd(11, ' '), gameObj.awayScore1st, gameObj.awayScore2nd, gameObj.awayScore3rd];
-				const homeRowArr = [awayHomeStr.padEnd(11, ' '), gameObj.homeScore1st, gameObj.homeScore2nd, gameObj.homeScore3rd];
-				gameObj.awayScoreFinal = away.score;
-				gameObj.homeScoreFinal = home.score;
+				const homeTeamStr = [`${gameObj.homeTeam} `, homePP, homeEN].join('');
+				const awayRowArr = [awayTeamStr.padEnd(14, ' '), gameObj.awayScore1st.toString().padEnd(4, ' '), gameObj.awayScore2nd.toString().padEnd(4, ' '), gameObj.awayScore3rd.toString().padEnd(4, ' ')];
+				const homeRowArr = [homeTeamStr.padEnd(14, ' '), gameObj.homeScore1st.toString().padEnd(4, ' '), gameObj.homeScore2nd.toString().padEnd(4, ' '), gameObj.homeScore3rd.toString().padEnd(4, ' ')];
+				gameObj.awayScoreFinal = away.score.toString().padEnd(4, ' ');
+				gameObj.homeScoreFinal = home.score.toString().padEnd(4, ' ');
 				gameObj.awayShots = linescore.teams.away.shotsOnGoal.toString().padEnd(2, ' ');
 				gameObj.homeShots = linescore.teams.home.shotsOnGoal.toString().padEnd(2, ' ');
-				gameObj.overtime ? awayRowArr.push(gameObj.awayScoreOT, gameObj.awayScoreFinal, gameObj.awayShots) : awayRowArr.push(gameObj.awayScoreFinal, gameObj.awayShots);
-				gameObj.overtime ? homeRowArr.push(gameObj.homeScoreOT, gameObj.homeScoreFinal, gameObj.homeShots) : homeRowArr.push(gameObj.homeScoreFinal, gameObj.homeShots);
-				gameObj.awayTeamLine = awayRowArr.join('   ');
-				gameObj.homeTeamLine = homeRowArr.join('   ');
+				gameObj.overtime ? awayRowArr.push(gameObj.awayScoreOT, gameObj.awayScoreFinal.toString().padEnd(4, ' '), gameObj.awayShots.toString().padEnd(2, ' ')) : awayRowArr.push(gameObj.awayScoreFinal.toString().padEnd(4, ' '), gameObj.awayShots.toString().padEnd(2, ' '));
+				gameObj.overtime ? homeRowArr.push(gameObj.homeScoreOT, gameObj.homeScoreFinal.toString().padEnd(4, ' '), gameObj.homeShots.toString().padEnd(2, ' ')) : homeRowArr.push(gameObj.homeScoreFinal.toString().padEnd(4, ' '), gameObj.homeShots.toString().padEnd(2, ' '));
+				gameObj.awayTeamLine = awayRowArr.join('');
+				gameObj.homeTeamLine = homeRowArr.join('');
 				const ot = linescore.currentPeriodOrdinal ? linescore.currentPeriodOrdinal.padEnd(4) : '';
 				const b = hasShootout ? [41, 20] : gameObj.overtime ? [35, 14] : [35, 14];
 				const o = gameObj.overtime ? 4 : 0;
