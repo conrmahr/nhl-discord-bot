@@ -10,7 +10,7 @@ module.exports = {
 	description: 'Get team stats or roster for active and former teams. Add `YYYY` to specifiy a season. Add the flags  `-roster`, `-advanced`, `-filter=<term>` for more options.',
 	category: 'stats',
 	aliases: ['team', 'teams', 't'],
-	examples: ['stl', '1996 det', '1982 nyi -roster', 'team 1978 mtl -filter=pp'],
+	examples: ['', '1996 det', '1982 nyi -roster', 'team 1978 mtl -filter=pp'],
 	async execute(message, args, flags, prefix) {
 
 		const parameters = {};

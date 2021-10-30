@@ -9,7 +9,7 @@ module.exports = {
 	description: 'Get games for `today`, `tomorrow`, `yesterday`, `next` 5 games, `last` 5 games, or a given date `YYYY-MM-DD`. If nothing is specified, games scheduled for today will return. Filter with a specific team and opponent abbreviations. Add flags `-tv`, `-venue`, `-hide`, `-zone` for more options.',
 	category: 'scores',
 	aliases: ['nhl', 'n'],
-	examples: ['', 'nyi -hide', 'tomorrow -tv -venue', 'next nyi nyr', '-zone=europe/stockholm'],
+	examples: ['', 'tomorrow -tv -venue', 'next nyi nyr', '-hide', '-zone=europe/stockholm'],
 	async execute(message, args, flags, prefix, timezone) {
 
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
@@ -171,7 +171,7 @@ module.exports = {
 				}
 				else if (statusCode > 2 && statusCode < 5) {
 					const clock = function getClock(timeLeft, type) {
-						const clockString = (timeLeft > 0 && type === 'int') ? ` [${moment().startOf('day').seconds(timeLeft).format('mm:ss')} Int] ` : (timeLeft > 0 && type === 'pp') ? `[*PP ${moment().startOf('day').seconds(timeLeft).format('mm:ss')}*] ` : '';
+						const clockString = (timeLeft > 0 && type === 'int') ? ` (${linescore.currentPeriodOrdinal} Int - ${moment().startOf('day').seconds(timeLeft).format('mm:ss')}) ` : (timeLeft > 0 && type === 'pp') ? `[*PP ${moment().startOf('day').seconds(timeLeft).format('mm:ss')}*] ` : '';
 						return clockString;
 					};
 
@@ -179,8 +179,8 @@ module.exports = {
 					const homePP = linescore.teams.home.powerPlay ? clock(linescore.powerPlayInfo.situationTimeRemaining, 'pp') : '';
 					const awayEN = linescore.teams.away.goaliePulled ? ' [*EN*] ' : '';
 					const homeEN = linescore.teams.home.goaliePulled ? ' [*EN*] ' : '';
-					const intermission = linescore.intermissionInfo.inIntermission ? clock(linescore.intermissionInfo.intermissionTimeRemaining, 'int') : '';
-					return `${match}${awayTeam} ${away.score} ${awayPP}${awayEN} ${homeTeam} ${home.score} ${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${intermission}${series}${arena}${tv}`;
+					const periodTime = linescore.intermissionInfo.inIntermission ? clock(linescore.intermissionInfo.intermissionTimeRemaining, 'int') : formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal);
+					return `${match}${awayBB}${awayTeam} ${away.score}${awayBB} ${awayPP}${awayEN} ${homeBB}${homeTeam} ${home.score}${homeBB} ${homePP}${homeEN} ${periodTime}${series}${arena}${tv}`;
 				}
 				else if (statusCode > 4 && statusCode < 8) {
 					return `${match}${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${series}${arena}`;

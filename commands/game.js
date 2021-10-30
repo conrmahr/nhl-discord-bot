@@ -10,7 +10,7 @@ module.exports = {
 	description: 'Get game boxscores, scoring, and penalty summaries. Add one flag `-scoring`, `-penalties`, `-lineups`, or `-recap` for more options.',
 	category: 'stats',
 	aliases: ['game', 'g'],
-	examples: ['phi', '1985-12-11 edm -scoring', '1981-02-26 bos -penalties'],
+	examples: ['1985-12-11 edm -scoring', '1981-02-26 bos -penalties', '2021-10-30 pit -lineups', '2020-08-11 tbl -recap'],
 	async execute(message, args, flags, prefix, timezone) {
 
 		const endpoint = 'https://statsapi.web.nhl.com';
@@ -197,30 +197,33 @@ module.exports = {
 				}
 
 				if (linescore.currentPeriod > 3) {
-					let awayOT = (linescore.teams.away.goals > linescore.teams.home.goals) ? 1 : 0;
-					let homeOT = (linescore.teams.away.goals < linescore.teams.home.goals) ? 1 : 0;
+					const awayOT = (linescore.teams.away.goals > linescore.teams.home.goals) ? '1' : '0';
+					const homeOT = (linescore.teams.away.goals < linescore.teams.home.goals) ? '1' : '0';
+					let awaySO = '   ';
+					let homeSO = '   ';
+
 					if (hasShootout) {
-						awayOT += ` (${linescore.shootoutInfo.away.scores}-${linescore.shootoutInfo.away.attempts})`;
-						homeOT += ` (${linescore.shootoutInfo.home.scores}-${linescore.shootoutInfo.home.attempts})`;
+						awaySO = ` (${linescore.shootoutInfo.away.scores}-${linescore.shootoutInfo.away.attempts})   `;
+						homeSO = ` (${linescore.shootoutInfo.home.scores}-${linescore.shootoutInfo.home.attempts})   `;
 					}
 
-					gameObj.awayScoreOT = awayOT;
-					gameObj.homeScoreOT = homeOT;
+					gameObj.awayScoreOT = `${awayOT}${awaySO}`;
+					gameObj.homeScoreOT = `${homeOT}${homeSO}`;
 					gameObj.overtime = true;
 				}
 
 				const awayTeamStr = [`${gameObj.awayTeam} `, awayPP, awayEN].join('');
-				const awayHomeStr = [`${gameObj.homeTeam} `, homePP, homeEN].join('');
-				const awayRowArr = [awayTeamStr.padEnd(11, ' '), gameObj.awayScore1st, gameObj.awayScore2nd, gameObj.awayScore3rd];
-				const homeRowArr = [awayHomeStr.padEnd(11, ' '), gameObj.homeScore1st, gameObj.homeScore2nd, gameObj.homeScore3rd];
-				gameObj.awayScoreFinal = away.score;
-				gameObj.homeScoreFinal = home.score;
+				const homeTeamStr = [`${gameObj.homeTeam} `, homePP, homeEN].join('');
+				const awayRowArr = [awayTeamStr.padEnd(14, ' '), gameObj.awayScore1st.toString().padEnd(4, ' '), gameObj.awayScore2nd.toString().padEnd(4, ' '), gameObj.awayScore3rd.toString().padEnd(4, ' ')];
+				const homeRowArr = [homeTeamStr.padEnd(14, ' '), gameObj.homeScore1st.toString().padEnd(4, ' '), gameObj.homeScore2nd.toString().padEnd(4, ' '), gameObj.homeScore3rd.toString().padEnd(4, ' ')];
+				gameObj.awayScoreFinal = away.score.toString().padEnd(4, ' ');
+				gameObj.homeScoreFinal = home.score.toString().padEnd(4, ' ');
 				gameObj.awayShots = linescore.teams.away.shotsOnGoal.toString().padEnd(2, ' ');
 				gameObj.homeShots = linescore.teams.home.shotsOnGoal.toString().padEnd(2, ' ');
-				gameObj.overtime ? awayRowArr.push(gameObj.awayScoreOT, gameObj.awayScoreFinal, gameObj.awayShots) : awayRowArr.push(gameObj.awayScoreFinal, gameObj.awayShots);
-				gameObj.overtime ? homeRowArr.push(gameObj.homeScoreOT, gameObj.homeScoreFinal, gameObj.homeShots) : homeRowArr.push(gameObj.homeScoreFinal, gameObj.homeShots);
-				gameObj.awayTeamLine = awayRowArr.join('   ');
-				gameObj.homeTeamLine = homeRowArr.join('   ');
+				gameObj.overtime ? awayRowArr.push(gameObj.awayScoreOT, gameObj.awayScoreFinal.toString().padEnd(4, ' '), gameObj.awayShots.toString().padEnd(2, ' ')) : awayRowArr.push(gameObj.awayScoreFinal.toString().padEnd(4, ' '), gameObj.awayShots.toString().padEnd(2, ' '));
+				gameObj.overtime ? homeRowArr.push(gameObj.homeScoreOT, gameObj.homeScoreFinal.toString().padEnd(4, ' '), gameObj.homeShots.toString().padEnd(2, ' ')) : homeRowArr.push(gameObj.homeScoreFinal.toString().padEnd(4, ' '), gameObj.homeShots.toString().padEnd(2, ' '));
+				gameObj.awayTeamLine = awayRowArr.join('');
+				gameObj.homeTeamLine = homeRowArr.join('');
 				const ot = linescore.currentPeriodOrdinal ? linescore.currentPeriodOrdinal.padEnd(4) : '';
 				const b = hasShootout ? [41, 20] : gameObj.overtime ? [35, 14] : [35, 14];
 				const o = gameObj.overtime ? 4 : 0;
@@ -257,10 +260,21 @@ module.exports = {
 		const eventsMethod = (y, z) => z.filter((e, i)=>{
 			return (y.includes(i));
 		});
+		const getHighlightURL = (content, eid)=>{
+			let watch = '';
+
+			if (contentObj.messageNumber || Object.keys(content.media.milestones).length === 0) return;
+			content.media.milestones.items.filter(x => x.statsEventId == eid).filter(plays => {
+
+				if (Object.keys(plays.highlight).length === 0) return;
+				watch = plays.highlight.playbacks.find(({ name }) => name === 'FLASH_1800K_896x504' || name === 'FLASH_1800K_960X540').url;
+			});
+			return watch;
+		};
 
 		if (flagLineup) {
 
-			if (contentObj.messageNumber !== 10 && contentObj.editorial.preview.items[0]) {
+			if (!contentObj.messageNumber && contentObj.editorial.preview.items[0]) {
 				const pre = contentObj.editorial.preview.items[0];
 				const turndownService = new turndown();
 				const contributorFooter = pre.contributor.contributors[0] ? `By ${pre.contributor.contributors[0].name}` : 'By NHL.com';
@@ -279,7 +293,7 @@ module.exports = {
 		}
 		else if (flagRecap) {
 
-			if (contentObj.messageNumber !== 10 && contentObj.editorial.recap.items[0]) {
+			if (!contentObj.messageNumber && contentObj.editorial.recap.items[0]) {
 				const post = contentObj.editorial.recap.items[0];
 				const final = `**${gameData.awayTeam} ${gameData.awayScoreFinal} ${gameData.homeTeam} ${gameData.homeScoreFinal} (${gameData.clock})**`;
 				const contributorFooter = post.contributor.source ? `By ${post.contributor.contributors[0].name} / ${post.contributor.source}` : `By ${post.contributor.contributors[0].name}`;
@@ -304,7 +318,9 @@ module.exports = {
 			if (scoringPlays.length && gameData.status > 2 && gameData.status < 8) {
 				const shootoutStr = allPlays.filter(({ players, about: { period } }) => period === 5 && players).map(({ players, team: { triCode }, result: { description } }) => `${players.filter(({ playerType }) => playerType === 'Shooter' || playerType === 'Scorer').map(({ playerType }) => `${playerType === 'Shooter' ? ':x:' : ':white_check_mark:'} ${triCode}`)} ${description}`).join('\n');
 				playsByPeriod.slice(0, 4).forEach((e, i) => {
-					const scoringStr = eventsMethod(scoringPlays, allPlays).filter(({ about: { period } }) => period === i + 1).map(({ players, result: { strength, emptyNet }, about: { periodTime, goals: { away, home } }, team: { triCode } }) => `:rotating_light: ${periodTime} ${away}-${home} ${triCode} ${players.filter(({ playerType }) => playerType === 'Scorer').map(({ player: { fullName }, seasonTotal }) => `**${fullName} ${seasonTotal}**${strength.code === 'EVEN' ? '' : ` [${strength.code}]`}${emptyNet ? ' [EN]' : ''}`).join('')} (${players.filter(({ playerType }) => playerType === 'Assist').map(({ player: { fullName }, seasonTotal }) => `${fullName.split(' ').slice(1).join(' ')} ${seasonTotal}`).join(', ') || 'Unassisted'})`).join('\n') || 'No goals';
+					let scoringStr = eventsMethod(scoringPlays, allPlays).filter(({ about: { period } }) => period === i + 1).map(({ players, result: { strength, emptyNet }, about: { eventId, periodTime, goals: { away, home } }, team: { triCode } }) => `:rotating_light: ${periodTime} ${away}-${home} ${triCode} [${players.filter(({ playerType }) => playerType === 'Scorer').map(({ player: { fullName }, seasonTotal }) => `**${fullName} ${seasonTotal}**${strength.code === 'EVEN' ? '' : ` [${strength.code}]`}${emptyNet ? ' [EN]' : ''}`).join('')} (${players.filter(({ playerType }) => playerType === 'Assist').map(({ player: { fullName }, seasonTotal }) => `${fullName.split(' ').slice(1).join(' ')} ${seasonTotal}`).join(', ') || 'Unassisted'})](${getHighlightURL(contentObj, eventId)})`).join('\n') || 'No goals';
+
+					if (scoringStr.length > 1023) scoringStr = `${eventsMethod(scoringPlays, allPlays).filter(({ about: { period } }) => period === i + 1).length} goals scored in this period`;
 					embed.addField(periodName[i], scoringStr);
 				});
 
@@ -340,7 +356,13 @@ module.exports = {
 				const goalies = [`:regional_indicator_w: ${decisions.winner.fullName}`, `:regional_indicator_l: ${decisions.loser.fullName}`].join('\n');
 				const stars = [`:star: ${decisions.firstStar.fullName}`, `:star::star: ${decisions.secondStar.fullName}`, `:star::star::star: ${decisions.thirdStar.fullName}`].join('\n');
 				embed.addField('Goalies', goalies, true);
-				embed.addField('Three Stars of the Game', stars, true);
+				embed.addField('Three Stars', stars, true);
+
+				if (typeof contentObj.media !== 'undefined') {
+					const shortPlayback = contentObj.media.epg.filter(({ title }) => title === 'Recap').map(({ items }) => items[0].playbacks.find(({ name }) => name === 'FLASH_1800K_896x504' || name === 'FLASH_1800K_960X540').url);
+					const longPlayback = contentObj.media.epg.filter(({ title }) => title === 'Extended Highlights').map(({ items }) => items[0].playbacks.find(({ name }) => name === 'FLASH_1800K_896x504' || name === 'FLASH_1800K_960X540').url);
+					embed.addField('Highlights', `:film_frames: [Recap](${shortPlayback})\n:film_frames: [Extended](${longPlayback})`, true);
+				}
 			}
 		}
 
