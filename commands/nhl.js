@@ -180,7 +180,7 @@ module.exports = {
 					const awayEN = linescore.teams.away.goaliePulled ? ' [*EN*] ' : '';
 					const homeEN = linescore.teams.home.goaliePulled ? ' [*EN*] ' : '';
 					const periodTime = linescore.intermissionInfo.inIntermission ? clock(linescore.intermissionInfo.intermissionTimeRemaining, 'int') : formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal);
-					return `${match}${awayTeam} ${away.score} ${awayPP}${awayEN} ${homeTeam} ${home.score} ${homePP}${homeEN} ${periodTime}${series}${arena}${tv}`;
+					return `${match}${awayBB}${awayTeam} ${away.score}${awayBB} ${awayPP}${awayEN} ${homeBB}${homeTeam} ${home.score}${homeBB} ${homePP}${homeEN} ${periodTime}${series}${arena}${tv}`;
 				}
 				else if (statusCode > 4 && statusCode < 8) {
 					return `${match}${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${series}${arena}`;
