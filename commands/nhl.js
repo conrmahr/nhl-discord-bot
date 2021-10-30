@@ -9,7 +9,7 @@ module.exports = {
 	description: 'Get games for `today`, `tomorrow`, `yesterday`, `next` 5 games, `last` 5 games, or a given date `YYYY-MM-DD`. If nothing is specified, games scheduled for today will return. Filter with a specific team and opponent abbreviations. Add flags `-tv`, `-venue`, `-hide`, `-zone` for more options.',
 	category: 'scores',
 	aliases: ['nhl', 'n'],
-	examples: ['', 'nyi -hide', 'tomorrow -tv -venue', 'next nyi nyr', '-zone=europe/stockholm'],
+	examples: ['', 'tomorrow -tv -venue', 'next nyi nyr', '-hide', '-zone=europe/stockholm'],
 	async execute(message, args, flags, prefix, timezone) {
 
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());

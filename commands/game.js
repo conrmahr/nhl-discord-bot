@@ -10,7 +10,7 @@ module.exports = {
 	description: 'Get game boxscores, scoring, and penalty summaries. Add one flag `-scoring`, `-penalties`, `-lineups`, or `-recap` for more options.',
 	category: 'stats',
 	aliases: ['game', 'g'],
-	examples: ['phi', '1985-12-11 edm -scoring', '1981-02-26 bos -penalties'],
+	examples: ['1985-12-11 edm -scoring', '1981-02-26 bos -penalties', '2021-10-30 pit -lineups', '2020-08-11 tbl -recap'],
 	async execute(message, args, flags, prefix, timezone) {
 
 		const endpoint = 'https://statsapi.web.nhl.com';
