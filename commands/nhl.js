@@ -171,7 +171,7 @@ module.exports = {
 				}
 				else if (statusCode > 2 && statusCode < 5) {
 					const clock = function getClock(timeLeft, type) {
-						const clockString = (timeLeft > 0 && type === 'int') ? ` [${moment().startOf('day').seconds(timeLeft).format('mm:ss')} Int] ` : (timeLeft > 0 && type === 'pp') ? `[*PP ${moment().startOf('day').seconds(timeLeft).format('mm:ss')}*] ` : '';
+						const clockString = (timeLeft > 0 && type === 'int') ? ` (${linescore.currentPeriodOrdinal} Int - ${moment().startOf('day').seconds(timeLeft).format('mm:ss')}) ` : (timeLeft > 0 && type === 'pp') ? `[*PP ${moment().startOf('day').seconds(timeLeft).format('mm:ss')}*] ` : '';
 						return clockString;
 					};
 
@@ -179,8 +179,8 @@ module.exports = {
 					const homePP = linescore.teams.home.powerPlay ? clock(linescore.powerPlayInfo.situationTimeRemaining, 'pp') : '';
 					const awayEN = linescore.teams.away.goaliePulled ? ' [*EN*] ' : '';
 					const homeEN = linescore.teams.home.goaliePulled ? ' [*EN*] ' : '';
-					const intermission = linescore.intermissionInfo.inIntermission ? clock(linescore.intermissionInfo.intermissionTimeRemaining, 'int') : '';
-					return `${match}${awayTeam} ${away.score} ${awayPP}${awayEN} ${homeTeam} ${home.score} ${homePP}${homeEN} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${intermission}${series}${arena}${tv}`;
+					const periodTime = linescore.intermissionInfo.inIntermission ? clock(linescore.intermissionInfo.intermissionTimeRemaining, 'int') : formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal);
+					return `${match}${awayTeam} ${away.score} ${awayPP}${awayEN} ${homeTeam} ${home.score} ${homePP}${homeEN} ${periodTime}${series}${arena}${tv}`;
 				}
 				else if (statusCode > 4 && statusCode < 8) {
 					return `${match}${awayBB}${awayTeam} ${away.score}${awayBB} ${homeBB}${homeTeam} ${home.score}${homeBB} ${formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal)}${series}${arena}`;
