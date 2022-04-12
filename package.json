@@ -30,7 +30,7 @@
     "discord.js": "^13.6.0",
     "eslint": "^8.13.0",
     "moment-timezone": "^0.5.33",
-    "node-fetch": "^2.6.5",
+    "node-fetch": "^3.2.3",
     "qs": "^6.10.1",
     "turndown": "^7.1.1"
   }
