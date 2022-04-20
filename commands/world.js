@@ -13,7 +13,7 @@ module.exports = {
 	category: 'scores',
 	aliases: ['world', 'w'],
 	examples: ['', 'tomorrow', '-hide', '-venue'],
-	async execute(message, args, flags, prefix, timezone) {
+	async execute(message, args, prefix, flags, timezone) {
 
 		const parameters = {
 			tourneyURLBase: 'https://www.iihf.com/en',
@@ -38,7 +38,7 @@ module.exports = {
 			args.push(args[0]);
 		}
 		else {
-			return message.reply(`\`${args[0]}\` is not a valid argument. Type \`${prefix}help world\` for a list of arguments.`);
+			return message.reply({ content: `\`${args[0]}\` is not a valid argument. Type \`${prefix}help world\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
 		}
 
 		const bitlyObj = await bitly.shorten(parameters.tourneyURLBase);
@@ -50,9 +50,7 @@ module.exports = {
 		parameters.tourneyId = tourneyIds.split(';')[0];
 		const getLatestScoresState = 'https://realtime.iihf.com/gamestate/GetLatestScoresState/';
 		const fullSchedule = await fetch(`${getLatestScoresState}${parameters.tourneyId}`).then(response => response.json());
-
-		if (!Array.isArray(fullSchedule) || !fullSchedule.length) return message.reply('no tournament found.');
-
+		if (!Array.isArray(fullSchedule) || !fullSchedule.length) return message.reply({ content: 'No tournament found.', allowedMentions: { repliedUser: true } });
 		const gameDateEST = moment(parameters.GameDateTimeTZ).format('YYYY-MM-DD');
 		let schedule = fullSchedule.filter(o => o.GameDateTime.substring(0, 10) === gameDateEST);
 
@@ -70,7 +68,7 @@ module.exports = {
 				flagHide = true;
 			}
 			else {
-				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help world\` for list of flags.`);
+				return message.reply({ content: `\`-${flag}\` is not a valid flag. Type \`${prefix}help world\` for list of flags.`, allowedMentions: { repliedUser: true } });
 			}
 		}
 
@@ -236,9 +234,9 @@ module.exports = {
 		const gamesList = await getScores(schedule);
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
-		embed.setAuthor(parameters.tourneyTitle, 'https://i.imgur.com/udUeTlY.png');
+		embed.setAuthor({ name: parameters.tourneyTitle, iconURL: 'https://i.imgur.com/udUeTlY.png' });
 		embed.addField(`:hockey: ${moment(parameters.GameDateTimeTZ).format('ddd, MMM DD')}`, gamesList);
 
-		message.channel.send(embed);
+		return message.channel.send({ embeds: [embed] });
 	},
 };

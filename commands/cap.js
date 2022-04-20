@@ -13,9 +13,9 @@ module.exports = {
 	category: 'stats',
 	aliases: ['cap', 'c'],
 	examples: ['mcdavid', 'edm', 'tavares -buyout'],
-	async execute(message, args, flags, prefix) {
+	async execute(message, args, prefix, flags) {
 
-		if (args.length === 0) return message.reply(`no player or team provided. Type \`${prefix}help cap\` for a list of arguments.`);
+		if (args.length === 0) return message.reply({ content: `No player or team provided. Type \`${prefix}help cap\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
 		const terms = args.join(' ');
 		const isTeam = teams.some(o => o.abbreviation === args[0].toUpperCase() || o.teamName.toUpperCase().split(' ').pop() === args[0].toUpperCase());
@@ -26,7 +26,7 @@ module.exports = {
 				flagBuyout = true;
 			}
 			else {
-				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
+				return message.reply({ content: `\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`, allowedMentions: { repliedUser: true } });
 			}
 		}
 
@@ -47,7 +47,7 @@ module.exports = {
 
 		if (google.error) {
 			const { error } = google;
-			message.reply(`${error.code}: ${error.message}`);
+			return message.reply({ content: `${error.code}: ${error.message}`, allowedMentions: { repliedUser: true } });
 		}
 		else if (google.searchInformation.totalResults > 0 && args[0]) {
 			let { link } = google.items[0];
@@ -132,7 +132,9 @@ module.exports = {
 
 				const na = (x) => x ? x : null;
 				playerObj.hasContract = contract.children().children().hasClass('ofh');
-				if (!playerObj.hasContract) return message.reply(`no NHL contract history found for ${playerObj.name}.`);
+
+				if (!playerObj.hasContract) return message.reply({ content: `No NHL contract history found for ${playerObj.name}.`, allowedMentions: { repliedUser: true } });
+
 				playerObj.contractType = na(contract.find('.cntrct > div.ofh').children().first().text());
 				playerObj.length = na(contract.find('.contract_data.rel.cntrct > div.ofh > div:nth-child(4)').text().split(':')[1]);
 				playerObj.expiryStatus = na(contract.find('.contract_data.rel.cntrct > div.ofh > div:nth-child(5)').text().split(':')[1]);
@@ -201,16 +203,15 @@ module.exports = {
 				}).get().join('');
 
 				block += `\`\`\`diff\n${table}\n\`\`\``;
-				embed.setAuthor(`${playerObj.name} - ${playerObj.team}`, 'https://i.imgur.com/RFALbw5.png', link);
+				embed.setAuthor({ name: `${playerObj.name} - ${playerObj.team}`, iconURL: 'https://i.imgur.com/RFALbw5.png', url: link });
 				embed.setDescription(block);
 				embed.setFooter(clause);
 			}
 
-			return message.channel.send(embed);
-
+			return message.channel.send({ embeds: [embed] });
 		}
 		else {
-			message.reply(`\`${terms}\` matched 0 players or teams.`);
+			return message.reply({ content: `\`${terms}\` matched 0 players or teams.`, allowedMentions: { repliedUser: true } });
 		}
 	},
 };

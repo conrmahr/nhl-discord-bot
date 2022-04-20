@@ -11,7 +11,7 @@ module.exports = {
 	category: 'draft',
 	aliases: ['draft', 'd'],
 	examples: ['', '1993', '2004 8', '1979 edm'],
-	async execute(message, args, flags, prefix) {
+	async execute(message, args, prefix) {
 
 		const endpoint = 'https://statsapi.web.nhl.com/api/v1/draft/';
 		const parameters = {};
@@ -50,8 +50,7 @@ module.exports = {
 			if (args[1].length === 3) {
 				teamObj = teams.find(o => o.abbreviation === args[1].toUpperCase() || o.teamName.toUpperCase().split(' ').pop() === args[1].toUpperCase()) || '';
 
-				if (!teamObj) return message.reply(`\`${args[1]}\` is not a team for the ${draftYear} Draft. Type \`${prefix}help draft\` for a list of arguments.`);
-
+				if (!teamObj) return message.reply({ content: `\`${args[1]}\` is not a team for the ${draftYear} Draft. Type \`${prefix}help draft\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
 				if (teamObj.active) {
 					const html = await fetch(teamObj.officialSiteUrl).then(response => response.text());
 					const $ = cheerio.load(html);
@@ -71,7 +70,7 @@ module.exports = {
 
 		const data = await fetch(`${endpoint}${draftYear}`).then(response => response.json());
 
-		if (!data.drafts[0].rounds) return message.reply(`no draft picks found for the ${draftYear} Draft. Type \`${prefix}help draft\` for a list of arguments.`);
+		if (!data.drafts[0].rounds) return message.reply({ content: `No draft picks found for the ${draftYear} Draft. Type \`${prefix}help draft\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
 
 		const flatFilterPicks = (draft, pred) => draft.drafts.flatMap(({ rounds }) => {
 			return rounds.flatMap(({ picks }) => picks.filter(pred));
@@ -83,12 +82,14 @@ module.exports = {
 		if (checkRound) {
 			draftObj = flatFilterPicks(data, pick => pick.round === draftRound);
 
-			if (!draftObj.length > 0) return message.reply(`\`${args[1]}\` is not a valid round for the ${draftYear} Draft. Type \`${prefix}help draft\` for a list of arguments.`);
+			if (!draftObj.length > 0) return message.reply({ content: `\`${args[1]}\` is not a valid round for the ${draftYear} Draft. Type \`${prefix}help draft\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
+
 		}
 		else if (teamObj) {
 			draftObj = flatFilterPicks(data, pick => pick.team.id === teamObj.id);
 
-			if (!draftObj) return message.reply(`no draft picks found for the ${draftYear} Draft. Type \`${prefix}help draft\` for a list of arguments.`);
+			if (!draftObj) return message.reply({ content: `No draft picks found for the ${draftYear} Draft. Type \`${prefix}help draft\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
+
 		}
 		else {
 			draftObj = flatFilterPicks(data, pick => pick.round === '1');
@@ -123,10 +124,10 @@ module.exports = {
 		const authorArr = [draftYear, draftTitle, draftTeam];
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
-		embed.setAuthor(authorArr.join(' '), 'https://i.imgur.com/zl8JzZc.png');
+		embed.setAuthor({ name: authorArr.join(' '), iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 		embed.setThumbnail(draftLogo);
 		embed.setDescription(block);
 
-		message.channel.send(embed);
+		return message.channel.send({ embeds: [embed] });
 	},
 };

@@ -11,7 +11,7 @@ module.exports = {
 	category: 'stats',
 	aliases: ['team', 'teams', 't'],
 	examples: ['', '1996 det', '1982 nyi -roster', 'team 1978 mtl -filter=pp'],
-	async execute(message, args, flags, prefix) {
+	async execute(message, args, prefix, flags) {
 
 		const parameters = {};
 		let teamObj = '';
@@ -24,7 +24,9 @@ module.exports = {
 		const advancedFlag = advanced.some(e => flags.includes(e));
 		const keywordFlag = flags.find(e => e.startsWith('filter=') || e.startsWith('f=')) || '';
 		const keyword = (keywordFlag.length > 0) ? keywordFlag.split('=', 2)[1].toLowerCase() : '';
-		if (flags.length > 0 && keywordFlag.length === 0 && !rosterFlag && !advancedFlag) return message.reply(`\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help team\` for list of flags.`);
+
+		if (flags.length > 0 && keywordFlag.length === 0 && !rosterFlag && !advancedFlag) return message.reply({ content: `\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help team\` for list of flags.`, allowedMentions: { repliedUser: true } });
+
 		let limit = (advancedFlag || keywordFlag.length > 0) ? 25 : 3;
 
 		if (moment(args[0], 'YYYY', true).isValid()) {
@@ -40,7 +42,7 @@ module.exports = {
 		const { teams } = await fetch(`https://statsapi.web.nhl.com/api/v1/teams/${query}`).then(response => response.json());
 		const { seasons } = await fetch(`https://statsapi.web.nhl.com/api/v1/seasons/${current}`).then(response => response.json());
 
-		if (!seasons[0]) return message.reply(`\`${args[0]}\` is not a valid NHL season.`);
+		if (!seasons[0]) return message.reply({ content: `\`${args[0]}\` is not a valid NHL season.`, allowedMentions: { repliedUser: true } });
 
 		const humanSeason = `${seasons[0].seasonId.substring(0, 4)}-${seasons[0].seasonId.substring(6)}`;
 		let teamLogo = 'https://i.imgur.com/zl8JzZc.png';
@@ -60,27 +62,25 @@ module.exports = {
 			});
 
 			embed.setColor(0x59acef);
-			embed.setAuthor(`${humanSeason} NHL Teams`, 'https://i.imgur.com/zl8JzZc.png');
+			embed.setAuthor({ name: `${humanSeason} NHL Teams`, iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 			embed.setThumbnail(teamLogo);
 
 			for (const division in divisions) {
 				embed.addField(division, divisions[division].sort().join('\n'), true);
 			}
 
-			return message.channel.send(embed);
+			return message.channel.send({ embeds: [embed] });
 		}
 
 		if (teams) {
 			teamObj = teams.find(o => o.abbreviation === args[1].toUpperCase() || o.teamName.toUpperCase().split(' ').pop() === args[1].toUpperCase());
 		}
 		else {
-			return message.reply(`\`${args[1]}\` matched 0 teams. Type \`${prefix}team\` for a list of teams.`);
+			return message.reply({ content: `\`${args[1]}\` matched 0 teams. Type \`${prefix}team\` for a list of teams.`, allowedMentions: { repliedUser: true } });
 		}
 
-		if (!teamObj) return message.reply(`\`${args[1]}\` matched 0 teams. Type \`${prefix}team\` for a list of teams.`);
-
+		if (!teamObj) return message.reply({ content: `\`${args[1]}\` matched 0 teams. Type \`${prefix}team\` for a list of teams.`, allowedMentions: { repliedUser: true } });
 		if (rosterFlag) type = '/roster/';
-
 		if (teamObj.officialSiteUrl) {
 			const html = await fetch(teamObj.officialSiteUrl).then(response => response.text());
 			const $ = cheerio.load(html);
@@ -93,7 +93,7 @@ module.exports = {
 		const franchise = [ establishedBio, conferenceBio, divisionBio ];
 		embed.setThumbnail(teamLogo);
 		embed.setColor(0x59acef);
-		embed.setAuthor(`${teamObj.name} (${humanSeason} Reg. Season)`, teamLogo);
+		embed.setAuthor({ name: `${teamObj.name} (${humanSeason} Reg. Season)`, iconURL: teamLogo });
 		embed.setDescription(franchise.join(' | '));
 		query = qs.stringify(parameters, { addQueryPrefix: true });
 		const data = await fetch(`https://statsapi.web.nhl.com/api/v1/teams/${teamObj.id}${type}${query}`).then(response => response.json());
@@ -154,8 +154,8 @@ module.exports = {
 
 		}
 
-		Object.entries(g).slice(0, limit).filter(([title, number]) => title.toLowerCase().startsWith(keyword.toLowerCase()) && number != null).forEach(([ key, value ]) => embed.addField(key, value, true));
-		return message.channel.send(embed);
+		Object.entries(g).slice(0, limit).filter(([title, number]) => title.toLowerCase().startsWith(keyword.toLowerCase()) && number != null).forEach(([ key, value ]) => embed.addField(`${key}`, `${value.join('\n')}`, true));
 
+		return message.channel.send({ embeds: [embed] });
 	},
 };

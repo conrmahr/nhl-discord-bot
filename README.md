@@ -11,7 +11,7 @@ NHL Discord Bot is a self-hosted bot that fetches data from live public [NHL API
 
 ### :page_with_curl: Requirements
 
-- Node.js v12+
+- Node.js v16.9+
 - Git v1.7+
 - [Discord Bot Token](https://discordjs.guide/preparations/setting-up-a-bot-application.html)
 - [Google Search Engine ID](https://developers.google.com/custom-search/docs/tutorial/creatingcse)
@@ -25,8 +25,8 @@ Make sure, that you have `git` and `node` installed first
 ```sh
 git --version && node -v
 # Example output:
-# git version 2.27.0
-# v12.18.2
+# git version 2.36.0
+# v16.14.0
 ```
 
 Clone the repository

@@ -10,7 +10,7 @@ module.exports = {
 	category: 'standings',
 	aliases: ['standings', 's'],
 	examples: ['metro', 'east', 'league', '1981 campbell', '1993 patrick'],
-	async execute(message, args, flags, prefix) {
+	async execute(message, args, prefix, flags) {
 
 		const endpoint = 'https://statsapi.web.nhl.com/api/v1/standings/';
 		const parameters = {};
@@ -38,9 +38,7 @@ module.exports = {
 		parameters.expand = 'standings.team';
 		query = qs.stringify(parameters, { addQueryPrefix: true });
 		const { seasons } = await fetch(`https://statsapi.web.nhl.com/api/v1/seasons/${current}`).then(response => response.json());
-
-		if (!seasons[0]) return message.reply(`the \`${args[0]}\` season does not have any games associated with it. Type \`${prefix}help standings\` for a list of arguments.`);
-
+		if (!seasons[0]) return message.reply({ content: `The \`${args[0]}\` season does not have any games associated with it. Type \`${prefix}help standings\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
 		const { seasonId, tiesInUse, conferencesInUse, divisionsInUse, wildCardInUse } = seasons[0];
 		humanSeason = `${seasonId.substring(0, 4)}-${seasonId.substring(6)}`;
 
@@ -50,21 +48,19 @@ module.exports = {
 					flagWildCard = true;
 				}
 				else {
-					return message.reply(`the \`${args[0]}\` season does not have a wild card format. Type \`${prefix}help standings\` for list of arguments.`);
+					return message.reply({ content: `The \`${args[0]}\` season does not have a wild card format. Type \`${prefix}help standings\` for list of arguments.`, allowedMentions: { repliedUser: true } });
 				}
 			}
 			else if (['percentage', 'p'].includes(flag)) {
 				flagPointsPercentage = true;
 			}
 			else {
-				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help standings\` for list of flags.`);
+				return message.reply({ content: `\`-${flag}\` is not a valid flag. Type \`${prefix}help standings\` for list of flags.`, allowedMentions: { repliedUser: true } });
 			}
 		}
 
 		const { records } = await fetch(`${endpoint}${query}`).then(response => response.json());
-
-		if (!records[0].standingsType) return message.reply('no standings available.');
-
+		if (!records[0].standingsType) return message.reply({ content: 'No standings available.', allowedMentions: { repliedUser: true } });
 		const divisionTeams = records.filter(o => {
 
 			if (divisionsInUse) {
@@ -109,8 +105,8 @@ module.exports = {
 			};
 			const divShort = divisionLogos[divisionName.toLowerCase()];
 			if (divShort) standingsLogo = divShort;
-			if (flagWildCard) return message.reply(`\`-wildcard\` is not a valid flag for this division table. Type \`${prefix}help standings\` for a list of arguments.`);
-			if (flagPointsPercentage) return message.reply(`\`-percentage\` is not a valid flag for this division table. Type \`${prefix}help standings\` for a list of arguments.`);
+			if (flagWildCard) return message.reply({ content: `\`-wildcard\` is not a valid flag for this division table. Type \`${prefix}help standings\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
+			if (flagPointsPercentage) return message.reply({ content: `\`-percentage\` is not a valid flag for this division table. Type \`${prefix}help standings\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
 			standingsObj = divisionTeams.sort((a, b) => Number(a.DivisionRank) - Number(b.DivisionRank));
 		}
 		else if (conferenceTeams.length > 0) {
@@ -145,7 +141,8 @@ module.exports = {
 		}
 		else {
 			const tableArr = [...new Set(tableNames)].filter(n => n);
-			return message.reply(`please define a table. \`${tableArr.join('` `')}\` are the available tables for the ${humanSeason} season. Type \`${prefix}help standings\` for a list of arguments.`);
+			return message.reply({ content: `Please define a table. \`${tableArr.join('` `')}\` are the available tables for the ${humanSeason} season. Type \`${prefix}help standings\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
+
 		}
 
 		const updated = moment(Math.max(...standingsObj.map(e => moment(e.lastUpdated)))).format();
@@ -198,12 +195,12 @@ module.exports = {
 		const block = `\`\`\`md\n${getStandings(standingsObj)}\n\`\`\``;
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
-		embed.setAuthor(`${humanSeason} ${standingsTitle}`, standingsLogo);
+		embed.setAuthor({ name: `${humanSeason} ${standingsTitle}`, iconURL: standingsLogo });
 		embed.setThumbnail(standingsLogo);
 		embed.setDescription(block);
 		embed.setTimestamp(updated);
-		embed.setFooter('Last updated', 'https://i.imgur.com/zl8JzZc.png');
+		embed.setFooter({ text: 'Last updated', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 
-		message.channel.send(embed);
+		return message.channel.send({ embeds: [embed] });
 	},
 };

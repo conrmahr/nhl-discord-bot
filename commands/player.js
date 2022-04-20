@@ -12,7 +12,7 @@ module.exports = {
 	category: 'stats',
 	aliases: ['player', 'p'],
 	examples: ['barzal', 'kucherov -advanced', 'crosby -playoffs', 'gretzky -career', 'mcdavid -log', 'ovechkin -onpace', 'marleau -year', 'wilson -filter=pim'],
-	async execute(message, args, flags, prefix) {
+	async execute(message, args, prefix, flags) {
 
 		let yearSet = false;
 		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current').then(response => response.json());
@@ -48,7 +48,7 @@ module.exports = {
 
 		if (google.error) {
 			const { error } = google;
-			message.reply(`${error.code}: ${error.message}`);
+			return message.reply({ content: `${error.code}: ${error.message}`, allowedMentions: { repliedUser: true } });
 		}
 		else if (google.searchInformation.totalResults > 0 && args[0]) {
 			const { link } = google.items[0];
@@ -76,7 +76,9 @@ module.exports = {
 			const advancedFlag = advanced.some(e => flags.includes(e));
 			const keywordFlag = flags.find(e => e.startsWith('filter=') || e.startsWith('f=')) || '';
 			const keyword = (keywordFlag.length > 0) ? keywordFlag.split('=', 2)[1].toLowerCase() : '';
-			if (flags.length > 0 && keywordFlag.length === 0 && !careerFlag && !playoffsFlag && !gameLogFlag && !yearFlag && !monthFlag && !dayFlag && !onPaceFlag && !advancedFlag) return message.reply(`\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help player\` for list of flags.`);
+
+			if (flags.length > 0 && keywordFlag.length === 0 && !careerFlag && !playoffsFlag && !gameLogFlag && !yearFlag && !monthFlag && !dayFlag && !onPaceFlag && !advancedFlag) return message.reply({ content: `\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help player\` for list of flags.`, allowedMentions: { repliedUser: true } });
+
 			let last = 0;
 			let seasonCount = 0;
 			let rows = '';
@@ -201,12 +203,13 @@ module.exports = {
 			const statTypeArr = statType.split(' ');
 			const multiYear = ['Career', 'Year'].some(needle => statTypeArr.includes(needle));
 			const seasonOrPlayoffs = multiYear ? `(${statType})` : `(${humanSeason} ${statType})`;
-			if (Array.isArray(splits) && splits.length === 0) return message.reply(`no stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`);
+			if (Array.isArray(splits) && splits.length === 0) return message.reply({ content: `No stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
 			parameters.player.push(fullName, sweater, seasonOrPlayoffs);
 			const embed = new MessageEmbed();
 			embed.setThumbnail(`${thumbnail}${playerId}.jpg`);
 			embed.setColor(0x59acef);
-			embed.setAuthor(parameters.player.join(' '), teamLogo);
+			embed.setAuthor({ name: parameters.player.join(' '), iconURL: teamLogo });
+
 
 			if (splits.length > 0) {
 				Object.keys(splits).slice(last).forEach(s=>{
@@ -279,7 +282,7 @@ module.exports = {
 						const o = Object.entries(n).map(([key, value]) => Object.assign({}, { key }, value)).sort((a, b) => a.order - b.order);
 
 						if (!(yearFlag || monthFlag || dayFlag)) {
-							Object.entries(o).slice(0, limit).filter(([, element]) => element.key.toLowerCase().startsWith(keyword) && element.stat !== null).forEach(([, values ]) => embed.addField(values.key, values.stat, true));
+							Object.entries(o).slice(0, limit).filter(([, element]) => element.key.toLowerCase().startsWith(keyword) && element.stat !== null).forEach(([, values ]) => embed.addField(`${values.key}`, `${values.stat}`, true));
 						}
 						else {
 							let season = '';
@@ -372,15 +375,16 @@ module.exports = {
 					seasonLine = `\`\`\`md\n#${columns}GP   G   A   P  +/- PIM${rows}\n\`\`\``;
 				}
 				else {
-					return message.reply(`no stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`);
+					return message.reply({ content: `No stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
 				}
 			}
 			embed.setDescription(`${parameters.bio.join(' | ')}\n${parameters.birthday.join(', ')}${seasonLine}`);
-			message.channel.send(embed);
+
+			return message.channel.send({ embeds: [embed] });
 		}
 		else {
 			const missing = (terms.length > 0) ? `\`${terms}\` matched 0 players. Type \`${prefix}team <team> -roster\` for a list of player names.` : `no name provided. Type \`${prefix}help player\` for a list of arguments.`;
-			message.reply(missing);
+			return message.reply({ content: missing, allowedMentions: { repliedUser: true } });
 		}
 
 	},

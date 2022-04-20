@@ -10,11 +10,11 @@ module.exports = {
 	category: 'stats',
 	aliases: ['official', 'o'],
 	examples: ['', '4'],
-	async execute(message, args, flags, prefix) {
+	async execute(message, args, prefix) {
 
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
-		embed.setAuthor('National Hockey League Officials', 'https://i.imgur.com/zl8JzZc.png');
+		embed.setAuthor({ name: 'National Hockey League Officials', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 		const endpoint = 'https://records.nhl.com/site/api/officials/';
 		const options = {
 			cayenneExp: 'active=true',
@@ -24,16 +24,18 @@ module.exports = {
 
 		if (args.length === 0) {
 			const positions = { Referee: [], Linesman: [] };
+
 			data.sort((a, b) => a.lastName.localeCompare(b.lastName));
+
 			data.forEach((official) => {
 				if (official.officialType) {
 					positions[official.officialType].push(`${official.lastName}, ${official.firstName} ${official.sweaterNumber}`);
 				}
 			});
 
-			Object.entries(positions).filter(([, number ]) => number != null).forEach(([ key, value ]) => embed.addField(key, value, true));
+			Object.entries(positions).filter(([, number ]) => number != null).forEach(([ key, value ]) => embed.addField(key, value.join('\n'), true));
 
-			message.channel.send(embed);
+			return message.channel.send({ embeds: [embed] });
 		}
 		else if (data.length > 0 && args[0] < 100) {
 
@@ -68,19 +70,20 @@ module.exports = {
 				else {
 					firstPlayoffGame = 'No games';
 				}
-				embed.setAuthor(`${o.first} ${o.last} #${o.number}`, 'https://i.imgur.com/zl8JzZc.png');
+				embed.setAuthor({ name: `${o.first} ${o.last} #${o.number}`, iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 				embed.setThumbnail(o.headshot);
 				embed.setDescription(`${o.type}${o.city}${o.province}${o.country}`);
 				embed.addField('First Regular Game', firstGame, true);
 				embed.addField('First Playoff Game', firstPlayoffGame, true);
-				message.channel.send(embed);
+
+				return message.channel.send({ embeds: [embed] });
 			}
 			else {
-				message.reply(`\`${args.join()}\` is not an active sweater number. Type \`${prefix}official\` for list of active officials.`);
+				return message.reply({ content: `\`${args.join()}\` is not an active sweater number. Type \`${prefix}official\` for list of active officials.`, allowedMentions: { repliedUser: true } });
 			}
 		}
 		else {
-			message.reply(`\`${args.join()}\` is not a valid argument. Type \`${prefix}help official\` for a list of arguments.`);
+			return message.reply({ content: `\`${args.join()}\` is not a valid argument. Type \`${prefix}help official\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
 		}
 
 	},

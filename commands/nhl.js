@@ -10,7 +10,7 @@ module.exports = {
 	category: 'scores',
 	aliases: ['nhl', 'n'],
 	examples: ['', 'tomorrow -tv -venue', 'next nyi nyr', '-hide', '-zone=europe/stockholm'],
-	async execute(message, args, flags, prefix, timezone) {
+	async execute(message, args, prefix, flags, timezone) {
 
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
 		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current/').then(response => response.json());
@@ -62,7 +62,7 @@ module.exports = {
 					parameters.teamId = teamObj.id;
 				}
 				else {
-					return message.reply(`\`${args[1]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`);
+					return message.reply({ content: `\`${args[1]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
 				}
 			}
 
@@ -74,7 +74,7 @@ module.exports = {
 					parameters.opponentId = opponentObj.id;
 				}
 				else {
-					return message.reply(`\`${args[2]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`);
+					return message.reply({ content: `\`${args[2]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
 				}
 			}
 		}
@@ -98,18 +98,17 @@ module.exports = {
 				flagZone = (flag.length > 0) ? flag.split('=', 2)[1] : timezone;
 
 				if (!moment.tz.zone(flagZone)) {
-					return message.reply(`\`${flagZone}\` is not a valid timezone database name. ${prefix}help nhl\` for an example.`);
+					return message.reply({ content: `\`${flagZone}\` is not a valid timezone database name. ${prefix}help nhl\` for an example.`, allowedMentions: { repliedUser: true } });
 				}
 			}
 			else {
-				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
+				return message.reply({ content: `\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`, allowedMentions: { repliedUser: true } });
 			}
 		}
 
 		const query = qs.stringify(parameters, { arrayFormat: 'comma', addQueryPrefix: true });
 		const schedule = await fetch(`${endpoint}${query}`).then(response => response.json());
-
-		if (!schedule.totalGames) return message.reply('no games scheduled.');
+		if (!schedule.totalGames) return message.reply({ content: 'No games scheduled.', allowedMentions: { repliedUser: true } });
 
 		function getScores(games) {
 			return games.map(game => {
@@ -203,10 +202,10 @@ module.exports = {
 
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
-		embed.setAuthor('NHL Scores', 'https://i.imgur.com/zl8JzZc.png');
+		embed.setAuthor({ name: 'NHL Scores', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
+
 		schedule.dates.slice(0, limit).map(({ date, games }) => embed.addField(`:hockey: ${moment(date).format('ddd, MMM DD')}`, `${getScores(games)}`));
 
-		message.channel.send(embed);
-
+		return message.channel.send({ embeds: [embed] });
 	},
 };

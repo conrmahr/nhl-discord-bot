@@ -11,7 +11,7 @@ module.exports = {
 	category: 'stats',
 	aliases: ['game', 'g'],
 	examples: ['1985-12-11 edm -scoring', '1981-02-26 bos -penalties', '2021-10-30 pit -lineups', '2020-08-11 tbl -recap'],
-	async execute(message, args, flags, prefix, timezone) {
+	async execute(message, args, prefix, flags, timezone) {
 
 		const endpoint = 'https://statsapi.web.nhl.com';
 		const { teams } = await fetch(`${endpoint}/api/v1/teams/`).then(response => response.json());
@@ -51,12 +51,14 @@ module.exports = {
 					parameters.teamId = teamObj.id;
 				}
 				else {
-					return message.reply(`\`${args[1]}\` is not a valid argument. Type \`${prefix}help game\` for a list of arguments.`);
+					return message.reply({ content: `\`${args[1]}\` is not a valid argument. Type \`${prefix}help game\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
+
 				}
 			}
 		}
 
-		if (!parameters.teamId) return message.reply(`no team was defined. Type \`${prefix}help game\` for a list of arguments.`);
+		if (!parameters.teamId) return message.reply({ content: `No team was defined. Type \`${prefix}help game\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
+
 
 		parameters.expand = ['schedule.teams', 'schedule.linescore', 'schedule.game.seriesSummary'];
 		let flagLineup = false;
@@ -78,14 +80,13 @@ module.exports = {
 				flagRecap = true;
 			}
 			else {
-				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help game\` for list of flags.`);
+				return message.reply({ content: `\`-${flag}\` is not a valid flag. Type \`${prefix}help game\` for list of flags.`, allowedMentions: { repliedUser: true } });
 			}
 		}
 
 		const query = qs.stringify(parameters, { arrayFormat: 'comma', addQueryPrefix: true });
 		const schedule = await fetch(`${endpoint}/api/v1/schedule/${query}`).then(response => response.json());
-
-		if (!schedule.totalGames) return message.reply('no games scheduled.');
+		if (!schedule.totalGames) return message.reply({ content: 'No games scheduled.', allowedMentions: { repliedUser: true } });
 
 		function getScores(games) {
 			return games.map(game => {
@@ -288,7 +289,7 @@ module.exports = {
 				embed.setFooter(contributorFooter);
 			}
 			else {
-				return message.reply('no `Game Preview` found.');
+				return message.reply({ content: 'No `Game Preview` found.', allowedMentions: { repliedUser: true } });
 			}
 		}
 		else if (flagRecap) {
@@ -306,7 +307,7 @@ module.exports = {
 				embed.setFooter(contributorFooter);
 			}
 			else {
-				return message.reply('no `Game Recap` found.');
+				return message.reply({ content: 'No `Game Recap` found.', allowedMentions: { repliedUser: true } });
 			}
 		}
 		else if (flagScoring) {
@@ -347,7 +348,7 @@ module.exports = {
 			if (officialsStr) embed.addField('Officials', officialsStr);
 		}
 		else {
-			embed.setAuthor('Boxscore', 'https://i.imgur.com/zl8JzZc.png');
+			embed.setAuthor({ name: 'Boxscore', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 			embed.setDescription(gameData.scoreboard);
 			embed.setFooter(gameData.venue);
 			embed.setTimestamp(datetime.dateTime);
@@ -366,6 +367,6 @@ module.exports = {
 			}
 		}
 
-		message.channel.send(embed);
+		return message.channel.send({ embeds: [embed] });
 	},
 };
