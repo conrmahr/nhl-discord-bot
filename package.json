@@ -1,7 +1,7 @@
 {
   "name": "nhl-discord-bot",
   "version": "3.0.0-rc1",
-  "description": "🏒 Self-Hosted NHL Discord Bot",
+  "description": "🏒 NHL Discord Bot",
   "main": "index.js",
   "scripts": {
     "test": "eslint ./"
