@@ -14,7 +14,11 @@ module.exports = {
 		embed.setColor(0x59acef);
 		embed.setAuthor({ name: 'Invite', iconURL: 'https://cdn.discordapp.com/avatars/535203406592344067/1473d566732ea6ffd24d02be45af8b21.png' });
 		embed.setDescription('Here are some helpful links:');
-		embed.addFields({ name: 'Add to Server', value: '[Invite nhl-discord-bot](https://discord.com/api/oauth2/authorize?client_id=535203406592344067&permissions=0&scope=bot)' }, { name: 'Get Support', value: '[Join Support Server](https://discord.gg/92UtjGs)' });
+		embed.addFields(
+			{ name: 'Add to Server', value: '[Invite nhl-discord-bot to Your Server](https://bot.hockey/invite)' },
+			{ name: 'Join', value: '[Join the Support Server](https://bot.hockey/join)' },
+			{ name: 'Contribute', value: '[Contribute to nhl-discord-bot on GitHub](https://git.io/nhl-discord-bot)' },
+		);
 
 		return message.channel.send({ embeds: [embed] });
 	},
