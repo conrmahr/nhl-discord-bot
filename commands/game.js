@@ -283,10 +283,10 @@ module.exports = {
 				embed.setURL(`https://www.nhl.com${pre.url}`);
 				const preTitle = `${turndownService.turndown(pre.preview)}\n\n${pre.subhead}`;
 				embed.setDescription(preTitle.replace(/#/g, ''));
-				embed.setAuthor('Game Preview', 'https://i.imgur.com/zl8JzZc.png');
+				embed.setAuthor({ name: 'Game Preview', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 				if (Object.keys(pre.media).length > 0) embed.setImage(pre.media.image.cuts['640x360'].src);
 				embed.setTimestamp(pre.date);
-				embed.setFooter(contributorFooter);
+				embed.setFooter({ text: contributorFooter });
 			}
 			else {
 				return message.reply({ content: 'No `Game Preview` found.', allowedMentions: { repliedUser: true } });
@@ -301,10 +301,11 @@ module.exports = {
 				embed.setTitle(post.headline);
 				embed.setURL(`https://www.nhl.com${post.url}`);
 				embed.setDescription(`${final}\n${post.subhead}`);
-				embed.setAuthor('Game Recap', 'https://i.imgur.com/zl8JzZc.png');
+				embed.setAuthor({ name: 'Game Recap', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
+
 				if (Object.keys(post.media).length > 0) { embed.setImage(post.media.image.cuts['640x360'].src); }
 				embed.setTimestamp(post.date);
-				embed.setFooter(contributorFooter);
+				embed.setFooter({ text: contributorFooter });
 			}
 			else {
 				return message.reply({ content: 'No `Game Recap` found.', allowedMentions: { repliedUser: true } });
@@ -312,8 +313,8 @@ module.exports = {
 		}
 		else if (flagScoring) {
 			embed.setDescription(`:hockey: ${gameData.awayTeam} ${gameData.awayScoreFinal} ${gameData.homeTeam} ${gameData.homeScoreFinal} (${gameData.clock})`);
-			embed.setAuthor('Scoring Summary', 'https://i.imgur.com/zl8JzZc.png');
-			embed.setFooter(gameData.venue);
+			embed.setAuthor({ name: 'Scoring Summary', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
+			embed.setFooter({ text: gameData.venue });
 			embed.setTimestamp(datetime.dateTime);
 
 			if (scoringPlays.length && gameData.status > 2 && gameData.status < 8) {
@@ -331,8 +332,8 @@ module.exports = {
 		else if (flagPenalty) {
 			const officialsStr = feedObj.liveData.boxscore.officials.map(({ official: { fullName }, officialType }) => `${officialType}: ${fullName}`).join('\n');
 			embed.setDescription(`:hockey: ${gameData.awayTeam} ${gameData.awayScoreFinal} ${gameData.homeTeam} ${gameData.homeScoreFinal} (${gameData.clock})`);
-			embed.setAuthor('Penalty Summary', 'https://i.imgur.com/zl8JzZc.png');
-			embed.setFooter(gameData.venue);
+			embed.setAuthor({ name: 'Penalty Summary', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
+			embed.setFooter({ text: gameData.venue });
 			embed.setTimestamp(datetime.dateTime);
 
 			if (penaltyPlays.length && gameData.status > 2 && gameData.status < 8) {
@@ -350,7 +351,7 @@ module.exports = {
 		else {
 			embed.setAuthor({ name: 'Boxscore', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 			embed.setDescription(gameData.scoreboard);
-			embed.setFooter(gameData.venue);
+			embed.setFooter({ text: gameData.venue });
 			embed.setTimestamp(datetime.dateTime);
 
 			if (decisions.winner && decisions.firstStar) {

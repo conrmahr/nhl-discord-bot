@@ -69,7 +69,7 @@ module.exports = {
 					capArr[title] = value;
 				});
 
-				embed.setAuthor(teamName.join(' '), 'https://i.imgur.com/RFALbw5.png', link);
+				embed.setAuthor({ name: teamName.join(' '), iconURL: 'https://i.imgur.com/RFALbw5.png', url: link });
 
 				for (const [key, value] of Object.entries(capArr)) {
 					embed.addField(key, value, true);
@@ -205,7 +205,7 @@ module.exports = {
 				block += `\`\`\`diff\n${table}\n\`\`\``;
 				embed.setAuthor({ name: `${playerObj.name} - ${playerObj.team}`, iconURL: 'https://i.imgur.com/RFALbw5.png', url: link });
 				embed.setDescription(block);
-				embed.setFooter(clause);
+				embed.setFooter({ text: clause });
 			}
 
 			return message.channel.send({ embeds: [embed] });
