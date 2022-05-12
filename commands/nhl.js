@@ -48,7 +48,7 @@ module.exports = {
 
 		if (args[0]) {
 
-			if (['last', 'yesterday', 'today', 'tomorrow', 'next'].includes(args[0])) {
+			if (['last', 'yesterday', 'yd', 'today', 'tomorrow', 'tmw', 'next'].includes(args[0])) {
 				switch (args[0]) {
 				case 'last':
 					parameters.startDate = moment(seasons[0].regularSeasonStartDate).format('YYYY-MM-DD');
@@ -56,6 +56,7 @@ module.exports = {
 					limit = 5;
 					break;
 				case 'yesterday':
+				case 'yd':
 					parameters.startDate = gameDateTimeNHLStart.add(-1, 'day').format('YYYY-MM-DD');
 					parameters.endDate = parameters.startDate;
 					break;
@@ -64,6 +65,7 @@ module.exports = {
 					parameters.endDate = gameDateTimeNHLEnd.format('YYYY-MM-DD');
 					break;
 				case 'tomorrow':
+				case 'tmw':
 					parameters.startDate = gameDateTimeNHLStart.add(1, 'day').format('YYYY-MM-DD');
 					parameters.endDate = parameters.startDate;
 					break;

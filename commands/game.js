@@ -19,7 +19,7 @@ module.exports = {
 
 		if (args[0]) {
 
-			if (['last', 'yesterday', 'today', 'tomorrow', 'next'].includes(args[0])) {
+			if (['yesterday', 'yd', 'today', 'tomorrow', 'tmw'].includes(args[0])) {
 				switch (args[0]) {
 				case 'yesterday':
 					parameters.startDate = moment().add(-1, 'day').format('MM/DD/YYYY');

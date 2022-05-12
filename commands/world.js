@@ -63,7 +63,7 @@ module.exports = {
 			tourney.currentDateTimeStartLocal = currentDateTimeStartLocal;
 			tourney.currentDateTimeEndLocal = currentDateTimeEndLocal;
 		}
-		else if (args[0] === 'tomorrow') {
+		else if (args[0] === 'tomorrow' || args[0] === 'tmw') {
 			tourney.currentDateTimeStartLocal = currentDateTimeStartLocal.add(1, 'day');
 			tourney.currentDateTimeEndLocal = currentDateTimeEndLocal.add(1, 'day');
 		}
