@@ -12,54 +12,13 @@ module.exports = {
 	description: 'Get IIHF tournament games for `today`, `tomorrow`, or a given date `YYYY-MM-DD`. If nothing is specified, games scheduled for today will return. Add flags `-venue` or `-hide` for more options.',
 	category: 'scores',
 	aliases: ['world', 'w'],
-	examples: ['', 'tomorrow', '-hide', '-venue'],
+	examples: ['', 'tomorrow', '-hide', '-venue', '-zone=europe/paris'],
 	async execute(message, args, prefix, flags, timezone) {
 
-		const parameters = {
-			tourneyURLBase: 'https://www.iihf.com/en',
-			tourneyURL: '',
-			GameDateTimeUTC: '',
-			tourneyTitleCode: '',
-			tourneyTitle: '',
-			tourneyId: '',
-		};
-
-		if (moment(args[0], 'YYYY-MM-DD', true).isValid()) {
-			parameters.GameDateTimeTZ = moment.tz(args[0], timezone);
-		}
-		else if (args[0] === 'today') {
-			parameters.GameDateTimeTZ = moment.tz(timezone);
-		}
-		else if (args[0] === 'tomorrow') {
-			parameters.GameDateTimeTZ = moment.tz(timezone).add(1, 'day');
-		}
-		else if (!args[0]) {
-			parameters.GameDateTimeTZ = moment.tz(timezone);
-			args.push(args[0]);
-		}
-		else {
-			return message.reply({ content: `\`${args[0]}\` is not a valid argument. Type \`${prefix}help world\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
-		}
-
-		const bitlyObj = await bitly.shorten(parameters.tourneyURLBase);
-		const link = bitlyObj.link;
-		const html = await fetch(link).then(response => response.text());
-		const $ = cheerio.load(html);
-		parameters.tourneyTitleCode = $('#live-championship-container > div.s-filter > div.b-tabs > div > a > span.is-show').first().text();
-		const tourneyIds = $('.m-footer').attr('data-eventids');
-		parameters.tourneyId = tourneyIds.split(';')[0];
-		const getLatestScoresState = 'https://realtime.iihf.com/gamestate/GetLatestScoresState/';
-		const fullSchedule = await fetch(`${getLatestScoresState}${parameters.tourneyId}`).then(response => response.json());
-		if (!Array.isArray(fullSchedule) || !fullSchedule.length) return message.reply({ content: 'No tournament found.', allowedMentions: { repliedUser: true } });
-		const gameDateEST = moment(parameters.GameDateTimeTZ).format('YYYY-MM-DD');
-		let schedule = fullSchedule.filter(o => o.GameDateTime.substring(0, 10) === gameDateEST);
-
-		if (!Array.isArray(schedule) || !schedule.length) {
-			schedule = [{ no: 'games' }];
-		}
-
+		const tourney = { tourneyURLBase: 'https://www.iihf.com/en' };
 		let flagVenue = false;
 		let flagHide = false;
+
 		for (const flag of flags) {
 			if (['venue', 'v'].includes(flag)) {
 				flagVenue = true;
@@ -67,9 +26,62 @@ module.exports = {
 			else if (['hide', 'h'].includes(flag)) {
 				flagHide = true;
 			}
-			else {
-				return message.reply({ content: `\`-${flag}\` is not a valid flag. Type \`${prefix}help world\` for list of flags.`, allowedMentions: { repliedUser: true } });
+			else if (['zone', 'z'].includes(flag.substring(0, 1))) {
+				timezone = (flag.length > 0) ? flag.split('=', 2)[1] : timezone;
+
+				if (!moment.tz.zone(timezone)) {
+					return message.reply({ content: `\`${timezone}\` is not a valid timezone database name. ${prefix}help nhl\` for an example.`, allowedMentions: { repliedUser: true } });
+				}
 			}
+			else {
+				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help world\` for list of flags.`);
+			}
+		}
+
+		const bitlyObj = await bitly.shorten(tourney.tourneyURLBase);
+		const link = bitlyObj.link;
+		const html = await fetch(link).then(response => response.text());
+		const $ = cheerio.load(html);
+		const liveBlock = $('#live-championship-container > div.s-filter > div.b-tabs > div > a > span.is-show').first();
+		tourney.tourneyTitleCode = liveBlock.text();
+		tourney.tourneyId = liveBlock.attr('data-tournament-id');
+		const getLatestScoresState = 'https://realtime.iihf.com/gamestate/GetLatestScoresState/';
+		const fullSchedule = await fetch(`${getLatestScoresState}${tourney.tourneyId}`).then(response => response.json());
+
+		if (!Array.isArray(fullSchedule) || !fullSchedule.length) return message.reply({ content: 'No tournament found.', allowedMentions: { repliedUser: true } });
+
+		const firstGameObj = fullSchedule.find(g => g.TimeOffset);
+		const gameDateTimeIIHF = moment().utcOffset(firstGameObj.TimeOffset);
+		const currentDateTimeStartLocal = gameDateTimeIIHF.clone().startOf('date');
+		const currentDateTimeEndLocal = gameDateTimeIIHF.clone().endOf('date');
+
+		if (moment(args[0], 'YYYY-MM-DD', true).isValid()) {
+			tourney.currentDateTimeStartLocal = moment(args[0]).utcOffset(firstGameObj.TimeOffset).startOf('date');
+			tourney.currentDateTimeEndLocal = moment(args[0]).utcOffset(firstGameObj.TimeOffset).endOf('date');
+		}
+		else if (args[0] === 'today') {
+			tourney.currentDateTimeStartLocal = currentDateTimeStartLocal;
+			tourney.currentDateTimeEndLocal = currentDateTimeEndLocal;
+		}
+		else if (args[0] === 'tomorrow') {
+			tourney.currentDateTimeStartLocal = currentDateTimeStartLocal.add(1, 'day');
+			tourney.currentDateTimeEndLocal = currentDateTimeEndLocal.add(1, 'day');
+		}
+		else if (!args[0]) {
+			tourney.currentDateTimeStartLocal = currentDateTimeStartLocal;
+			tourney.currentDateTimeEndLocal = currentDateTimeEndLocal;
+			args.push(args[0]);
+		}
+		else {
+			return message.reply({ content: `\`${args[0]}\` is not a valid argument. Type \`${prefix}help world\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
+		}
+
+		let schedule = fullSchedule.filter(o => {
+			return moment.utc(o.GameDateTime).isBetween(tourney.currentDateTimeStartLocal, tourney.currentDateTimeEndLocal);
+		});
+
+		if (!Array.isArray(schedule) || !schedule.length) {
+			schedule = [{ no: 'games' }];
 		}
 
 		const tourneyNameObj = {
@@ -107,8 +119,8 @@ module.exports = {
 			WW18IIB: 'U18 Women\'s World Championship Div. II, Group B',
 		};
 
-		const tourneyYear = moment(fullSchedule.pop().GameDateTime).format('YYYY');
-		parameters.tourneyTitle = tourneyNameObj[parameters.tourneyTitleCode] ? `${tourneyYear} ${tourneyNameObj[parameters.tourneyTitleCode]}` : 'TBD';
+		const tourneyYear = gameDateTimeIIHF.year();
+		tourney.tourneyTitle = tourneyNameObj[tourney.tourneyTitleCode] ? `${tourneyYear} ${tourneyNameObj[tourney.tourneyTitleCode]}` : 'TBD';
 
 		function getScores(games) {
 			return Promise.all(games.map(async (game) => {
@@ -163,6 +175,7 @@ module.exports = {
 
 				const { HomeTeam, GuestTeam, GameDateTime, GameDateTimeUTC, EventStatus, Venue, PhaseId, Group, Status, GameId } = game;
 				const phaseObj = {
+					RoundRobin: 'Round Robin',
 					PreliminaryRound: 'Prelims',
 					BronzeMedalGame: ':third_place: Medal Game',
 					GoldMedalGame: ':first_place: Medal Game',
@@ -216,14 +229,17 @@ module.exports = {
 				}
 
 				if (gameObj.eventStatus < 3 || flagHide) {
-					const gameTimeEST = moment(gameObj.gameUTC).tz(timezone).format('h:mm A z');
-					gameObj.gameTime = gameTimeEST;
-					return `*${gameObj.round}${gameObj.groupId}*: ${gameObj.awayTeam} @ ${gameObj.homeTeam} ${gameObj.gameTime} ${gameObj.arena}`;
+					const gameTimeTZ = moment.utc(gameObj.gameUTC).tz(timezone);
+					const dayDiff = moment(gameTimeTZ.format('YYYY-MM-DD')).diff(tourney.currentDateTimeStartLocal.format('YYYY-MM-DD'), 'days');
+					const plusMinusDay = (dayDiff > 0) ? ' (+1 day)' : (dayDiff < 0) ? ' (-1 day)' : '';
+					const gameTime = `${moment(gameObj.gameUTC).tz(timezone).format('h:mm A z')}${plusMinusDay}`;
+					gameObj.gameTime = gameTime;
+					return `[${gameObj.round}${gameObj.groupId}] ${gameObj.awayTeam} @ ${gameObj.homeTeam} ${gameObj.gameTime} ${gameObj.arena}`;
 				}
 				else if (gameObj.eventStatus > 2 && gameObj.eventStatus < 8) {
 					const awayBB = isBold(gameObj.awayScore, gameObj.homeScore);
 					const homeBB = isBold(gameObj.homeScore, gameObj.awayScore);
-					return `*${gameObj.round}${gameObj.groupId}*: ${gameObj.awayTeam} ${awayBB}${gameObj.awayScore}${awayBB} ${gameObj.homeTeam} ${homeBB}${gameObj.homeScore}${homeBB} ${formatPeriod(gameObj.clock, gameObj.period, gameObj.isFinished)} ${gameObj.arena}`;
+					return `[${gameObj.round}${gameObj.groupId}] ${gameObj.awayTeam} ${awayBB}${gameObj.awayScore}${awayBB} ${gameObj.homeTeam} ${homeBB}${gameObj.homeScore}${homeBB} ${formatPeriod(gameObj.clock, gameObj.period, gameObj.isFinished)} ${gameObj.arena}`;
 				}
 				else {
 					return 'Game status not found.';
@@ -234,8 +250,8 @@ module.exports = {
 		const gamesList = await getScores(schedule);
 		const embed = new MessageEmbed();
 		embed.setColor(0x59acef);
-		embed.setAuthor({ name: parameters.tourneyTitle, iconURL: 'https://i.imgur.com/udUeTlY.png' });
-		embed.addField(`:hockey: ${moment(parameters.GameDateTimeTZ).format('ddd, MMM DD')}`, gamesList);
+		embed.setAuthor({ name: tourney.tourneyTitle, iconURL: 'https://i.imgur.com/udUeTlY.png' });
+		embed.addField(`:hockey: ${tourney.currentDateTimeStartLocal.format('ddd, MMM DD')}`, gamesList);
 
 		return message.channel.send({ embeds: [embed] });
 	},
