@@ -28,11 +28,12 @@
     "bitly": "^7.1.2",
     "cheerio": "^1.0.0-rc.10",
     "discord.js": "^13.6.0",
-    "eslint": "^8.13.0",
-    "install": "^0.13.0",
     "moment-timezone": "^0.5.33",
     "node-fetch": "^2.6.7",
     "qs": "^6.10.1",
     "turndown": "^7.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.15.0"
   }
 }
