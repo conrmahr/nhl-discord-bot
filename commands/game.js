@@ -250,7 +250,7 @@ module.exports = {
 		const feedObj = await fetch(`${endpoint}${gameData.live}`).then(response => response.json());
 		const contentObj = await fetch(`${endpoint}${gameData.content}`).then(response => response.json());
 		const embed = new MessageEmbed();
-		embed.setColor(0x59acef);
+		embed.setColor('#7289da');
 		const periodName = { 0: '1st Period', 1: '2nd Period', 2: '3rd Period', 3: 'OT', 4: 'SO' };
 		const allPlays = feedObj.liveData.plays.allPlays;
 		const playsByPeriod = feedObj.liveData.plays.playsByPeriod;

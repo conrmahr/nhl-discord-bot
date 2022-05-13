@@ -194,7 +194,7 @@ module.exports = {
 
 		const block = `\`\`\`md\n${getStandings(standingsObj)}\n\`\`\``;
 		const embed = new MessageEmbed();
-		embed.setColor(0x59acef);
+		embed.setColor('#7289da');
 		embed.setAuthor({ name: `${humanSeason} ${standingsTitle}`, iconURL: standingsLogo });
 		embed.setThumbnail(standingsLogo);
 		embed.setDescription(block);

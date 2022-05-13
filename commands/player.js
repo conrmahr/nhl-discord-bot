@@ -207,7 +207,7 @@ module.exports = {
 			parameters.player.push(fullName, sweater, seasonOrPlayoffs);
 			const embed = new MessageEmbed();
 			embed.setThumbnail(`${thumbnail}${playerId}.jpg`);
-			embed.setColor(0x59acef);
+			embed.setColor('#7289da');
 			embed.setAuthor({ name: parameters.player.join(' '), iconURL: teamLogo });
 
 

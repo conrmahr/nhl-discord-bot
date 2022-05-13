@@ -61,7 +61,7 @@ module.exports = {
 				divisions[checkDivision].push(`${team.teamName.split(' ').pop()} <${team.abbreviation.toLowerCase()}>`);
 			});
 
-			embed.setColor(0x59acef);
+			embed.setColor('#7289da');
 			embed.setAuthor({ name: `${humanSeason} NHL Teams`, iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 			embed.setThumbnail(teamLogo);
 
@@ -92,7 +92,7 @@ module.exports = {
 		const divisionBio = teamObj.division.name ? `${teamObj.division.name} Division` : 'Unknown Division';
 		const franchise = [ establishedBio, conferenceBio, divisionBio ];
 		embed.setThumbnail(teamLogo);
-		embed.setColor(0x59acef);
+		embed.setColor('#7289da');
 		embed.setAuthor({ name: `${teamObj.name} (${humanSeason} Reg. Season)`, iconURL: teamLogo });
 		embed.setDescription(franchise.join(' | '));
 		query = qs.stringify(parameters, { addQueryPrefix: true });

@@ -249,7 +249,7 @@ module.exports = {
 		}
 		const gamesList = await getScores(schedule);
 		const embed = new MessageEmbed();
-		embed.setColor(0x59acef);
+		embed.setColor('#7289da');
 		embed.setAuthor({ name: tourney.tourneyTitle, iconURL: 'https://i.imgur.com/udUeTlY.png' });
 		embed.addField(`:hockey: ${tourney.currentDateTimeStartLocal.format('ddd, MMM DD')}`, gamesList);
 

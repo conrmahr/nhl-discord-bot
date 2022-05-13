@@ -11,7 +11,7 @@ module.exports = {
 	async execute(message) {
 
 		const embed = new MessageEmbed();
-		embed.setColor(0x59acef);
+		embed.setColor('#7289da');
 		embed.setAuthor({ name: 'About', iconURL: 'https://cdn.discordapp.com/avatars/535203406592344067/1473d566732ea6ffd24d02be45af8b21.png' });
 		embed.setDescription(
 			`**${name}** is developed by **[@conrmahr](https://github.com/conrmahr)** using the **[Discord.js](https://discord.js.org)** library.

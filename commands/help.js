@@ -12,7 +12,7 @@ module.exports = {
 		const embed = new MessageEmbed();
 
 		if (!args.length) {
-			embed.setColor(0x59acef);
+			embed.setColor('#7289da');
 			embed.setAuthor({ name: 'Command List', iconURL: 'https://cdn.discordapp.com/avatars/535203406592344067/1473d566732ea6ffd24d02be45af8b21.png' });
 			embed.setDescription(`This is a list of all available commands.\nTo view details for a command, type \`${prefix}help <command>\`.`);
 			embed.addField('Commands', `\`${commands.map(c => c.name).join('` `')}\``);
@@ -28,7 +28,7 @@ module.exports = {
 
 		}
 
-		embed.setColor(0x59acef);
+		embed.setColor('#7289da');
 		embed.setTitle(`\`${prefix}${command.name} ${command.usage}\``);
 		embed.addField('Description', command.description);
 		if (command.examples.length) {

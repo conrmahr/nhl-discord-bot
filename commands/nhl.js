@@ -215,7 +215,7 @@ module.exports = {
 		}
 
 		const embed = new MessageEmbed();
-		embed.setColor(0x59acef);
+		embed.setColor('#7289da');
 		embed.setAuthor({ name: 'NHL Scores', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 
 		schedule.dates.slice(0, limit).map(({ date, games }) => {

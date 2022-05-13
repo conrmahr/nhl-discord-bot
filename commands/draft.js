@@ -123,7 +123,7 @@ module.exports = {
 		const block = `\`\`\`md\n${getPicks(draftObj)}\n\`\`\``;
 		const authorArr = [draftYear, draftTitle, draftTeam];
 		const embed = new MessageEmbed();
-		embed.setColor(0x59acef);
+		embed.setColor('#7289da');
 		embed.setAuthor({ name: authorArr.join(' '), iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 		embed.setThumbnail(draftLogo);
 		embed.setDescription(block);

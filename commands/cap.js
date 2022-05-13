@@ -88,7 +88,7 @@ module.exports = {
 		const bitlyObj = await bitly.shorten(data[0].url);
 		const link = bitlyObj.link;
 		const embed = new MessageEmbed();
-		embed.setColor(0x59acef);
+		embed.setColor('#7289da');
 
 		if (teamObj) {
 			embed.setAuthor({ name: nameString, iconURL: 'https://i.imgur.com/ekQAz39.png', url: link });

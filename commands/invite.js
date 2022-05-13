@@ -11,7 +11,7 @@ module.exports = {
 
 		const embed = new MessageEmbed();
 
-		embed.setColor(0x59acef);
+		embed.setColor('#7289da');
 		embed.setAuthor({ name: 'Invite', iconURL: 'https://cdn.discordapp.com/avatars/535203406592344067/1473d566732ea6ffd24d02be45af8b21.png' });
 		embed.setDescription('Here are some helpful links:');
 		embed.addFields(

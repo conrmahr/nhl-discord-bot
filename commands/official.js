@@ -13,7 +13,7 @@ module.exports = {
 	async execute(message, args, prefix) {
 
 		const embed = new MessageEmbed();
-		embed.setColor(0x59acef);
+		embed.setColor('#7289da');
 		embed.setAuthor({ name: 'National Hockey League Officials', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 		const endpoint = 'https://records.nhl.com/site/api/officials/';
 		const options = {
