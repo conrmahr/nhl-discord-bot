@@ -22,6 +22,7 @@ module.exports = {
 			if (['yesterday', 'yd', 'today', 'tomorrow', 'tmw'].includes(args[0])) {
 				switch (args[0]) {
 				case 'yesterday':
+				case 'yd':
 					parameters.startDate = moment().add(-1, 'day').format('MM/DD/YYYY');
 					parameters.endDate = parameters.startDate;
 					break;
@@ -30,6 +31,7 @@ module.exports = {
 					parameters.endDate = parameters.startDate;
 					break;
 				case 'tomorrow':
+				case 'tmw':
 					parameters.startDate = moment().add(1, 'day').format('MM/DD/YYYY');
 					parameters.endDate = parameters.startDate;
 					break;

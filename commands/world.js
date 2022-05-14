@@ -124,7 +124,7 @@ module.exports = {
 
 		function getScores(games) {
 			return Promise.all(games.map(async (game) => {
-				if (!game.HomeTeam) return 'No games scheduled or is past this date.';
+				if (!game.HomeTeam) return 'No games scheduled or in-progress on this date.';
 				function isBold(w, l) {
 					const b = (w > l) ? '**' : '';
 					return b;
@@ -252,6 +252,8 @@ module.exports = {
 		embed.setColor('#7289da');
 		embed.setAuthor({ name: tourney.tourneyTitle, iconURL: 'https://i.imgur.com/udUeTlY.png' });
 		embed.addField(`:hockey: ${tourney.currentDateTimeStartLocal.format('ddd, MMM DD')}`, gamesList);
+		embed.setFooter({ text: '*Completed games will not display' });
+
 
 		return message.channel.send({ embeds: [embed] });
 	},
