@@ -7,7 +7,7 @@ today! As a contributor, here are the guidelines we would like you to follow:
  - [Question or Problem?](#question)
  - [Issues and Bugs](#issue)
  - [Feature Requests](#feature)
- - [Submit a Pull Request](#contribute)
+ - [Setup on Local Environment](#setup)
 
 ## <a name="coc"></a> Code of Conduct
 
@@ -25,14 +25,79 @@ If you find a bug in the source code, you can help us by [submitting an issue][i
 
 You can *request* a new feature by [submitting an issue][issue-template] to the GitHub Repository.
 
-## <a name="contribute"></a> Submit a Feature and/or Bug Fix
+## <a name="setup"></a> Setup Local Environment
 
-1. [Fork the repository](https://github.com/conrmahr/nhl-discord-bot/fork)
-2. Clone your fork: `git clone https://github.com/your-username/nhl-discord-bot.git`
-3. Create your feature branch: `git checkout -b my-new-feature`
-4. Commit your changes: `git commit -am 'Add some feature'`
-5. Push to the branch: `git push origin my-new-feature`
-6. [Submit a pull request](https://github.com/conrmahr/nhl-discord-bot/compare)
+### Requirements
+
+- Node.js v16.9+
+- Git v1.7+
+- [Discord Bot Token](https://discordjs.guide/preparations/setting-up-a-bot-application.html)
+- [Google Search Engine ID](https://developers.google.com/custom-search/docs/tutorial/creatingcse)
+- [Google APIs Key](https://developers.google.com/custom-search/v1/introduction)
+- [Bitly Generic Access Token](https://support.bitly.com/hc/en-us/articles/230647907-How-do-I-generate-an-OAuth-access-token-for-the-Bitly-API-)
+- [Timezone Database Name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+
+
+### Installation
+
+Make sure, that you have `git` and `node` installed first
+```sh
+git --version && node -v
+# Example output:
+# git version 2.36.0
+# v16.14.0
+```
+
+Clone the repository
+```sh
+git clone https://github.com/conrmahr/nhl-discord-bot.git
+```
+
+Change directories
+```sh
+cd nhl-discord-bot
+```
+
+Install all required dependencies
+```sh
+npm i
+```
+
+Copy the `config-sample.json` file
+```sh
+cp config-sample.json config.json
+```
+
+Edit the `config.json` file
+```json
+{
+  "prefix": "ONE-CHARACTER-SYMBOL",
+  "token": "DISCORD-BOT-TOKEN",
+  "timezone": "COUNTRY/CITY",
+  "activity": {
+    "type": "WATCHING-OR-LISTENING",
+    "name": "ANY-TEXT-STRING"
+  },
+  "googleSearch": {
+    "cx": "GOOGLE-SEARCH-ENGINE-ID",
+    "key": "GOOGLE-APIS-KEY"
+  },
+  "bitlyAccess": {
+    "token": "BITLY-GENERIC-ACCESS-TOKEN"
+  }
+}
+```
+
+Run the bot
+```sh
+node .
+# nhl-discord-bot is logged in!
+```
+
+```
+# Open this URL in a browser to add the bot to server
+https://discordapp.com/oauth2/authorize?client_id={YOUR_CLIENT_ID}&scope=bot
+```
 
 <!-- LINKS -->
 [coc]: CODE_OF_CONDUCT.md

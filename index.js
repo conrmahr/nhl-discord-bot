@@ -1,5 +1,5 @@
 const fs = require('fs');
-const Discord = require('discord.js');
+const { Client, Collection, Intents } = require('discord.js');
 const { prefix, token, timezone, activity } = require('./config.json');
 
 if (!prefix || prefix.length !== 1) throw 'Prefix must be exactly 1 character.';
@@ -7,8 +7,9 @@ if (!token || token.length !== 59) throw 'Token must be exactly 59 characters.';
 if (!timezone) throw 'Default timezone is not defined.';
 if (!activity) throw 'Activity is not defined.';
 
-const client = new Discord.Client();
-client.commands = new Discord.Collection();
+
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES], allowedMentions: { parse: ['users'], repliedUser: true } });
+client.commands = new Collection();
 
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
@@ -19,10 +20,11 @@ for (const file of commandFiles) {
 
 client.once('ready', () => {
 	client.user.setActivity(activity.name, { type: activity.type });
-	console.log(`${client.user.tag} is logged in!`);
+	console.log(`[${client.user.username}] is logged in!`);
+	console.log(client.guilds.cache.map(guild => `[${guild.id}] ${guild.name} (${guild.memberCount} Members)`).join('\n'));
 });
 
-client.on('message', message => {
+client.on('messageCreate', message => {
 
 	if (!message.content.startsWith(prefix) || !isNaN(message.content.substring(1, 2)) || message.author.bot) return;
 	const args = [];
@@ -46,7 +48,7 @@ client.on('message', message => {
 		return message.reply(reply);
 	}
 	try {
-		command.execute(message, args, flags, prefix, timezone);
+		command.execute(message, args, prefix, flags, timezone);
 	}
 	catch (error) {
 		console.error(error);

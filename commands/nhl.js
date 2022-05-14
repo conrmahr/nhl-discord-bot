@@ -10,79 +10,19 @@ module.exports = {
 	category: 'scores',
 	aliases: ['nhl', 'n'],
 	examples: ['', 'tomorrow -tv -venue', 'next nyi nyr', '-hide', '-zone=europe/stockholm'],
-	async execute(message, args, flags, prefix, timezone) {
+	async execute(message, args, prefix, flags, timezone) {
 
 		const { teams } = await fetch('https://statsapi.web.nhl.com/api/v1/teams/').then(response => response.json());
 		const { seasons } = await fetch('https://statsapi.web.nhl.com/api/v1/seasons/current/').then(response => response.json());
 		const endpoint = 'https://statsapi.web.nhl.com/api/v1/schedule/';
-		const parameters = {};
+		const parameters = { expand: ['schedule.teams', 'schedule.linescore', 'schedule.game.seriesSummary'] };
 		let limit = 1;
-
-		if (args[0]) {
-
-			if (['last', 'yesterday', 'today', 'tomorrow', 'next'].includes(args[0])) {
-				switch (args[0]) {
-				case 'last':
-					parameters.startDate = moment(seasons[0].regularSeasonStartDate).format('MM/DD/YYYY');
-					parameters.endDate = moment().format('MM/DD/YYYY');
-					limit = 5;
-					break;
-				case 'yesterday':
-					parameters.startDate = moment().add(-1, 'day').format('MM/DD/YYYY');
-					parameters.endDate = parameters.startDate;
-					break;
-				case 'today':
-					parameters.startDate = moment().format('MM/DD/YYYY');
-					parameters.endDate = parameters.startDate;
-					break;
-				case 'tomorrow':
-					parameters.startDate = moment().add(1, 'day').format('MM/DD/YYYY');
-					parameters.endDate = parameters.startDate;
-					break;
-				case 'next':
-					parameters.startDate = moment().format('MM/DD/YYYY');
-					parameters.endDate = moment(seasons[0].seasonEndDate).format('MM/DD/YYYY');
-					limit = 5;
-					break;
-				}
-			}
-			else if (moment(args[0], 'YYYY-MM-DD', true).isValid()) {
-				parameters.startDate = moment(args[0]).format('MM/DD/YYYY');
-				parameters.endDate = moment(args[0]).format('MM/DD/YYYY');
-			}
-			else {
-				args.push(args[0]);
-			}
-
-			if (args[1]) {
-
-				const teamObj = teams.find(o => o.abbreviation === args[1].toUpperCase() || o.teamName.toUpperCase().split(' ').pop() === args[1].toUpperCase());
-
-				if (teamObj) {
-					parameters.teamId = teamObj.id;
-				}
-				else {
-					return message.reply(`\`${args[1]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`);
-				}
-			}
-
-			if (args[2]) {
-
-				const opponentObj = teams.find(o => o.abbreviation === args[2].toUpperCase() || o.teamName.toUpperCase().split(' ').pop() === args[1].toUpperCase());
-
-				if (opponentObj) {
-					parameters.opponentId = opponentObj.id;
-				}
-				else {
-					return message.reply(`\`${args[2]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`);
-				}
-			}
-		}
-
-		parameters.expand = ['schedule.teams', 'schedule.linescore', 'schedule.game.seriesSummary'];
 		let flagVenue = false;
 		let flagHide = false;
-		let flagZone = timezone;
+		const timezoneNHL = 'America/New_York';
+		const gameDateTimeNHL = moment.tz(timezoneNHL);
+		const gameDateTimeNHLStart = gameDateTimeNHL.clone().startOf('date');
+		const gameDateTimeNHLEnd = gameDateTimeNHL.clone().endOf('date');
 
 		for (const flag of flags) {
 			if (['tv', 't'].includes(flag)) {
@@ -95,21 +35,91 @@ module.exports = {
 				flagHide = true;
 			}
 			else if (['zone', 'z'].includes(flag.substring(0, 1))) {
-				flagZone = (flag.length > 0) ? flag.split('=', 2)[1] : timezone;
+				timezone = (flag.length > 0) ? flag.split('=', 2)[1] : timezone;
 
-				if (!moment.tz.zone(flagZone)) {
-					return message.reply(`\`${flagZone}\` is not a valid timezone database name. ${prefix}help nhl\` for an example.`);
+				if (!moment.tz.zone(timezone)) {
+					return message.reply({ content: `\`${timezone}\` is not a valid timezone database name. ${prefix}help nhl\` for an example.`, allowedMentions: { repliedUser: true } });
 				}
 			}
 			else {
-				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`);
+				return message.reply({ content: `\`-${flag}\` is not a valid flag. Type \`${prefix}help nhl\` for list of flags.`, allowedMentions: { repliedUser: true } });
 			}
+		}
+
+		if (args[0]) {
+
+			if (['last', 'yesterday', 'yd', 'today', 'tomorrow', 'tmw', 'next'].includes(args[0])) {
+				switch (args[0]) {
+				case 'last':
+					parameters.startDate = moment(seasons[0].regularSeasonStartDate).format('YYYY-MM-DD');
+					parameters.endDate = gameDateTimeNHLEnd.format('YYYY-MM-DD');
+					limit = 5;
+					break;
+				case 'yesterday':
+				case 'yd':
+					parameters.startDate = gameDateTimeNHLStart.add(-1, 'day').format('YYYY-MM-DD');
+					parameters.endDate = parameters.startDate;
+					break;
+				case 'today':
+					parameters.startDate = gameDateTimeNHLStart.format('YYYY-MM-DD');
+					parameters.endDate = gameDateTimeNHLEnd.format('YYYY-MM-DD');
+					break;
+				case 'tomorrow':
+				case 'tmw':
+					parameters.startDate = gameDateTimeNHLStart.add(1, 'day').format('YYYY-MM-DD');
+					parameters.endDate = parameters.startDate;
+					break;
+				case 'next':
+					parameters.startDate = gameDateTimeNHLStart.format('YYYY-MM-DD');
+					parameters.endDate = moment(seasons[0].seasonEndDate).format('YYYY-MM-DD');
+					limit = 5;
+					break;
+				}
+			}
+			else if (moment(args[0], 'YYYY-MM-DD', true).isValid()) {
+				const gameDateTimeNHLDateOnly = moment(args[0]).tz(timezoneNHL).format('YYYY-MM-DD');
+				parameters.startDate = gameDateTimeNHLDateOnly;
+				parameters.endDate = gameDateTimeNHLDateOnly;
+			}
+			else {
+				parameters.startDate = gameDateTimeNHLStart.format('YYYY-MM-DD');
+				parameters.endDate = gameDateTimeNHLEnd.format('YYYY-MM-DD');
+				args.push(args[0]);
+			}
+
+			if (args[1]) {
+
+				const teamObj = teams.find(o => o.abbreviation === args[1].toUpperCase() || o.teamName.toUpperCase().split(' ').pop() === args[1].toUpperCase());
+
+				if (teamObj) {
+					parameters.teamId = teamObj.id;
+				}
+				else {
+					return message.reply({ content: `\`${args[1]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
+				}
+			}
+
+			if (args[2]) {
+
+				const opponentObj = teams.find(o => o.abbreviation === args[2].toUpperCase() || o.teamName.toUpperCase().split(' ').pop() === args[1].toUpperCase());
+
+				if (opponentObj) {
+					parameters.opponentId = opponentObj.id;
+				}
+				else {
+					return message.reply({ content: `\`${args[2]}\` is not a valid argument. Type \`${prefix}help nhl\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
+				}
+			}
+		}
+		else {
+			parameters.startDate = gameDateTimeNHLStart.format('YYYY-MM-DD');
+			parameters.endDate = gameDateTimeNHLEnd.format('YYYY-MM-DD');
 		}
 
 		const query = qs.stringify(parameters, { arrayFormat: 'comma', addQueryPrefix: true });
 		const schedule = await fetch(`${endpoint}${query}`).then(response => response.json());
 
-		if (!schedule.totalGames) return message.reply('no games scheduled.');
+		if (!schedule.totalGames) return message.reply({ content: 'No games scheduled.', allowedMentions: { repliedUser: true } });
 
 		function getScores(games) {
 			return games.map(game => {
@@ -165,8 +175,11 @@ module.exports = {
 				}
 
 				if (statusCode < 3 || flagHide) {
-					const gameTimeTZ = moment(game.gameDate).tz(flagZone);
-					const gameTime = (statusCode > 2 && !flagHide) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : `${gameTimeTZ.format('h:mm A z')}`;
+					const gameTimeTZ = moment(game.gameDate).tz(timezone);
+					const gameTimeNHL = moment(game.gameDate).tz(timezoneNHL);
+					const dayDiff = moment(gameTimeTZ.format('YYYY-MM-DD')).diff(gameTimeNHL.format('YYYY-MM-DD'), 'days');
+					const plusMinusDay = (dayDiff > 0) ? ' (+1 day)' : (dayDiff < 0) ? ' (-1 day)' : '';
+					const gameTime = (statusCode > 2 && !flagHide) ? formatPeriod(linescore.currentPeriodTimeRemaining, linescore.currentPeriodOrdinal) : `${gameTimeTZ.format('h:mm A z')}${plusMinusDay}`;
 					return `${match}${awayTeam} @ ${homeTeam} ${gameTime}${series}${arena}${tv}`;
 				}
 				else if (statusCode > 2 && statusCode < 5) {
@@ -202,11 +215,13 @@ module.exports = {
 		}
 
 		const embed = new MessageEmbed();
-		embed.setColor(0x59acef);
-		embed.setAuthor('NHL Scores', 'https://i.imgur.com/zl8JzZc.png');
-		schedule.dates.slice(0, limit).map(({ date, games }) => embed.addField(`:hockey: ${moment(date).format('ddd, MMM DD')}`, `${getScores(games)}`));
+		embed.setColor('#7289da');
+		embed.setAuthor({ name: 'NHL Scores', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 
-		message.channel.send(embed);
+		schedule.dates.slice(0, limit).map(({ date, games }) => {
+			return embed.addField(`:hockey: ${moment(date).tz(timezoneNHL).format('ddd, MMM DD')}`, `${getScores(games)}`);
+		});
 
+		return message.channel.send({ embeds: [embed] });
 	},
 };

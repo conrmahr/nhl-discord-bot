@@ -11,7 +11,7 @@ module.exports = {
 	category: 'stats',
 	aliases: ['game', 'g'],
 	examples: ['1985-12-11 edm -scoring', '1981-02-26 bos -penalties', '2021-10-30 pit -lineups', '2020-08-11 tbl -recap'],
-	async execute(message, args, flags, prefix, timezone) {
+	async execute(message, args, prefix, flags, timezone) {
 
 		const endpoint = 'https://statsapi.web.nhl.com';
 		const { teams } = await fetch(`${endpoint}/api/v1/teams/`).then(response => response.json());
@@ -19,9 +19,10 @@ module.exports = {
 
 		if (args[0]) {
 
-			if (['last', 'yesterday', 'today', 'tomorrow', 'next'].includes(args[0])) {
+			if (['yesterday', 'yd', 'today', 'tomorrow', 'tmw'].includes(args[0])) {
 				switch (args[0]) {
 				case 'yesterday':
+				case 'yd':
 					parameters.startDate = moment().add(-1, 'day').format('MM/DD/YYYY');
 					parameters.endDate = parameters.startDate;
 					break;
@@ -30,6 +31,7 @@ module.exports = {
 					parameters.endDate = parameters.startDate;
 					break;
 				case 'tomorrow':
+				case 'tmw':
 					parameters.startDate = moment().add(1, 'day').format('MM/DD/YYYY');
 					parameters.endDate = parameters.startDate;
 					break;
@@ -51,12 +53,14 @@ module.exports = {
 					parameters.teamId = teamObj.id;
 				}
 				else {
-					return message.reply(`\`${args[1]}\` is not a valid argument. Type \`${prefix}help game\` for a list of arguments.`);
+					return message.reply({ content: `\`${args[1]}\` is not a valid argument. Type \`${prefix}help game\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
+
 				}
 			}
 		}
 
-		if (!parameters.teamId) return message.reply(`no team was defined. Type \`${prefix}help game\` for a list of arguments.`);
+		if (!parameters.teamId) return message.reply({ content: `No team was defined. Type \`${prefix}help game\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
+
 
 		parameters.expand = ['schedule.teams', 'schedule.linescore', 'schedule.game.seriesSummary'];
 		let flagLineup = false;
@@ -78,14 +82,13 @@ module.exports = {
 				flagRecap = true;
 			}
 			else {
-				return message.reply(`\`-${flag}\` is not a valid flag. Type \`${prefix}help game\` for list of flags.`);
+				return message.reply({ content: `\`-${flag}\` is not a valid flag. Type \`${prefix}help game\` for list of flags.`, allowedMentions: { repliedUser: true } });
 			}
 		}
 
 		const query = qs.stringify(parameters, { arrayFormat: 'comma', addQueryPrefix: true });
 		const schedule = await fetch(`${endpoint}/api/v1/schedule/${query}`).then(response => response.json());
-
-		if (!schedule.totalGames) return message.reply('no games scheduled.');
+		if (!schedule.totalGames) return message.reply({ content: 'No games scheduled.', allowedMentions: { repliedUser: true } });
 
 		function getScores(games) {
 			return games.map(game => {
@@ -249,7 +252,7 @@ module.exports = {
 		const feedObj = await fetch(`${endpoint}${gameData.live}`).then(response => response.json());
 		const contentObj = await fetch(`${endpoint}${gameData.content}`).then(response => response.json());
 		const embed = new MessageEmbed();
-		embed.setColor(0x59acef);
+		embed.setColor('#7289da');
 		const periodName = { 0: '1st Period', 1: '2nd Period', 2: '3rd Period', 3: 'OT', 4: 'SO' };
 		const allPlays = feedObj.liveData.plays.allPlays;
 		const playsByPeriod = feedObj.liveData.plays.playsByPeriod;
@@ -282,13 +285,13 @@ module.exports = {
 				embed.setURL(`https://www.nhl.com${pre.url}`);
 				const preTitle = `${turndownService.turndown(pre.preview)}\n\n${pre.subhead}`;
 				embed.setDescription(preTitle.replace(/#/g, ''));
-				embed.setAuthor('Game Preview', 'https://i.imgur.com/zl8JzZc.png');
+				embed.setAuthor({ name: 'Game Preview', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 				if (Object.keys(pre.media).length > 0) embed.setImage(pre.media.image.cuts['640x360'].src);
 				embed.setTimestamp(pre.date);
-				embed.setFooter(contributorFooter);
+				embed.setFooter({ text: contributorFooter });
 			}
 			else {
-				return message.reply('no `Game Preview` found.');
+				return message.reply({ content: 'No `Game Preview` found.', allowedMentions: { repliedUser: true } });
 			}
 		}
 		else if (flagRecap) {
@@ -300,19 +303,20 @@ module.exports = {
 				embed.setTitle(post.headline);
 				embed.setURL(`https://www.nhl.com${post.url}`);
 				embed.setDescription(`${final}\n${post.subhead}`);
-				embed.setAuthor('Game Recap', 'https://i.imgur.com/zl8JzZc.png');
+				embed.setAuthor({ name: 'Game Recap', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
+
 				if (Object.keys(post.media).length > 0) { embed.setImage(post.media.image.cuts['640x360'].src); }
 				embed.setTimestamp(post.date);
-				embed.setFooter(contributorFooter);
+				embed.setFooter({ text: contributorFooter });
 			}
 			else {
-				return message.reply('no `Game Recap` found.');
+				return message.reply({ content: 'No `Game Recap` found.', allowedMentions: { repliedUser: true } });
 			}
 		}
 		else if (flagScoring) {
 			embed.setDescription(`:hockey: ${gameData.awayTeam} ${gameData.awayScoreFinal} ${gameData.homeTeam} ${gameData.homeScoreFinal} (${gameData.clock})`);
-			embed.setAuthor('Scoring Summary', 'https://i.imgur.com/zl8JzZc.png');
-			embed.setFooter(gameData.venue);
+			embed.setAuthor({ name: 'Scoring Summary', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
+			embed.setFooter({ text: gameData.venue });
 			embed.setTimestamp(datetime.dateTime);
 
 			if (scoringPlays.length && gameData.status > 2 && gameData.status < 8) {
@@ -330,8 +334,8 @@ module.exports = {
 		else if (flagPenalty) {
 			const officialsStr = feedObj.liveData.boxscore.officials.map(({ official: { fullName }, officialType }) => `${officialType}: ${fullName}`).join('\n');
 			embed.setDescription(`:hockey: ${gameData.awayTeam} ${gameData.awayScoreFinal} ${gameData.homeTeam} ${gameData.homeScoreFinal} (${gameData.clock})`);
-			embed.setAuthor('Penalty Summary', 'https://i.imgur.com/zl8JzZc.png');
-			embed.setFooter(gameData.venue);
+			embed.setAuthor({ name: 'Penalty Summary', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
+			embed.setFooter({ text: gameData.venue });
 			embed.setTimestamp(datetime.dateTime);
 
 			if (penaltyPlays.length && gameData.status > 2 && gameData.status < 8) {
@@ -347,9 +351,9 @@ module.exports = {
 			if (officialsStr) embed.addField('Officials', officialsStr);
 		}
 		else {
-			embed.setAuthor('Boxscore', 'https://i.imgur.com/zl8JzZc.png');
+			embed.setAuthor({ name: 'Boxscore', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 			embed.setDescription(gameData.scoreboard);
-			embed.setFooter(gameData.venue);
+			embed.setFooter({ text: gameData.venue });
 			embed.setTimestamp(datetime.dateTime);
 
 			if (decisions.winner && decisions.firstStar) {
@@ -366,6 +370,6 @@ module.exports = {
 			}
 		}
 
-		message.channel.send(embed);
+		return message.channel.send({ embeds: [embed] });
 	},
 };
