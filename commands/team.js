@@ -128,7 +128,7 @@ module.exports = {
 				g = {
 					Games: `${teamStats.gamesPlayed}`,
 					Record: `${teamStats.wins}W-${teamStats.losses}L-${ties}`,
-					'PTS%': Number(teamStats.ptPctg) ? `${teamStats.ptPctg} (${teamRank.ptPctg})` : null,
+					'PTS': Number(teamStats.pts) ? `${teamStats.pts} (${teamRank.pts})` : null,
 					'GF/GP': teamStats.goalsPerGame ? `${teamStats.goalsPerGame.toFixed(2)} (${teamRank.goalsPerGame})` : null,
 					'GA/GP': teamStats.goalsAgainstPerGame ? `${teamStats.goalsAgainstPerGame.toFixed(2)} (${teamRank.goalsAgainstPerGame})` : null,
 					'PP%': Number(teamStats.powerPlayPercentage) ? `${teamStats.powerPlayPercentage} (${teamRank.powerPlayPercentage})` : null,
