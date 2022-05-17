@@ -83,8 +83,10 @@ module.exports = {
 		if (rosterFlag) type = '/roster/';
 		if (teamObj.officialSiteUrl) {
 			const html = await fetch(teamObj.officialSiteUrl).then(response => response.text());
-			const $ = cheerio.load(html);
-			teamLogo = $('[rel="shortcut icon"]').attr('href');
+			if (html) {
+				const $ = cheerio.load(html);
+				teamLogo = $('[rel="shortcut icon"]').attr('href');
+			}
 		}
 
 		const establishedBio = teamObj.firstYearOfPlay ? `Est: ${teamObj.firstYearOfPlay}` : 'Est: Unknown';
@@ -128,7 +130,7 @@ module.exports = {
 				g = {
 					Games: `${teamStats.gamesPlayed}`,
 					Record: `${teamStats.wins}W-${teamStats.losses}L-${ties}`,
-					'PTS%': Number(teamStats.ptPctg) ? `${teamStats.ptPctg} (${teamRank.ptPctg})` : null,
+					'PTS': Number(teamStats.pts) ? `${teamStats.pts} (${teamRank.pts})` : null,
 					'GF/GP': teamStats.goalsPerGame ? `${teamStats.goalsPerGame.toFixed(2)} (${teamRank.goalsPerGame})` : null,
 					'GA/GP': teamStats.goalsAgainstPerGame ? `${teamStats.goalsAgainstPerGame.toFixed(2)} (${teamRank.goalsAgainstPerGame})` : null,
 					'PP%': Number(teamStats.powerPlayPercentage) ? `${teamStats.powerPlayPercentage} (${teamRank.powerPlayPercentage})` : null,
@@ -154,7 +156,7 @@ module.exports = {
 
 		}
 
-		Object.entries(g).slice(0, limit).filter(([title, number]) => title.toLowerCase().startsWith(keyword.toLowerCase()) && number != null).forEach(([ key, value ]) => embed.addField(`${key}`, `${value.join('\n')}`, true));
+		Object.entries(g).slice(0, limit).filter(([title, number]) => title.toLowerCase().startsWith(keyword.toLowerCase()) && number != null).forEach(([ key, value ]) => embed.addField(`${key}`, `${value}`, true));
 
 		return message.channel.send({ embeds: [embed] });
 	},
