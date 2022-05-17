@@ -28,10 +28,10 @@
   "dependencies": {
     "bitly": "^7.1.2",
     "cheerio": "^1.0.0-rc.10",
-    "discord.js": "^13.6.0",
-    "moment-timezone": "^0.5.33",
+    "discord.js": "^13.7.0",
+    "moment-timezone": "^0.5.34",
     "node-fetch": "^2.6.7",
-    "qs": "^6.10.1",
+    "qs": "^6.10.3",
     "turndown": "^7.1.1"
   },
   "devDependencies": {
