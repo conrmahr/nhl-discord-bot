@@ -4,6 +4,7 @@
   "description": "🏒 NHL Discord Bot",
   "main": "index.js",
   "scripts": {
+    "start": "node .",
     "test": "eslint ./"
   },
   "repository": {
