@@ -154,7 +154,7 @@ module.exports = {
 
 		}
 
-		Object.entries(g).slice(0, limit).filter(([title, number]) => title.toLowerCase().startsWith(keyword.toLowerCase()) && number != null).forEach(([ key, value ]) => embed.addField(`${key}`, `${value.join('\n')}`, true));
+		Object.entries(g).slice(0, limit).filter(([title, number]) => title.toLowerCase().startsWith(keyword.toLowerCase()) && number != null).forEach(([ key, value ]) => embed.addField(`${key}`, `${value}`, true));
 
 		return message.channel.send({ embeds: [embed] });
 	},
