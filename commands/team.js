@@ -83,8 +83,10 @@ module.exports = {
 		if (rosterFlag) type = '/roster/';
 		if (teamObj.officialSiteUrl) {
 			const html = await fetch(teamObj.officialSiteUrl).then(response => response.text());
-			const $ = cheerio.load(html);
-			teamLogo = $('[rel="shortcut icon"]').attr('href');
+			if (html) {
+				const $ = cheerio.load(html);
+				teamLogo = $('[rel="shortcut icon"]').attr('href');
+			}
 		}
 
 		const establishedBio = teamObj.firstYearOfPlay ? `Est: ${teamObj.firstYearOfPlay}` : 'Est: Unknown';

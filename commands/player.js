@@ -79,9 +79,9 @@ module.exports = {
 
 			if (flags.length > 0 && keywordFlag.length === 0 && !careerFlag && !playoffsFlag && !gameLogFlag && !yearFlag && !monthFlag && !dayFlag && !onPaceFlag && !advancedFlag) return message.reply({ content: `\`-${flags.join(' -')}\` is not a valid flag. Type \`${prefix}help player\` for list of flags.`, allowedMentions: { repliedUser: true } });
 
-			let last = 0;
 			let seasonCount = 0;
 			let rows = '';
+			const last = [];
 			const limit = (advancedFlag || keywordFlag.length > 0) ? 23 : 3;
 
 			if (careerFlag && playoffsFlag) {
@@ -89,11 +89,11 @@ module.exports = {
 			}
 			else if (gameLogFlag && playoffsFlag) {
 				parameters.stats = 'playoffGameLog';
-				last = -7;
+				last.push(0, 7);
 			}
 			else if (gameLogFlag) {
 				parameters.stats = 'gameLog';
-				last = -5;
+				last.push(0, 5);
 			}
 			else if (playoffsFlag && yearFlag) {
 				parameters.stats = 'yearByYearPlayoffs';
@@ -161,8 +161,10 @@ module.exports = {
 				const querySeason = { season: fullSeason };
 				const { teams } = await fetch(`${apiTeams}/${p.currentTeam.id}/${qs.stringify(querySeason, { addQueryPrefix: true })}`).then(response => response.json());
 				const html = await fetch(teams[0].officialSiteUrl).then(response => response.text());
-				const $ = cheerio.load(html);
-				teamLogo = $('[rel="shortcut icon"]').attr('href');
+				if (html) {
+					const $ = cheerio.load(html);
+					teamLogo = $('[rel="shortcut icon"]').attr('href');
+				}
 				currentTeam = teams[0].abbreviation ? `${teams[0].abbreviation} ` : '';
 				currentAge = p.currentAge ? `(${p.currentAge}) ` : '';
 			}
@@ -203,7 +205,9 @@ module.exports = {
 			const statTypeArr = statType.split(' ');
 			const multiYear = ['Career', 'Year'].some(needle => statTypeArr.includes(needle));
 			const seasonOrPlayoffs = multiYear ? `(${statType})` : `(${humanSeason} ${statType})`;
+
 			if (Array.isArray(splits) && splits.length === 0) return message.reply({ content: `No stats found for ${fullName.trim()} ${seasonOrPlayoffs}. Type \`${prefix}help player\` for a list of arguments.`, allowedMentions: { repliedUser: true } });
+
 			parameters.player.push(fullName, sweater, seasonOrPlayoffs);
 			const embed = new MessageEmbed();
 			embed.setThumbnail(`${thumbnail}${playerId}.jpg`);
@@ -212,7 +216,13 @@ module.exports = {
 
 
 			if (splits.length > 0) {
-				Object.keys(splits).slice(last).forEach(s=>{
+				let gameByGameStats = splits;
+
+				if (gameLogFlag || playoffsFlag) {
+					gameByGameStats = Object.entries(splits).slice(last[0], last[1]).map(entry => entry.date);
+				}
+
+				Object.keys(gameByGameStats).forEach(s=>{
 					const k = splits[s];
 					if (!gameLogFlag) {
 						const skip = (x) => yearFlag ? x : null;
