@@ -111,10 +111,6 @@ module.exports = {
 				}
 			}
 		}
-		else {
-			parameters.startDate = gameDateTimeNHLStart.format('YYYY-MM-DD');
-			parameters.endDate = gameDateTimeNHLEnd.format('YYYY-MM-DD');
-		}
 
 		const query = qs.stringify(parameters, { arrayFormat: 'comma', addQueryPrefix: true });
 		const schedule = await fetch(`${endpoint}${query}`).then(response => response.json());
@@ -219,7 +215,8 @@ module.exports = {
 		embed.setAuthor({ name: 'NHL Scores', iconURL: 'https://i.imgur.com/zl8JzZc.png' });
 
 		schedule.dates.slice(0, limit).map(({ date, games }) => {
-			return embed.addField(`:hockey: ${moment(date).tz(timezoneNHL).format('ddd, MMM DD')}`, `${getScores(games)}`);
+
+			return embed.addField(`:hockey: ${moment.tz(`${date} 12:00`, timezoneNHL).format('ddd, MMM DD')}`, `${getScores(games)}`);
 		});
 
 		return message.channel.send({ embeds: [embed] });
